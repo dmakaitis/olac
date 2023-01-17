@@ -5,6 +5,25 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
-<p th:text="'Hello, ' + ${name} + '!'"/>
+<form action="#" th:action="@{/reservation}" th:object="${form}" method="post">
+    <label>First Name</label>
+    <input type="text" th:field="*{firstName}"/>
+    <label>Last Name</label>
+    <input type="text" th:field="*{lastName}"/>
+    <label>Email</label>
+    <input type="text" th:field="*{email}"/>
+    <label>Phone</label>
+    <input type="text" th:field="*{phone}"/>
+
+    <div th:each="type, itemStat : *{ticketTypeCounts}">
+        <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].typeCode}"/>
+
+        <label th:text="*{ticketTypeCounts[__${itemStat.index}__].description} + ' (' + *{ticketTypeCounts[__${itemStat.index}__].costPerTicket} + ')'">Type
+            (cost)</label>
+        <input type="text" th:field="*{ticketTypeCounts[__${itemStat.index}__].count}"/>
+    </div>
+
+    <p><input type="submit" value="Submit"></p>
+</form>
 </body>
 </html>

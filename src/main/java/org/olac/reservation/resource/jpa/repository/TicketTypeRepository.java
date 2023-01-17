@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface TicketTypeRepository extends CrudRepository<TicketTypeEntity, Long> {
 
-    Optional<TicketTypeEntity> findByTicketType(String ticketType);
+    Optional<TicketTypeEntity> findByCode(String code);
 
 }

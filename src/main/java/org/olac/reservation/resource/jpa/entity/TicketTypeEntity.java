@@ -12,16 +12,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TicketTypeEntity {
 
-    public TicketTypeEntity(String ticketType, double ticketCost) {
-        this.ticketType = ticketType;
-        this.ticketCost = ticketCost;
+    public TicketTypeEntity(String code, String description, double costPerTicket) {
+        this.code = code;
+        this.description = description;
+        this.costPerTicket = costPerTicket;
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String ticketType;
-    private double ticketCost;
+    private String code;
+    private String description;
+    private double costPerTicket;
 
 }

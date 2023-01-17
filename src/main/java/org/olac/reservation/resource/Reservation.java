@@ -7,7 +7,8 @@ import java.util.List;
 @Data
 public class Reservation {
 
-    private String name;
+    private String firstName;
+    private String lastName;
     private String email;
     private String phone;
 

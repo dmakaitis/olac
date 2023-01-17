@@ -1,11 +1,13 @@
 package org.olac.reservation.resource;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class TicketCounts {
 
-    private String ticketType;
+    private String ticketTypeCode;
     private int count;
 
 }

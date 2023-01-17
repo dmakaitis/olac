@@ -6,8 +6,6 @@ public interface TicketRA {
 
     List<TicketType> getTicketTypes();
 
-    void saveTicketType(TicketType ticketType);
-
-    void renameTicketType(String oldName, String newName);
+    TicketType saveTicketType(TicketType ticketType);
 
 }
