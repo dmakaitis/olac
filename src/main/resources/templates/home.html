@@ -1,19 +1,42 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Getting Started: Serving Web Content</title>
+    <title>Omaha Lithuanian American Community</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" type="text/css"
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz@6..96&display=swap">
+    <link rel="stylesheet" type="text/css" href="/olac.css">
 </head>
 <body>
+<div class="header">
+    <h1>Registration Page</h1>
+</div>
+
 <form action="#" th:action="@{/reservation}" th:object="${form}" method="post">
-    <label>First Name</label>
-    <input type="text" th:field="*{firstName}"/>
-    <label>Last Name</label>
-    <input type="text" th:field="*{lastName}"/>
-    <label>Email</label>
-    <input type="text" th:field="*{email}"/>
-    <label>Phone</label>
-    <input type="text" th:field="*{phone}"/>
+    <div class="row">
+        <div class="col-6">
+            <label>First Name</label>
+            <input type="text" th:field="*{firstName}"/>
+        </div>
+        <div class="col-6">
+            <label>Last Name</label>
+            <input type="text" th:field="*{lastName}"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <label>Email</label>
+            <input type="text" th:field="*{email}"/>
+        </div>
+        <div class="col-6">
+            <label>Phone</label>
+            <input type="text" th:field="*{phone}"/>
+        </div>
+    </div>
 
     <div th:each="type, itemStat : *{ticketTypeCounts}">
         <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].typeCode}"/>

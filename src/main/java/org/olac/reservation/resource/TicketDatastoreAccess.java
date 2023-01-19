@@ -2,7 +2,7 @@ package org.olac.reservation.resource;
 
 import java.util.List;
 
-public interface TicketRA {
+public interface TicketDatastoreAccess {
 
     List<TicketType> getTicketTypes();
 

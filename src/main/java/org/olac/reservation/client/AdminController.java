@@ -2,7 +2,7 @@ package org.olac.reservation.client;
 
 import lombok.RequiredArgsConstructor;
 import org.olac.reservation.client.form.TicketTypeForm;
-import org.olac.reservation.resource.TicketRA;
+import org.olac.reservation.resource.TicketDatastoreAccess;
 import org.olac.reservation.resource.TicketType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,12 +18,12 @@ import static java.util.Comparator.comparing;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final TicketRA ticketRA;
+    private final TicketDatastoreAccess ticketDatastoreAccess;
 
     @GetMapping("/admin/ticketTypes")
     public String getTicketTypes(Model model) {
-        List<TicketType> ticketTypes = ticketRA.getTicketTypes().stream()
-                .sorted(comparing(TicketType::getCostPerTicket))
+        List<TicketType> ticketTypes = ticketDatastoreAccess.getTicketTypes().stream()
+                .sorted(comparing(TicketType::getCostPerTicket).reversed())
                 .toList();
 
         model.addAttribute("ticketTypes", ticketTypes);
@@ -35,7 +35,7 @@ public class AdminController {
     @PostMapping("/admin/ticketTypes")
     public String addTicketType(@ModelAttribute TicketTypeForm form, Model model) {
         TicketType newType = new TicketType(form.getDescription(), form.getCost());
-        ticketRA.saveTicketType(newType);
+        ticketDatastoreAccess.saveTicketType(newType);
 
         return getTicketTypes(model);
     }

@@ -1,6 +1,6 @@
 package org.olac.reservation.resource;
 
-public interface ReservationRA {
+public interface ReservationDatastoreAccess {
 
     long createReservation(Reservation reservation);
 

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xl="http://www.w3.org/1999/xlink" version="1.1"
+     xmlns="http://www.w3.org/2000/svg" viewBox="-35527137e-22 -35527137e-22 360 252" width="360" height="252">
+    <defs>
+        <linearGradient x1="0" x2="1" id="Gradient" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#d3b589"/>
+            <stop offset=".0701" stop-color="#ccaf83"/>
+            <stop offset="1" stop-color="#b09868"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient" xl:href="#Gradient"
+                        gradientTransform="translate(162 43.06) rotate(45) scale(270.02994)"/>
+        <linearGradient x1="0" x2="1" id="Gradient_2" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#d3b589"/>
+            <stop offset=".0701" stop-color="#ccaf83"/>
+            <stop offset="1" stop-color="#b09868"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient_2" xl:href="#Gradient_2"
+                        gradientTransform="translate(333.98 -16142913e-13) rotate(45.000007) scale(36.797837)"/>
+        <linearGradient x1="0" x2="1" id="Gradient_3" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#d3b589"/>
+            <stop offset=".0701" stop-color="#ccaf83"/>
+            <stop offset="1" stop-color="#b09868"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient_3" xl:href="#Gradient_3"
+                        gradientTransform="translate(162 36.68) rotate(45) scale(279.05262)"/>
+        <linearGradient x1="0" x2="1" id="Gradient_4" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#d3b589"/>
+            <stop offset=".0701" stop-color="#ccaf83"/>
+            <stop offset="1" stop-color="#b09868"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient_4" xl:href="#Gradient_4"
+                        gradientTransform="translate(162 49.449986) rotate(45.000007) scale(260.99312)"/>
+        <linearGradient x1="0" x2="1" id="Gradient_5" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#d3b589"/>
+            <stop offset=".0701" stop-color="#ccaf83"/>
+            <stop offset="1" stop-color="#b09868"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient_5" xl:href="#Gradient_5"
+                        gradientTransform="translate(327.59 19.16) rotate(44.999993) scale(18.73833)"/>
+        <linearGradient id="Obj_Gradient_6" xl:href="#Gradient"
+                        gradientTransform="translate(319.22 36.06) rotate(45) scale(6.675088)"/>
+        <linearGradient x1="0" x2="1" id="Gradient_6" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#d3b589"/>
+            <stop offset=".0701" stop-color="#ccaf83"/>
+            <stop offset="1" stop-color="#b09868"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient_7" xl:href="#Gradient_6"
+                        gradientTransform="translate(7.06001 43.059986) rotate(45.000007) scale(270.02994)"/>
+        <linearGradient id="Obj_Gradient_8" xl:href="#Gradient"
+                        gradientTransform="translate(-35527137e-22 -17763568e-22) rotate(45) scale(36.797837)"/>
+        <linearGradient id="Obj_Gradient_9" xl:href="#Gradient"
+                        gradientTransform="translate(.68 36.68) rotate(45) scale(279.05262)"/>
+        <linearGradient x1="0" x2="1" id="Gradient_7" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#d3b589"/>
+            <stop offset=".0701" stop-color="#ccaf83"/>
+            <stop offset="1" stop-color="#b09868"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient_10" xl:href="#Gradient_7"
+                        gradientTransform="translate(13.44999 49.450014) rotate(44.999993) scale(260.9931)"/>
+        <linearGradient id="Obj_Gradient_11" xl:href="#Gradient_3"
+                        gradientTransform="translate(19.16 19.16) rotate(45) scale(18.73833)"/>
+        <linearGradient x1="0" x2="1" id="Gradient_8" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#d3b589"/>
+            <stop offset=".0701" stop-color="#ccaf83"/>
+            <stop offset="1" stop-color="#b09868"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient_12" xl:href="#Gradient_8"
+                        gradientTransform="translate(36.06 36.06) rotate(44.999993) scale(6.675088)"/>
+    </defs>
+    <metadata>Produced by OmniGraffle 7.18.6\n2023-01-18 18:51:58 +0000</metadata>
+    <g id="Canvas_1" fill="none" fill-opacity="1" stroke-opacity="1" stroke="none" stroke-dasharray="none">
+        <title>Canvas 1</title>
+        <g id="Canvas_1_Layer_1">
+            <title>Layer 1</title>
+            <g id="Group_28">
+                <g id="Graphic_34">
+                    <path d="M 334.94 252 L 333.98 252 L 333.98 26.02 L 180 26.02 L 180 25.06 L 334.94 25.06 Z"
+                          fill="url(#Obj_Gradient)"/>
+                </g>
+                <g id="Graphic_33">
+                    <path d="M 360 26.02 L 333.98 26.02 L 333.98 17763568e-22 L 334.94 17763568e-22 L 334.94 25.06 L 360 25.06 Z"
+                          fill="url(#Obj_Gradient_2)"/>
+                </g>
+                <g id="Graphic_32">
+                    <path d="M 341.32 252 L 340.36 252 L 340.36 19.64 L 180 19.64 L 180 18.68 L 341.32 18.68 Z"
+                          fill="url(#Obj_Gradient_3)"/>
+                </g>
+                <g id="Graphic_31">
+                    <path d="M 328.55 252 L 327.59 252 L 327.59 32.41 L 180 32.41 L 180 31.45 L 328.55 31.45 Z"
+                          fill="url(#Obj_Gradient_4)"/>
+                </g>
+                <g id="Graphic_30">
+                    <path d="M 340.84 32.41 L 327.59 32.41 L 327.59 19.16 L 328.55 19.16 L 328.55 31.45 L 340.84 31.45 Z"
+                          fill="url(#Obj_Gradient_5)"/>
+                </g>
+                <g id="Graphic_29">
+                    <rect x="319.22" y="36.06" width="4.72" height="4.72" fill="url(#Obj_Gradient_6)"/>
+                </g>
+            </g>
+            <g id="Group_21">
+                <g id="Graphic_27">
+                    <path d="M 26.02 252 L 25.06 252 L 25.06 25.06 L 180 25.06 L 180 26.02 L 26.02 26.02 Z"
+                          fill="url(#Obj_Gradient_7)"/>
+                </g>
+                <g id="Graphic_26">
+                    <path d="M 26.02 26.02 L -35527137e-22 26.02 L -35527137e-22 25.06 L 25.06 25.06 L 25.06 -35527137e-22 L 26.02 -35527137e-22 Z"
+                          fill="url(#Obj_Gradient_8)"/>
+                </g>
+                <g id="Graphic_25">
+                    <path d="M 19.64 252 L 18.68 252 L 18.68 18.68 L 180 18.68 L 180 19.64 L 19.64 19.64 Z"
+                          fill="url(#Obj_Gradient_9)"/>
+                </g>
+                <g id="Graphic_24">
+                    <path d="M 32.41 252 L 31.45 252 L 31.45 31.45 L 180 31.45 L 180 32.41 L 32.41 32.41 Z"
+                          fill="url(#Obj_Gradient_10)"/>
+                </g>
+                <g id="Graphic_23">
+                    <path d="M 32.41 32.41 L 19.16 32.41 L 19.16 31.45 L 31.45 31.45 L 31.45 19.16 L 32.41 19.16 Z"
+                          fill="url(#Obj_Gradient_11)"/>
+                </g>
+                <g id="Graphic_22">
+                    <rect x="36.06" y="36.06" width="4.72" height="4.72" fill="url(#Obj_Gradient_12)"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

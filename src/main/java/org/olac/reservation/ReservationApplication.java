@@ -1,7 +1,7 @@
 package org.olac.reservation;
 
 import lombok.RequiredArgsConstructor;
-import org.olac.reservation.resource.TicketRA;
+import org.olac.reservation.resource.TicketDatastoreAccess;
 import org.olac.reservation.resource.TicketType;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @RequiredArgsConstructor
 public class ReservationApplication implements ApplicationRunner {
 
-    private final TicketRA ticketRA;
+    private final TicketDatastoreAccess ticketDatastoreAccess;
 
     public static void main(String[] args) {
         SpringApplication.run(ReservationApplication.class, args);
@@ -20,8 +20,8 @@ public class ReservationApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        ticketRA.saveTicketType(new TicketType("Adult", 50.0));
-        ticketRA.saveTicketType(new TicketType("Child 2-10", 30.0));
+        ticketDatastoreAccess.saveTicketType(new TicketType("Adult", 50.0));
+        ticketDatastoreAccess.saveTicketType(new TicketType("Child 2-10", 30.0));
     }
 
 }
