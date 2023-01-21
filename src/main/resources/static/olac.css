@@ -1,37 +1,10 @@
-html {
-    font-family: 'Bodoni Moda', serif;
-    font-size: 16pt;
-    color: #E6E6E6;
+:root {
+    --background: #212C3D;
+    --margin: 150px;
 }
 
-.header {
-    padding: 15px;
-}
-
-.menu ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-.menu li {
-    padding: 8px;
-    margin-bottom: 7px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-* {
-    box-sizing: border-box;
-}
-
-.menu {
-    width: 25%;
-    float: left;
-}
-
-.main {
-    width: 75%;
-    float: left;
+.center {
+    text-align: center;
 }
 
 .col-1 {
@@ -85,7 +58,41 @@ html {
 [class*="col-"] {
     float: left;
     padding: 15px;
-    border: 1px solid red;
+}
+
+.container {
+    max-width: 72em;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.header {
+    height: 200px;
+    width: 100%;
+}
+
+.headerimage {
+    background-color: var(--background);
+    padding: 10px;
+    height: var(--margin)
+}
+
+.input-container {
+    float: left;
+}
+
+.menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu li {
+    padding: 8px;
+    margin-bottom: 7px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 .row::after {
@@ -94,13 +101,46 @@ html {
     display: table;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
-    background-color: #212C3D;
+    background-color: var(--background);
 
     border-image-source: url('/BorderTop.svg');
     border-image-slice: 45 45 10 45;
-    border-image-width: 100px 100px 0px 100px;
+    border-image-width: var(--margin) var(--margin) 0px var(--margin);
     border-image-outset: 0px 0px 0px 0px;
     border-image-repeat: stretch stretch;
     border-style: solid solid none solid;
+
+    padding-left: var(--margin);
+    padding-right: var(--margin);
+}
+
+html {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 1.5em;
+    color: #E6E6E6;
+}
+
+html, body {
+    height: 100%
+}
+
+input {
+    width: 100%;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 1em;
+    color: black;
+    background-color: whitesmoke;
+}
+
+input, label {
+    display: block;
+}
+
+label {
+    font-size: 0.6em;
 }

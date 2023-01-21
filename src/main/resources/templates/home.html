@@ -12,41 +12,82 @@
 </head>
 <body>
 <div class="header">
-    <h1>Registration Page</h1>
+    <div class="col-1"></div>
+    <div class="col-4 center"><img class="headerimage" src="/jav.svg" alt="JAV Lietuvių Bendruomenė"/></div>
+    <div class="col-2"></div>
+    <div class="col-4 center"><img class="headerimage" src="/omaha.svg" alt="Omaha"/></div>
+    <div class="col-1"></div>
 </div>
 
-<form action="#" th:action="@{/reservation}" th:object="${form}" method="post">
-    <div class="row">
-        <div class="col-6">
-            <label>First Name</label>
-            <input type="text" th:field="*{firstName}"/>
-        </div>
-        <div class="col-6">
-            <label>Last Name</label>
-            <input type="text" th:field="*{lastName}"/>
-        </div>
-    </div>
+<div class="container">
 
-    <div class="row">
-        <div class="col-6">
-            <label>Email</label>
-            <input type="text" th:field="*{email}"/>
+    <p>The Lithuanian American Community of Omaha is proudly celebrating its 70th year as an organization since its
+        founding on April 26th, 1953. A home to Lithuanians for decades, Omaha has more than just supported the
+        Lithuanian community, the city has helped the organization thrive.</p>
+
+    <p>The Lithuanian American Community has been an integral part of Omaha history for over a century. We look forward
+        to sharing this celebration with you, of not just culture, but the history that comes with it.</p>
+
+    <form action="#" th:action="@{/reservation}" th:object="${form}" method="post" autocomplete="on">
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-4 input-container">
+                <label>First Name:</label>
+                <input type="text" th:field="*{firstName}"/>
+            </div>
+            <div class="col-4 input-container">
+                <label>Last Name:</label>
+                <input type="text" th:field="*{lastName}"/>
+            </div>
+            <div class="col-2"></div>
         </div>
-        <div class="col-6">
-            <label>Phone</label>
-            <input type="text" th:field="*{phone}"/>
+
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-4 input-container">
+                <label>Email:</label>
+                <input type="text" th:field="*{email}"/>
+            </div>
+            <div class="col-4 input-container">
+                <label>Phone:</label>
+                <input type="text" th:field="*{phone}"/>
+            </div>
+            <div class="col-2"></div>
         </div>
-    </div>
 
-    <div th:each="type, itemStat : *{ticketTypeCounts}">
-        <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].typeCode}"/>
+        <!--
+                <th:block th:with="partitions=${T(org.apache.commons.collections4.ListUtils).partition(*{ticketTypeCounts}, 2)}">
+                    <div class="row" th:each="partition: ${partitions}">
+                        <div class="col-3"></div>
+                        <div class="col-3" th:each="type: ${partition}">
+                            <label th:text="*{type.description}">Type @ cost each</label>
+                            <input type="text" th:field="*{type.count}"/>
+                        </div>
+                        <div class="col-3"></div>
+                    </div>
+                </th:block>
+        -->
+        <div th:each="type, itemStat : *{ticketTypeCounts}" class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].typeCode}"/>
 
-        <label th:text="*{ticketTypeCounts[__${itemStat.index}__].description} + ' (' + *{ticketTypeCounts[__${itemStat.index}__].costPerTicket} + ')'">Type
-            (cost)</label>
-        <input type="text" th:field="*{ticketTypeCounts[__${itemStat.index}__].count}"/>
-    </div>
+                <label>[[*{ticketTypeCounts[__${itemStat.index}__].description}]] @
+                    [[*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}]] each</label>
+                <input type="text" th:field="*{ticketTypeCounts[__${itemStat.index}__].count}"/>
+            </div>
+            <div class="col-4"></div>
+        </div>
 
-    <p><input type="submit" value="Submit"></p>
-</form>
+        <div class="row">
+            <div class="col-5"></div>
+            <div class="col-2">
+                <input type="submit" value="Submit">
+            </div>
+            <div class="col-5"></div>
+        </div>
+    </form>
+</div>
+
 </body>
 </html>
