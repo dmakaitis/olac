@@ -16,6 +16,8 @@ public class TicketTypeCount {
     private String description;
     private String costPerTicket;
     @PositiveOrZero
-    private int count;
+    private Integer count;
+
+    private String total;
 
 }

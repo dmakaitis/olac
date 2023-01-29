@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Omaha Lithuanian American Community</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" type="text/css"
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz@6..96&display=swap">
+    <link rel="stylesheet" type="text/css" href="/olac.css">
+</head>
+<body>
+<div class="header">
+    <div class="col-1"></div>
+    <div class="col-4 center"><img class="headerimage" src="/jav.svg" alt="JAV Lietuvių Bendruomenė"/></div>
+    <div class="col-2"></div>
+    <div class="col-4 center"><img class="headerimage" src="/omaha.svg" alt="Omaha"/></div>
+    <div class="col-1"></div>
+</div>
+
+<div class="container" th:object="${reservationForm}">
+    <div class="row">
+        <div class="col-12 center">
+            Thank you for reserving tickets to the Omaha Lithuanian Community 70th Anniversary Event! Your reservation
+            number is: [[${reservationId}]]
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 center">
+            You may use one of the following options to provide your payment of [[${amount}]], or you may pay at the
+            door. If paying online, please include your name and reservation number in the comments.
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 center"><a href="https://www.venmo.com/u/dmakaitis">Venmo</a></div>
+    </div>
+</div>
+
+</body>
+</html>

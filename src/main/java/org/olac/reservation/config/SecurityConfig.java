@@ -32,14 +32,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserDetailsService userDetailsService() {
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
         manager.createUser(User.withUsername("user")
-                .password(bCryptPasswordEncoder.encode("userPass"))
+                .password("$2a$10$K2r2Jqr.zgGefnoKbK//we2bNrtKduUXTTrsf.wj3L//zOtvIJOHm")
                 .roles("USER")
                 .build());
         manager.createUser(User.withUsername("admin")
-                .password(bCryptPasswordEncoder.encode("adminPass"))
+                .password("$2a$10$5.Ni6.0mF08Py2JH65B0L.6Gc/tFI7IlzTk3AD52pL7ygpRYU/eFC")
                 .roles("USER", "ADMIN")
                 .build());
         return manager;
@@ -50,6 +50,7 @@ public class SecurityConfig {
         http
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico").permitAll()
                         .requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN")
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
@@ -63,8 +64,7 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.debug(securityDebug)
-                .ignoring()
-                .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico");
+        return web -> web.debug(securityDebug);
     }
+
 }

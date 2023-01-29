@@ -1,10 +1,71 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Getting Started: Serving Web Content</title>
+    <title>Omaha Lithuanian American Community</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" type="text/css"
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz@6..96&display=swap">
+    <link rel="stylesheet" type="text/css" href="/olac.css">
 </head>
 <body>
-Your reservation ID is: <span th:text="${reservationId}">#</span>
+<div class="header">
+    <div class="col-1"></div>
+    <div class="col-4 center"><img class="headerimage" src="/jav.svg" alt="JAV Lietuvių Bendruomenė"/></div>
+    <div class="col-2"></div>
+    <div class="col-4 center"><img class="headerimage" src="/omaha.svg" alt="Omaha"/></div>
+    <div class="col-1"></div>
+</div>
+
+<div class="container" th:object="${reservationForm}">
+    <div class="row">
+        <div class="col-12 center">Please confirm the following information:</div>
+    </div>
+
+    <div class="row">
+        <div class="col-6 right">First name:</div>
+        <div class="col-6 left">[[*{firstName}]]</div>
+    </div>
+    <div class="row">
+        <div class="col-6 right">Last name:</div>
+        <div class="col-6 left">[[*{lastName}]]</div>
+    </div>
+    <div class="row">
+        <div class="col-6 right">Email:</div>
+        <div class="col-6 left">[[*{email}]]</div>
+    </div>
+    <div class="row" th:if="*{!#strings.isEmpty(phone)}">
+        <div class="col-6 right">Phone number:</div>
+        <div class="col-6 left">[[*{phone}]]</div>
+    </div>
+
+    <th:block th:each="type: *{ticketTypeCounts}">
+        <div class="row">
+            <div class="col-6 right">[[${type.description}]]</div>
+            <div class="col-1 center">[[${type.count}]]</div>
+            <div class="col-5 left">[[${type.total}]]</div>
+        </div>
+    </th:block>
+
+    <div class="row">
+        <div class="col-6 right">Total:</div>
+        <div class="col-1"></div>
+        <div class="col-5 left">[[*{total}]]</div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 center">Does everything look correct?</div>
+    </div>
+
+    <div class="row">
+        <div class="col-5"></div>
+        <div class="col-1 center"><a class="button" th:href="@{/confirm}">Yes</a></div>
+        <div class="col-2 center"><a class="button" th:href="@{/}">No</a></div>
+        <div class="col-5"></div>
+    </div>
+</div>
+
 </body>
 </html>

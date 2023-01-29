@@ -20,8 +20,10 @@ public class ReservationApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        ticketDatastoreAccess.saveTicketType(new TicketType("Adult", 50.0));
-        ticketDatastoreAccess.saveTicketType(new TicketType("Child 2-10", 30.0));
+        if (ticketDatastoreAccess.getTicketTypes().isEmpty()) {
+            ticketDatastoreAccess.saveTicketType(new TicketType("Adult", 50.0));
+            ticketDatastoreAccess.saveTicketType(new TicketType("Child 2-12", 30.0));
+        }
     }
 
 }
