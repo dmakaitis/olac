@@ -11,12 +11,8 @@
     <link rel="stylesheet" type="text/css" href="/olac.css">
 </head>
 <body>
-<div class="header">
-    <div class="col-1"></div>
-    <div class="col-4 center"><img class="headerimage" src="/jav.svg" alt="JAV Lietuvių Bendruomenė"/></div>
-    <div class="col-2"></div>
-    <div class="col-4 center"><img class="headerimage" src="/omaha.svg" alt="Omaha"/></div>
-    <div class="col-1"></div>
+<div th:replace="~{fragments/header.html :: header}">
+    Header
 </div>
 
 <div class="container">
@@ -29,40 +25,31 @@
         to sharing this celebration with you, of not just culture, but the history that comes with it.</p>
 
     <form action="#" th:action="@{/}" th:object="${reservationForm}" method="post" autocomplete="on">
-        <div class="row">
-            <div class="col-2"></div>
-            <div class="col-4 input-container">
+        <div class="flex-container">
+            <div class="input-container">
                 <label>First Name:</label>
                 <input type="text" th:field="*{firstName}"/>
                 <div class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Name Error</div>
             </div>
-            <div class="col-4 input-container">
+            <div class="input-container">
                 <label>Last Name:</label>
                 <input type="text" th:field="*{lastName}"/>
                 <div class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Last Name Error
                 </div>
             </div>
-            <div class="col-2"></div>
-        </div>
 
-        <div class="row">
-            <div class="col-2"></div>
-            <div class="col-4 input-container">
+            <div class="input-container">
                 <label>Email:</label>
                 <input type="text" th:field="*{email}"/>
                 <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</div>
             </div>
-            <div class="col-4 input-container">
+            <div class="input-container">
                 <label>Phone:</label>
                 <input type="text" th:field="*{phone}"/>
                 <div class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Phone Number Error</div>
             </div>
-            <div class="col-2"></div>
-        </div>
 
-        <div th:each="type, itemStat : *{ticketTypeCounts}" class="row">
-            <div class="col-4"></div>
-            <div class="col-4">
+            <div th:each="type, itemStat : *{ticketTypeCounts}" class="input-container">
                 <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].typeCode}"/>
                 <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].description}"/>
                 <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}"/>
@@ -74,17 +61,18 @@
                      th:errors="*{ticketTypeCounts[__${itemStat.index}__].count}">Ticekt Count Error
                 </div>
             </div>
-            <div class="col-4"></div>
         </div>
 
         <div class="row">
-            <div class="col-5"></div>
-            <div class="col-2">
+            <div class="col-12 center">
                 <input type="submit" value="Submit">
             </div>
-            <div class="col-5"></div>
         </div>
     </form>
+</div>
+
+<div th:replace="~{fragments/footer.html :: footer}">
+    Footer
 </div>
 
 </body>

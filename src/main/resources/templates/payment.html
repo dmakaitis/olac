@@ -11,32 +11,24 @@
     <link rel="stylesheet" type="text/css" href="/olac.css">
 </head>
 <body>
-<div class="header">
-    <div class="col-1"></div>
-    <div class="col-4 center"><img class="headerimage" src="/jav.svg" alt="JAV Lietuvių Bendruomenė"/></div>
-    <div class="col-2"></div>
-    <div class="col-4 center"><img class="headerimage" src="/omaha.svg" alt="Omaha"/></div>
-    <div class="col-1"></div>
+<div th:replace="~{fragments/header.html :: header}">
+    Header
 </div>
 
 <div class="container" th:object="${reservationForm}">
-    <div class="row">
-        <div class="col-12 center">
-            Thank you for reserving tickets to the Omaha Lithuanian Community 70th Anniversary Event! Your reservation
-            number is: [[${reservationId}]]
-        </div>
-    </div>
+    <p>Thank you for reserving tickets to the Omaha Lithuanian Community 70th Anniversary Event! Your reservation number
+        is: [[${reservationId}]]</p>
 
-    <div class="row">
-        <div class="col-12 center">
-            You may use one of the following options to provide your payment of [[${amount}]], or you may pay at the
-            door. If paying online, please include your name and reservation number in the comments.
-        </div>
-    </div>
+    <p>You may use one of the following options to provide your payment of [[${amount}]], or you may pay at the door. If
+        paying online, please include your name and reservation number in the comments.</p>
 
-    <div class="row">
-        <div class="col-12 center"><a href="https://www.venmo.com/u/dmakaitis">Venmo</a></div>
+    <div class="flex-container">
+        <div><a href="https://www.venmo.com/u/dmakaitis">Venmo</a></div>
     </div>
+</div>
+
+<div th:replace="~{fragments/footer.html :: footer}">
+    Footer
 </div>
 
 </body>

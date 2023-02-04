@@ -2,10 +2,7 @@ package org.olac.reservation.resource.jpa;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.olac.reservation.resource.Reservation;
-import org.olac.reservation.resource.ReservationDatastoreAccess;
-import org.olac.reservation.resource.TicketDatastoreAccess;
-import org.olac.reservation.resource.TicketType;
+import org.olac.reservation.resource.*;
 import org.olac.reservation.resource.jpa.entity.ReservationEntity;
 import org.olac.reservation.resource.jpa.entity.ReservationTicketsEntity;
 import org.olac.reservation.resource.jpa.entity.TicketTypeEntity;
@@ -66,6 +63,13 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         return reservationEntity.getId();
     }
 
+    @Override
+    public List<Reservation> getReservations() {
+        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
+                .map(this::toReservation)
+                .toList();
+    }
+
     private TicketTypeEntity getTicketTypeEntity(String code) {
         TicketTypeEntity entity;
         if (isBlank(code)) {
@@ -84,6 +88,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     private ReservationEntity toEntity(Reservation reservation) {
         ReservationEntity entity = new ReservationEntity();
 
+        entity.setId(reservation.getId());
         entity.setFirstName(reservation.getFirstName());
         entity.setLastName(reservation.getLastName());
         entity.setEmail(reservation.getEmail());
@@ -98,4 +103,21 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
         return entity;
     }
+
+    private Reservation toReservation(ReservationEntity entity) {
+        Reservation reservation = new Reservation();
+
+        reservation.setId(entity.getId());
+        reservation.setFirstName(entity.getFirstName());
+        reservation.setLastName(entity.getLastName());
+        reservation.setEmail(entity.getEmail());
+        reservation.setPhone(entity.getPhone());
+
+        reservation.setTicketCounts(entity.getTickets().stream()
+                .map(t -> new TicketCounts(t.getTicketType().getCode(), t.getCount()))
+                .toList());
+
+        return reservation;
+    }
+
 }

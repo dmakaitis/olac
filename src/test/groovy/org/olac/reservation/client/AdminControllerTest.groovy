@@ -1,7 +1,7 @@
 package org.olac.reservation.client
 
 import org.olac.reservation.client.form.TicketTypeForm
-import org.olac.reservation.resource.TicketDatastoreAccess
+import org.olac.reservation.manager.ReservationManager
 import org.olac.reservation.resource.TicketType
 import org.springframework.ui.Model
 import spock.lang.Specification
@@ -12,11 +12,11 @@ class AdminControllerTest extends Specification {
     def type2 = new TicketType(UUID.randomUUID().toString(), "Type 2", 15.0)
     def type3 = new TicketType(UUID.randomUUID().toString(), "Type 3", 75.0)
 
-    def ticketRA = Mock(TicketDatastoreAccess) {
+    def manager = Mock(ReservationManager) {
         _ * getTicketTypes() >> [type1, type2, type3]
     }
 
-    def controller = new AdminController(ticketRA)
+    def controller = new AdminController(manager)
 
     def model = Mock(Model)
 
@@ -44,7 +44,7 @@ class AdminControllerTest extends Specification {
         then:
           result == "ticketTypes"
 
-          1 * ticketRA.saveTicketType(new TicketType("My New Ticket Type", 42.0))
+          1 * manager.saveTicketType(new TicketType("My New Ticket Type", 42.0))
           1 * model.addAttribute("ticketTypes", [type3, type1, type2])
           1 * model.addAttribute("form", new TicketTypeForm())
     }

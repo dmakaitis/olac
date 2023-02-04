@@ -6,7 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.client.form.ReservationForm;
 import org.olac.reservation.client.form.TicketTypeCount;
-import org.olac.reservation.resource.*;
+import org.olac.reservation.manager.ReservationManager;
+import org.olac.reservation.resource.Reservation;
+import org.olac.reservation.resource.TicketCounts;
+import org.olac.reservation.resource.TicketType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,9 +31,7 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 public class PublicController {
 
-    private final TicketDatastoreAccess ticketDatastoreAccess;
-    private final ReservationDatastoreAccess reservationDatastoreAccess;
-    private final NotificationAccess notificationAccess;
+    private final ReservationManager reservationManager;
 
     @GetMapping("/")
     public String home(ReservationForm reservationForm, HttpSession session) {
@@ -67,8 +68,7 @@ public class PublicController {
 
         Reservation reservation = toReservation(reservationForm);
 
-        long reservationId = reservationDatastoreAccess.createReservation(reservation);
-        notificationAccess.sendReservationConfirmation(reservationId, reservation);
+        long reservationId = reservationManager.createReservation(reservation);
 
         model.addAttribute("reservationId", reservationId);
         model.addAttribute("amount", reservationForm.getTotal());
@@ -76,7 +76,7 @@ public class PublicController {
         return "payment";
     }
 
-    private static String format(double value) {
+    public static String format(double value) {
         return NumberFormat.getCurrencyInstance().format(value);
     }
 
@@ -103,7 +103,7 @@ public class PublicController {
 
         AtomicReference<Double> grandTotal = new AtomicReference<>(0.0);
 
-        reservationForm.setTicketTypeCounts(ticketDatastoreAccess.getTicketTypes().stream()
+        reservationForm.setTicketTypeCounts(reservationManager.getTicketTypes().stream()
                 .sorted(comparing(TicketType::getCostPerTicket).reversed())
                 .map(t -> {
                     int count = typeCounts.getOrDefault(t.getCode(), 0);

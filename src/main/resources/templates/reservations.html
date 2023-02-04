@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Getting Started: Serving Web Content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th:block th:each="col : ${headers}">
+            <th th:text="${col}">Column</th>
+        </th:block>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:if="${reservations.empty}">
+        <td colspan="4"> No reservations found.</td>
+    </tr>
+    <tr th:each="reservation : ${reservations}">
+        <th:block th:each="value: ${reservation}">
+            <td th:text="${value}">Value</td>
+        </th:block>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

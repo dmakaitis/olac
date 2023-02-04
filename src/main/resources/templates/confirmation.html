@@ -11,60 +11,69 @@
     <link rel="stylesheet" type="text/css" href="/olac.css">
 </head>
 <body>
-<div class="header">
-    <div class="col-1"></div>
-    <div class="col-4 center"><img class="headerimage" src="/jav.svg" alt="JAV Lietuvių Bendruomenė"/></div>
-    <div class="col-2"></div>
-    <div class="col-4 center"><img class="headerimage" src="/omaha.svg" alt="Omaha"/></div>
-    <div class="col-1"></div>
+<div th:replace="~{fragments/header.html :: header}">
+    Header
 </div>
 
 <div class="container" th:object="${reservationForm}">
-    <div class="row">
-        <div class="col-12 center">Please confirm the following information:</div>
-    </div>
 
-    <div class="row">
-        <div class="col-6 right">First name:</div>
-        <div class="col-6 left">[[*{firstName}]]</div>
-    </div>
-    <div class="row">
-        <div class="col-6 right">Last name:</div>
-        <div class="col-6 left">[[*{lastName}]]</div>
-    </div>
-    <div class="row">
-        <div class="col-6 right">Email:</div>
-        <div class="col-6 left">[[*{email}]]</div>
-    </div>
-    <div class="row" th:if="*{!#strings.isEmpty(phone)}">
-        <div class="col-6 right">Phone number:</div>
-        <div class="col-6 left">[[*{phone}]]</div>
-    </div>
+    <p>Please confirm the following information:</p>
 
-    <th:block th:each="type: *{ticketTypeCounts}">
-        <div class="row">
-            <div class="col-6 right">[[${type.description}]]</div>
-            <div class="col-1 center">[[${type.count}]]</div>
-            <div class="col-5 left">[[${type.total}]]</div>
+    <div class="flex-container">
+        <div class="input-container">
+            <label>First name:</label>
+            <div class="big-text">[[*{firstName}]]</div>
         </div>
-    </th:block>
+        <div class="input-container">
+            <label>Last name:</label>
+            <div class="big-text">[[*{lastName}]]</div>
+        </div>
+        <div class="input-container">
+            <label>Email:</label>
+            <div class="big-text">[[*{email}]]</div>
+        </div>
 
-    <div class="row">
-        <div class="col-6 right">Total:</div>
-        <div class="col-1"></div>
-        <div class="col-5 left">[[*{total}]]</div>
+        <div class="input-container">
+            <th:block th:if="*{!#strings.isEmpty(phone)}">
+                <label>Phone number:</label>
+                <div class="big-text">[[*{phone}]]</div>
+            </th:block>
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-12 center">Does everything look correct?</div>
+    <table class="center" style="width: 300px;">
+        <tr>
+            <th style="text-align: left;">Ticket Type</th>
+            <th style="text-align: center;">Count</th>
+            <th style="text-align: right;">Total</th>
+        </tr>
+
+        <th:block th:each="type: *{ticketTypeCounts}">
+            <tr>
+                <td style="text-align: left;">[[${type.description}]]</td>
+                <td style="text-align: center;">[[${type.count}]]</td>
+                <td style="text-align: right;">[[${type.total}]]</td>
+            </tr>
+        </th:block>
+
+        <tr>
+            <th colspan="2" style="text-align: right;">Total:</th>
+            <th style="text-align: right;">[[*{total}]]</th>
+        </tr>
+    </table>
+
+    <div class="center">
+        <p>Does everything look correct?</p>
     </div>
 
-    <div class="row">
-        <div class="col-5"></div>
-        <div class="col-1 center"><a class="button" th:href="@{/confirm}">Yes</a></div>
-        <div class="col-2 center"><a class="button" th:href="@{/}">No</a></div>
-        <div class="col-5"></div>
+    <div class="button-container">
+        <div><a class="button" th:href="@{/confirm}">Yes</a></div>
+        <div><a class="button" th:href="@{/}">No</a></div>
     </div>
+</div>
+
+<div th:replace="~{fragments/footer.html :: footer}">
+    Footer
 </div>
 
 </body>
