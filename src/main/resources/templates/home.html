@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css"
           href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz@6..96&display=swap">
     <link rel="stylesheet" type="text/css" href="/olac.css">
+    <link rel="icon" href="/olac-logo.svg" type="image/svg+xml">
 </head>
 <body>
 <div th:replace="~{fragments/header.html :: header}">
@@ -16,59 +17,13 @@
 </div>
 
 <div class="container">
-
-    <p>The Lithuanian American Community of Omaha is proudly celebrating its 70th year as an organization since its
-        founding on April 26th, 1953. A home to Lithuanians for decades, Omaha has more than just supported the
-        Lithuanian community, the city has helped the organization thrive.</p>
-
-    <p>The Lithuanian American Community has been an integral part of Omaha history for over a century. We look forward
-        to sharing this celebration with you, of not just culture, but the history that comes with it.</p>
-
-    <form action="#" th:action="@{/}" th:object="${reservationForm}" method="post" autocomplete="on">
-        <div class="flex-container">
-            <div class="input-container">
-                <label>First Name:</label>
-                <input type="text" th:field="*{firstName}"/>
-                <div class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Name Error</div>
-            </div>
-            <div class="input-container">
-                <label>Last Name:</label>
-                <input type="text" th:field="*{lastName}"/>
-                <div class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Last Name Error
-                </div>
-            </div>
-
-            <div class="input-container">
-                <label>Email:</label>
-                <input type="text" th:field="*{email}"/>
-                <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</div>
-            </div>
-            <div class="input-container">
-                <label>Phone:</label>
-                <input type="text" th:field="*{phone}"/>
-                <div class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Phone Number Error</div>
-            </div>
-
-            <div th:each="type, itemStat : *{ticketTypeCounts}" class="input-container">
-                <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].typeCode}"/>
-                <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].description}"/>
-                <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}"/>
-
-                <label>[[*{ticketTypeCounts[__${itemStat.index}__].description}]] @
-                    [[*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}]] each</label>
-                <input type="text" th:field="*{ticketTypeCounts[__${itemStat.index}__].count}"/>
-                <div class="error" th:if="${#fields.hasErrors('*{ticketTypeCounts[__${itemStat.index}__].count}')}"
-                     th:errors="*{ticketTypeCounts[__${itemStat.index}__].count}">Ticekt Count Error
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12 center">
-                <input type="submit" value="Submit">
-            </div>
-        </div>
-    </form>
+    <div th:replace="~{fragments/olac.html :: olac}">OLAC</div>
+    <hr/>
+    <div th:replace="~{fragments/ausra.html :: ausra}">Ausra</div>
+    <hr/>
+    <div th:replace="~{fragments/womens-club.html :: womens-club}">Women's Club</div>
+    <hr/>
+    <div th:replace="~{fragments/sister-city.html :: sister-city}">Sister City</div>
 </div>
 
 <div th:replace="~{fragments/footer.html :: footer}">

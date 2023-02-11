@@ -2,7 +2,6 @@
     --background: #465a71;
     --input-color: black;
     --input-bg-color: white;
-    --margin: 150px;
     --max-width: 1000px;
     --field-width: 400px;
 }
@@ -59,6 +58,34 @@
     padding: 15px;
 }
 
+.float-left {
+    float: left;
+    margin: 5px;
+    width: 30%;
+    min-width: 300px;
+}
+
+.float-right {
+    float: right;
+    margin: 5px;
+    width: 30%;
+    min-width: 300px;
+}
+
+@media (max-width: 600px) {
+    .float-left {
+        float: none;
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .float-right {
+        float: none;
+        width: 100%;
+        min-width: 100%;
+    }
+}
+
 .footer {
     position: fixed;
     left: 0;
@@ -70,7 +97,7 @@
 }
 
 .header {
-    height: 200px;
+    height: 220px;
     max-width: var(--max-width);
     margin: auto;
     background-color: var(--background)
@@ -79,7 +106,7 @@
 .headerimage {
     background-color: var(--background);
     padding: 10px;
-    height: var(--margin)
+    height: 150px;
 }
 
 .input-container {
@@ -100,6 +127,10 @@ html {
     color: black;
 }
 
+hr {
+    clear: both;
+}
+
 input {
     font-family: 'Bodoni Moda', serif;
     font-size: 1em;
@@ -109,4 +140,29 @@ input {
 
 label {
     color: var(--background)
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--background);
+}
+
+li {
+    float: left;
+}
+
+li a {
+    display: inline-block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a:hover {
+    color: var(--background);
+    background-color: ghostwhite;
 }

@@ -31,11 +31,18 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 public class PublicController {
 
+    private static final String ATTRIB_RESERVATION_FORM = "reservationForm";
+
     private final ReservationManager reservationManager;
 
     @GetMapping("/")
+    public String home() {
+        return "home";
+    }
+
+    @GetMapping("/tickets")
     public String home(ReservationForm reservationForm, HttpSession session) {
-        ReservationForm oldForm = (ReservationForm) session.getAttribute("reservationForm");
+        ReservationForm oldForm = (ReservationForm) session.getAttribute(ATTRIB_RESERVATION_FORM);
         if (oldForm != null) {
             reservationForm.setFirstName(oldForm.getFirstName());
             reservationForm.setLastName(oldForm.getLastName());
@@ -46,25 +53,27 @@ public class PublicController {
 
         fixTicketTypes(reservationForm);
 
-        return "home";
+        session.removeAttribute(ATTRIB_RESERVATION_FORM);
+
+        return "tickets";
     }
 
-    @PostMapping("/")
+    @PostMapping("/tickets")
     public String postReservation(@Valid ReservationForm reservationForm, BindingResult result, HttpSession session) {
         fixTicketTypes(reservationForm);
 
         if (result.hasErrors()) {
-            return "home";
+            return "tickets";
         }
 
-        session.setAttribute("reservationForm", reservationForm);
+        session.setAttribute(ATTRIB_RESERVATION_FORM, reservationForm);
 
         return "confirmation";
     }
 
     @GetMapping("/confirm")
     public String confirmReservation(HttpSession session, Model model) {
-        ReservationForm reservationForm = (ReservationForm) session.getAttribute("reservationForm");
+        ReservationForm reservationForm = (ReservationForm) session.getAttribute(ATTRIB_RESERVATION_FORM);
 
         Reservation reservation = toReservation(reservationForm);
 
@@ -72,6 +81,8 @@ public class PublicController {
 
         model.addAttribute("reservationId", reservationId);
         model.addAttribute("amount", reservationForm.getTotal());
+
+        session.removeAttribute(ATTRIB_RESERVATION_FORM);
 
         return "payment";
     }
@@ -109,7 +120,7 @@ public class PublicController {
                     int count = typeCounts.getOrDefault(t.getCode(), 0);
                     double total = count * t.getCostPerTicket();
 
-                    grandTotal.accumulateAndGet(total, (a, b) -> a + b);
+                    grandTotal.accumulateAndGet(total, Double::sum);
 
                     return new TicketTypeCount(t.getCode(), t.getDescription(), format(t.getCostPerTicket()), count, format(total));
                 })
