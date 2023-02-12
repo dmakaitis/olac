@@ -35,14 +35,15 @@ class PublicControllerTest extends Specification {
           )
 
         when:
-          def result = controller.home(expectedForm, session)
+          def result = controller.tickets(expectedForm, session)
 
         then:
-          result == "home"
+          result == "tickets"
     }
 
     def "Posting a new reservation should save it to the database"() {
         given:
+          def model = Mock(Model)
           def bindingResult = Mock(BindingResult) {
               _ * hasErrors() >> false
           }
@@ -53,18 +54,18 @@ class PublicControllerTest extends Specification {
                   email: "dmakaitis@gmail.com",
                   phone: "402-880-8442",
                   ticketTypeCounts: [
-                          new TicketTypeCount(typeCode: "aaaa", count: 5),
-                          new TicketTypeCount(typeCode: "bbbb", count: 3)
+                          new TicketTypeCount(typeCode: type1.code, count: 5),
+                          new TicketTypeCount(typeCode: type2.code, count: 3)
                   ]
           )
-          def newReserationId = 42
 
         when:
-          def result = controller.postReservation(form, bindingResult, session)
+          def result = controller.postReservation(form, bindingResult, model, session)
 
         then:
           result == "confirmation"
 
+          1 * manager.areTicketsAvailable(8) >> true
           1 * session.setAttribute("reservationForm", form)
     }
 }

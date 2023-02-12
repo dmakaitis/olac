@@ -15,4 +15,6 @@ public interface ReservationManager {
 
     List<Reservation> getReservations();
 
+    boolean areTicketsAvailable(long requestedTicketCount);
+
 }

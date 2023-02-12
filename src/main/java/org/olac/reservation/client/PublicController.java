@@ -32,16 +32,20 @@ import static java.util.stream.Collectors.toMap;
 public class PublicController {
 
     private static final String ATTRIB_RESERVATION_FORM = "reservationForm";
+    public static final String TEMPLATE_HOME = "home";
+    public static final String TEMPLATE_TICKETS = "tickets";
+    public static final String TEMPLATE_PAYMENT = "payment";
+    public static final String TEMPLATE_CONFIRMATION = "confirmation";
 
     private final ReservationManager reservationManager;
 
     @GetMapping("/")
     public String home() {
-        return "home";
+        return TEMPLATE_HOME;
     }
 
     @GetMapping("/tickets")
-    public String home(ReservationForm reservationForm, HttpSession session) {
+    public String tickets(ReservationForm reservationForm, HttpSession session) {
         ReservationForm oldForm = (ReservationForm) session.getAttribute(ATTRIB_RESERVATION_FORM);
         if (oldForm != null) {
             reservationForm.setFirstName(oldForm.getFirstName());
@@ -55,20 +59,27 @@ public class PublicController {
 
         session.removeAttribute(ATTRIB_RESERVATION_FORM);
 
-        return "tickets";
+        return TEMPLATE_TICKETS;
     }
 
     @PostMapping("/tickets")
-    public String postReservation(@Valid ReservationForm reservationForm, BindingResult result, HttpSession session) {
+    public String postReservation(@Valid ReservationForm reservationForm, BindingResult result, Model model, HttpSession session) {
         fixTicketTypes(reservationForm);
 
         if (result.hasErrors()) {
-            return "tickets";
+            return TEMPLATE_TICKETS;
+        }
+
+        if (!reservationManager.areTicketsAvailable(reservationForm.getTicketTypeCounts().stream()
+                .mapToLong(TicketTypeCount::getCount)
+                .sum())) {
+            model.addAttribute("ticketCountError", "Not enough tickets are available");
+            return TEMPLATE_TICKETS;
         }
 
         session.setAttribute(ATTRIB_RESERVATION_FORM, reservationForm);
 
-        return "confirmation";
+        return TEMPLATE_CONFIRMATION;
     }
 
     @GetMapping("/confirm")
@@ -84,7 +95,7 @@ public class PublicController {
 
         session.removeAttribute(ATTRIB_RESERVATION_FORM);
 
-        return "payment";
+        return TEMPLATE_PAYMENT;
     }
 
     public static String format(double value) {

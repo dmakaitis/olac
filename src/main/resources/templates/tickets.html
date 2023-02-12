@@ -25,7 +25,7 @@
     <p>The Lithuanian American Community has been an integral part of Omaha history for over a century. We look forward
         to sharing this celebration with you, of not just culture, but the history that comes with it.</p>
 
-    <form action="#" th:action="@{/}" th:object="${reservationForm}" method="post" autocomplete="on">
+    <form action="#" th:action="@{/tickets}" th:object="${reservationForm}" method="post" autocomplete="on">
         <div class="flex-container">
             <div class="input-container">
                 <label>First Name:</label>
@@ -59,9 +59,13 @@
                     [[*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}]] each</label>
                 <input type="text" th:field="*{ticketTypeCounts[__${itemStat.index}__].count}"/>
                 <div class="error" th:if="${#fields.hasErrors('*{ticketTypeCounts[__${itemStat.index}__].count}')}"
-                     th:errors="*{ticketTypeCounts[__${itemStat.index}__].count}">Ticekt Count Error
+                     th:errors="*{ticketTypeCounts[__${itemStat.index}__].count}">Ticket Count Error
                 </div>
             </div>
+        </div>
+
+        <div class="error" th:if="${not #strings.isEmpty(ticketCountError)}" th:text="${ticketCountError}">Not enough
+            tickets
         </div>
 
         <div class="row">
