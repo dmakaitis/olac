@@ -109,30 +109,36 @@ public class PublicController {
     private List<PurchaseUnitRequest> toPurchaseUnits(long reservationId, ReservationForm reservationForm) {
         String totalAmount = reservationForm.getTotal().replaceAll("[$]", "");
 
-        PurchaseUnitRequest purchaseUnit = new PurchaseUnitRequest();
-
-        purchaseUnit.setAmount(new AmountWithBreakdown(
-                "USD",
-                totalAmount,
-                new AmountBreakdown(new Money("USD", totalAmount))
-        ));
-        purchaseUnit.setDescription("Omaha Lithuanian Community's 70th Anniversary Celebration on Saturday, April 22, 2023");
-        purchaseUnit.setInvoiceId(Long.toString(reservationId));
-        purchaseUnit.setItems(reservationForm.getTicketTypeCounts().stream()
-                .map(this::toItem)
-                .toList());
+        PurchaseUnitRequest purchaseUnit = PurchaseUnitRequest.builder()
+                .amount(AmountWithBreakdown.builder()
+                        .currencyCode("USD")
+                        .value(totalAmount)
+                        .breakdown(AmountBreakdown.builder()
+                                .itemTotal(Money.builder()
+                                        .currencyCode("USD")
+                                        .value(totalAmount)
+                                        .build())
+                                .build())
+                        .build())
+                .description("Omaha Lithuanian Community's 70th Anniversary Celebration on Saturday, April 22, 2023")
+//                .invoiceId(Long.toString(reservationId))
+                .items(reservationForm.getTicketTypeCounts().stream()
+                        .map(this::toItem)
+                        .toList())
+                .build();
 
         return singletonList(purchaseUnit);
     }
 
     private Item toItem(TicketTypeCount ticketTypeCount) {
-        Item item = new Item();
-
-        item.setName(ticketTypeCount.getDescription());
-        item.setUnitAmount(new Money("USD", ticketTypeCount.getCostPerTicket().replaceAll("[$]", "")));
-        item.setQuantity(ticketTypeCount.getCount().toString());
-
-        return item;
+        return Item.builder()
+                .name(ticketTypeCount.getDescription())
+                .unitAmount(Money.builder()
+                        .currencyCode("USD")
+                        .value(ticketTypeCount.getCostPerTicket().replaceAll("[$]", ""))
+                        .build())
+                .quantity(ticketTypeCount.getCount().toString())
+                .build();
     }
 
     public static String format(double value) {

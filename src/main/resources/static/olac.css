@@ -64,14 +64,14 @@
 
 .float-left {
     float: left;
-    margin: 5px;
+    margin: 15px;
     width: 30%;
     min-width: 300px;
 }
 
 .float-right {
     float: right;
-    margin: 5px;
+    margin: 15px;
     width: 30%;
     min-width: 300px;
 }
@@ -119,6 +119,10 @@
 
 .input-container > input {
     width: 100%;
+}
+
+.shadow {
+    box-shadow: 5px 5px 5px #999;
 }
 
 body {

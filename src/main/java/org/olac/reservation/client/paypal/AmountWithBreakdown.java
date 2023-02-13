@@ -1,15 +1,17 @@
 package org.olac.reservation.client.paypal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class AmountWithBreakdown {
 
     /**
      * The three-character ISO-4217 currency code that identifies the currency.
+     * <p>
+     * (required)
      */
     @JsonProperty("currency_code")
     private String currencyCode;
@@ -21,6 +23,8 @@ public class AmountWithBreakdown {
      * <li>A decimal fraction for currencies like TND that are subdivided into thousandths.</li>
      * </ul>
      * For the required number of decimal places for a currency code, see Currency Codes.
+     * <p>
+     * (required)
      */
     private String value;
 
