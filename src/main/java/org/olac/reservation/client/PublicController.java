@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.client.form.ReservationForm;
 import org.olac.reservation.client.form.TicketTypeCount;
 import org.olac.reservation.client.paypal.*;
+import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.manager.ReservationManager;
 import org.olac.reservation.resource.Reservation;
 import org.olac.reservation.resource.TicketCounts;
@@ -40,6 +41,7 @@ public class PublicController {
     public static final String TEMPLATE_CONFIRMATION = "confirmation";
 
     private final ReservationManager reservationManager;
+    private final OlacProperties properties;
 
     @GetMapping("/")
     public String home() {
@@ -97,6 +99,7 @@ public class PublicController {
 
         List<PurchaseUnitRequest> purchaseUnits = toPurchaseUnits(reservationId, reservationForm);
         model.addAttribute("purchaseUnits", purchaseUnits);
+        model.addAttribute("paypalClient", properties.getPaypalClient());
 
         session.removeAttribute(ATTRIB_RESERVATION_FORM);
 
