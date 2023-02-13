@@ -23,9 +23,7 @@
     <p>You may use one of the following options to provide your payment of [[${amount}]], or you may pay at the door. If
         paying online, please include your name and reservation number in the comments.</p>
 
-    <div class="flex-container">
-        <div><a href="https://www.venmo.com/u/dmakaitis">Venmo</a></div>
-    </div>
+    <div th:replace="~{fragments/paypal.html :: paypal}">PayPal</div>
 </div>
 
 <div th:replace="~{fragments/footer.html :: footer}">

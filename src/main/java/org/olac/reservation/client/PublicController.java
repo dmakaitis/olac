@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.client.form.ReservationForm;
 import org.olac.reservation.client.form.TicketTypeCount;
+import org.olac.reservation.client.paypal.*;
 import org.olac.reservation.manager.ReservationManager;
 import org.olac.reservation.resource.Reservation;
 import org.olac.reservation.resource.TicketCounts;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toMap;
 
@@ -93,9 +95,41 @@ public class PublicController {
         model.addAttribute("reservationId", reservationId);
         model.addAttribute("amount", reservationForm.getTotal());
 
+        List<PurchaseUnitRequest> purchaseUnits = toPurchaseUnits(reservationId, reservationForm);
+        model.addAttribute("purchaseUnits", purchaseUnits);
+
         session.removeAttribute(ATTRIB_RESERVATION_FORM);
 
         return TEMPLATE_PAYMENT;
+    }
+
+    private List<PurchaseUnitRequest> toPurchaseUnits(long reservationId, ReservationForm reservationForm) {
+        String totalAmount = reservationForm.getTotal().replaceAll("[$]", "");
+
+        PurchaseUnitRequest purchaseUnit = new PurchaseUnitRequest();
+
+        purchaseUnit.setAmount(new AmountWithBreakdown(
+                "USD",
+                totalAmount,
+                new AmountBreakdown(new Money("USD", totalAmount))
+        ));
+        purchaseUnit.setDescription("Omaha Lithuanian Community's 70th Anniversary Celebration on Saturday, April 22, 2023");
+        purchaseUnit.setInvoiceId(Long.toString(reservationId));
+        purchaseUnit.setItems(reservationForm.getTicketTypeCounts().stream()
+                .map(this::toItem)
+                .toList());
+
+        return singletonList(purchaseUnit);
+    }
+
+    private Item toItem(TicketTypeCount ticketTypeCount) {
+        Item item = new Item();
+
+        item.setName(ticketTypeCount.getDescription());
+        item.setUnitAmount(new Money("USD", ticketTypeCount.getCostPerTicket().replaceAll("[$]", "")));
+        item.setQuantity(ticketTypeCount.getCount().toString());
+
+        return item;
     }
 
     public static String format(double value) {
