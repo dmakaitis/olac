@@ -3,9 +3,7 @@ package org.olac.reservation.client;
 import lombok.RequiredArgsConstructor;
 import org.olac.reservation.client.form.TicketTypeForm;
 import org.olac.reservation.manager.ReservationManager;
-import org.olac.reservation.resource.Reservation;
-import org.olac.reservation.resource.TicketCounts;
-import org.olac.reservation.resource.TicketType;
+import org.olac.reservation.resource.model.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -104,7 +102,10 @@ public class AdminController {
                     }
 
                     values.add(PublicController.format(total));
-                    values.add(PublicController.format(0.0));
+                    values.add(PublicController.format(r.getPayments().stream()
+                            .filter(p -> p.getStatus() == PaymentStatus.SUCCESSFUL)
+                            .mapToDouble(Payment::getAmount)
+                            .sum()));
 
                     return values;
                 })

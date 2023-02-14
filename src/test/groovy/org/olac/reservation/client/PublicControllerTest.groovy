@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpSession
 import org.olac.reservation.client.form.ReservationForm
 import org.olac.reservation.client.form.TicketTypeCount
 import org.olac.reservation.manager.ReservationManager
-import org.olac.reservation.resource.TicketType
+import org.olac.reservation.resource.model.TicketType
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import spock.lang.Specification

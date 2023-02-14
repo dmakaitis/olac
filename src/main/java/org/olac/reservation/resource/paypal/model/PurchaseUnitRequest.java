@@ -1,4 +1,4 @@
-package org.olac.reservation.client.paypal;
+package org.olac.reservation.resource.paypal.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

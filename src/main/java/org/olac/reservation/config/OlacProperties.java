@@ -10,5 +10,6 @@ public class OlacProperties {
     private int maxTickets;
 
     private String paypalClient;
+    private String paypalSecret;
 
 }

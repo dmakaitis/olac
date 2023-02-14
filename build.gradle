@@ -30,6 +30,11 @@ dependencies {
 
     implementation 'org.apache.commons:commons-lang3'
 
+    implementation 'io.github.openfeign:feign-okhttp:10.12'
+    implementation 'io.github.openfeign:feign-jackson:10.12'
+    implementation 'io.github.openfeign.form:feign-form:3.8.0'
+    implementation 'io.github.openfeign:feign-slf4j:10.12'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
 

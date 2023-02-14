@@ -2,12 +2,18 @@ package org.olac.reservation.resource.jpa;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.olac.reservation.resource.*;
+import org.olac.reservation.resource.ReservationDatastoreAccess;
+import org.olac.reservation.resource.TicketDatastoreAccess;
+import org.olac.reservation.resource.jpa.entity.PaymentEntity;
 import org.olac.reservation.resource.jpa.entity.ReservationEntity;
 import org.olac.reservation.resource.jpa.entity.ReservationTicketsEntity;
 import org.olac.reservation.resource.jpa.entity.TicketTypeEntity;
 import org.olac.reservation.resource.jpa.repository.ReservationRepository;
 import org.olac.reservation.resource.jpa.repository.TicketTypeRepository;
+import org.olac.reservation.resource.model.Payment;
+import org.olac.reservation.resource.model.Reservation;
+import org.olac.reservation.resource.model.TicketCounts;
+import org.olac.reservation.resource.model.TicketType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +21,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
@@ -70,6 +76,15 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
                 .toList();
     }
 
+    @Override
+    public void addPaymentToReservation(String reservationId, Payment payment) {
+        Optional<ReservationEntity> reservationEntity = reservationRepository.findByReservationId(reservationId);
+        reservationEntity.ifPresent(e -> {
+            e.getPayments().add(toPaymentEntity(payment, e));
+            reservationRepository.save(e);
+        });
+    }
+
     private TicketTypeEntity getTicketTypeEntity(String code) {
         TicketTypeEntity entity;
         if (isBlank(code)) {
@@ -89,18 +104,22 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         ReservationEntity entity = new ReservationEntity();
 
         entity.setId(reservation.getId());
+        entity.setReservationId(reservation.getReservationId());
         entity.setFirstName(reservation.getFirstName());
         entity.setLastName(reservation.getLastName());
         entity.setEmail(reservation.getEmail());
         entity.setPhone(reservation.getPhone());
-
+        entity.setReservationTimestamp(reservation.getReservationTimestamp());
+        entity.setAmountDue(reservation.getAmountDue());
         entity.setTickets(reservation.getTicketCounts().stream()
                 .map(t -> ticketTypeRepository.findByCode(t.getTicketTypeCode())
                         .map(c -> new ReservationTicketsEntity(entity, c, t.getCount())))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toSet()));
-
+                .collect(toSet()));
+        entity.setPayments(reservation.getPayments().stream()
+                .map(p -> toPaymentEntity(p, entity))
+                .collect(toSet()));
         return entity;
     }
 
@@ -108,16 +127,41 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         Reservation reservation = new Reservation();
 
         reservation.setId(entity.getId());
+        reservation.setReservationId(entity.getReservationId());
         reservation.setFirstName(entity.getFirstName());
         reservation.setLastName(entity.getLastName());
         reservation.setEmail(entity.getEmail());
         reservation.setPhone(entity.getPhone());
+        reservation.setReservationTimestamp(entity.getReservationTimestamp());
+        reservation.setAmountDue(entity.getAmountDue());
 
         reservation.setTicketCounts(entity.getTickets().stream()
                 .map(t -> new TicketCounts(t.getTicketType().getCode(), t.getCount()))
                 .toList());
+        reservation.setPayments(entity.getPayments().stream()
+                .map(this::toPayment)
+                .toList());
 
         return reservation;
+    }
+
+    private PaymentEntity toPaymentEntity(Payment payment, ReservationEntity reservation) {
+        PaymentEntity entity = new PaymentEntity();
+
+        entity.setId(payment.getId());
+        entity.setReservation(reservation);
+        entity.setAmount(payment.getAmount());
+        entity.setStatus(payment.getStatus());
+
+        return entity;
+    }
+
+    private Payment toPayment(PaymentEntity entity) {
+        return Payment.builder()
+                .id(entity.getId())
+                .amount(entity.getAmount())
+                .status(entity.getStatus())
+                .build();
     }
 
 }

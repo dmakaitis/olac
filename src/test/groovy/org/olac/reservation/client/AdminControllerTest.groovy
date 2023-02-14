@@ -2,7 +2,7 @@ package org.olac.reservation.client
 
 import org.olac.reservation.client.form.TicketTypeForm
 import org.olac.reservation.manager.ReservationManager
-import org.olac.reservation.resource.TicketType
+import org.olac.reservation.resource.model.TicketType
 import org.springframework.ui.Model
 import spock.lang.Specification
 

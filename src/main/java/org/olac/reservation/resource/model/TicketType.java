@@ -1,4 +1,4 @@
-package org.olac.reservation.resource;
+package org.olac.reservation.resource.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

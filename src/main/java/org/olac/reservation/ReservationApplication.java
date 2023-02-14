@@ -2,7 +2,7 @@ package org.olac.reservation;
 
 import lombok.RequiredArgsConstructor;
 import org.olac.reservation.resource.TicketDatastoreAccess;
-import org.olac.reservation.resource.TicketType;
+import org.olac.reservation.resource.model.TicketType;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;

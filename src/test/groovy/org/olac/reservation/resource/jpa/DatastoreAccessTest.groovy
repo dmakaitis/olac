@@ -1,13 +1,13 @@
 package org.olac.reservation.resource.jpa
 
-import org.olac.reservation.resource.Reservation
-import org.olac.reservation.resource.TicketCounts
-import org.olac.reservation.resource.TicketType
 import org.olac.reservation.resource.jpa.entity.ReservationEntity
 import org.olac.reservation.resource.jpa.entity.ReservationTicketsEntity
 import org.olac.reservation.resource.jpa.entity.TicketTypeEntity
 import org.olac.reservation.resource.jpa.repository.ReservationRepository
 import org.olac.reservation.resource.jpa.repository.TicketTypeRepository
+import org.olac.reservation.resource.model.Reservation
+import org.olac.reservation.resource.model.TicketCounts
+import org.olac.reservation.resource.model.TicketType
 import spock.lang.Specification
 
 import java.util.function.Supplier

@@ -5,13 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.engine.TemplateEngine;
 import org.olac.reservation.manager.ReservationManager;
-import org.olac.reservation.resource.*;
+import org.olac.reservation.resource.NotificationAccess;
+import org.olac.reservation.resource.PaymentProcessorAccess;
+import org.olac.reservation.resource.ReservationDatastoreAccess;
+import org.olac.reservation.resource.TicketDatastoreAccess;
+import org.olac.reservation.resource.model.*;
+import org.olac.reservation.resource.paypal.model.CreateOrderResponse;
+import org.olac.reservation.resource.paypal.model.PurchaseUnit;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-import static java.util.stream.Collectors.toMap;
+import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +29,7 @@ public class ReservationManagerImpl implements ReservationManager {
     private final ReservationDatastoreAccess reservationDatastoreAccess;
     private final TemplateEngine templateEngine;
     private final NotificationAccess notificationAccess;
+    private final PaymentProcessorAccess paymentProcessorAccess;
     private final OlacProperties properties;
 
     @Override
@@ -41,9 +49,11 @@ public class ReservationManagerImpl implements ReservationManager {
         }
 
         long reservationId = reservationDatastoreAccess.createReservation(reservation);
-        double amount = calculateReservationAmount(reservation);
-        String message = templateEngine.createReservationNotificationMessage(reservationId, amount);
-        notificationAccess.sentNotification(reservation.getEmail(), "Reservation Confirmation", message);
+
+//        double amount = reservation.getAmountDue();
+//        String message = templateEngine.createReservationNotificationMessage(reservationId, amount);
+//        notificationAccess.sentNotification(reservation.getEmail(), "Reservation Confirmation", message);
+
         return reservationId;
     }
 
@@ -63,18 +73,66 @@ public class ReservationManagerImpl implements ReservationManager {
         return requestedTicketCount <= availableTickets;
     }
 
+    @Override
+    public boolean validateAndAddPayment(String reservationId, String paymentProcessorTransactionId) {
+        if (isBlank(reservationId) || isBlank(paymentProcessorTransactionId)) {
+            return false;
+        }
+
+        // Load the actual transaction from PayPal since the one we have could have been altered...
+        Optional<CreateOrderResponse> responseOptional = paymentProcessorAccess.getOrder(paymentProcessorTransactionId);
+        if (responseOptional.isEmpty()) {
+            // Not a valid transaction
+            return false;
+        }
+        CreateOrderResponse response = responseOptional.get();
+
+        // Search through the transaction for our reservation in order to find the amount paid...
+        double amount = getPaymentAmount(reservationId, response);
+
+        if (amount <= 0.0) {
+            // Could not find purchase unit with payment for reservation
+            return false;
+        }
+
+        // Record the payment:
+        Payment payment = Payment.builder()
+                .amount(amount)
+                .status(PaymentStatus.SUCCESSFUL)
+                .build();
+
+        reservationDatastoreAccess.addPaymentToReservation(reservationId, payment);
+
+        return true;
+    }
+
+    private static double getPaymentAmount(String reservationId, CreateOrderResponse response) {
+        List<PurchaseUnit> purchaseUnits = response.getPurchaseUnits();
+        if (purchaseUnits == null) {
+            purchaseUnits = emptyList();
+        }
+
+        double amount = 0.0;
+
+        for (PurchaseUnit purchaseUnit : purchaseUnits) {
+            if (reservationId.equals(purchaseUnit.getCustomId())) {
+                if (purchaseUnit.getAmount() != null && purchaseUnit.getAmount().getValue() != null) {
+                    amount = Double.parseDouble(purchaseUnit.getAmount().getValue());
+                    break;
+                }
+            }
+        }
+        return amount;
+    }
+
+    @Override
+    public void addPayment(String reservationId, Payment payment) {
+        reservationDatastoreAccess.addPaymentToReservation(reservationId, payment);
+    }
+
     private long getTicketCount(Reservation reservation) {
         return reservation.getTicketCounts().stream()
                 .mapToLong(TicketCounts::getCount)
-                .sum();
-    }
-
-    private double calculateReservationAmount(Reservation reservation) {
-        Map<String, Double> typeCosts = getTicketTypes().stream()
-                .collect(toMap(TicketType::getCode, TicketType::getCostPerTicket));
-
-        return reservation.getTicketCounts().stream()
-                .mapToDouble(c -> c.getCount() * typeCosts.getOrDefault(c.getTicketTypeCode(), 0.0))
                 .sum();
     }
 

@@ -17,6 +17,9 @@
             <div id="paypal-button-container"></div>
         </div>
     </div>
+    <form id="createOrderResponseForm" action="#" th:action="@{/thanks}" method="post">
+        <input type="hidden" id="createOrderResponse" name="createOrderResponse"/>
+    </form>
     <script th:src="@{https://www.paypal.com/sdk/js(client-id=${paypalClient},enable-funding=venmo,currency=USD)}"
             data-sdk-integration-source="button-factory"></script>
     <script th:inline="javascript">
@@ -46,7 +49,8 @@
                         element.innerHTML = '<h3>Thank you for your payment!</h3>';
 
                         // Or go to another URL:  actions.redirect('thank_you.html');
-
+                        document.getElementById('createOrderResponse').value = JSON.stringify(orderData);
+                        document.getElementById('createOrderResponseForm').submit()
                     });
                 },
                 onError: function (err) {

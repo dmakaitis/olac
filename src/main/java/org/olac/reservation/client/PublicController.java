@@ -6,22 +6,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.client.form.ReservationForm;
 import org.olac.reservation.client.form.TicketTypeCount;
-import org.olac.reservation.client.paypal.*;
 import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.manager.ReservationManager;
-import org.olac.reservation.resource.Reservation;
-import org.olac.reservation.resource.TicketCounts;
-import org.olac.reservation.resource.TicketType;
+import org.olac.reservation.resource.model.Reservation;
+import org.olac.reservation.resource.model.TicketCounts;
+import org.olac.reservation.resource.model.TicketType;
+import org.olac.reservation.resource.paypal.model.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.NumberFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.emptyList;
@@ -35,6 +34,7 @@ import static java.util.stream.Collectors.toMap;
 public class PublicController {
 
     private static final String ATTRIB_RESERVATION_FORM = "reservationForm";
+    private static final String ATTRIB_RESERVATION_ID = "reservationId";
     public static final String TEMPLATE_HOME = "home";
     public static final String TEMPLATE_TICKETS = "tickets";
     public static final String TEMPLATE_PAYMENT = "payment";
@@ -97,19 +97,37 @@ public class PublicController {
         model.addAttribute("reservationId", reservationId);
         model.addAttribute("amount", reservationForm.getTotal());
 
-        List<PurchaseUnitRequest> purchaseUnits = toPurchaseUnits(reservationId, reservationForm);
+        List<PurchaseUnitRequest> purchaseUnits = toPurchaseUnits(reservation.getReservationId(), reservationForm);
         model.addAttribute("purchaseUnits", purchaseUnits);
         model.addAttribute("paypalClient", properties.getPaypalClient());
 
         session.removeAttribute(ATTRIB_RESERVATION_FORM);
+        session.setAttribute(ATTRIB_RESERVATION_ID, reservation.getReservationId());
 
         return TEMPLATE_PAYMENT;
     }
 
-    private List<PurchaseUnitRequest> toPurchaseUnits(long reservationId, ReservationForm reservationForm) {
+    @PostMapping("/thanks")
+    public String postPayment(@RequestParam CreateOrderResponse createOrderResponse, HttpSession session) {
+        String transactionId = createOrderResponse.getId();
+        String reservationId = (String) session.getAttribute(ATTRIB_RESERVATION_ID);
+
+        boolean success = reservationManager.validateAndAddPayment(reservationId, transactionId);
+
+        if (success) {
+            log.info("Payment was confirmed!");
+            return "thanks";
+        } else {
+            log.error("Failed to validate payment");
+            return "paymenterror";
+        }
+    }
+
+    private List<PurchaseUnitRequest> toPurchaseUnits(String paypalId, ReservationForm reservationForm) {
         String totalAmount = reservationForm.getTotal().replaceAll("[$]", "");
 
         PurchaseUnitRequest purchaseUnit = PurchaseUnitRequest.builder()
+                .customId(paypalId)
                 .amount(AmountWithBreakdown.builder()
                         .currencyCode("USD")
                         .value(totalAmount)
@@ -121,7 +139,7 @@ public class PublicController {
                                 .build())
                         .build())
                 .description("Omaha Lithuanian Community's 70th Anniversary Celebration on Saturday, April 22, 2023")
-//                .invoiceId(Long.toString(reservationId))
+                .softDescriptor("OLAC 70th Anniversary")
                 .items(reservationForm.getTicketTypeCounts().stream()
                         .map(this::toItem)
                         .toList())
@@ -147,6 +165,9 @@ public class PublicController {
 
     private Reservation toReservation(ReservationForm form) {
         Reservation reservation = new Reservation();
+        reservation.setReservationId(UUID.randomUUID().toString());
+        reservation.setReservationTimestamp(new Date());
+
         reservation.setFirstName(form.getFirstName());
         reservation.setLastName(form.getLastName());
         reservation.setEmail(form.getEmail());
@@ -155,6 +176,13 @@ public class PublicController {
         reservation.setTicketCounts(form.getTicketTypeCounts().stream()
                 .map(t -> new TicketCounts(t.getTypeCode(), t.getCount()))
                 .toList());
+
+        Map<String, Double> typeCosts = reservationManager.getTicketTypes().stream()
+                .collect(toMap(TicketType::getCode, TicketType::getCostPerTicket));
+
+        reservation.setAmountDue(form.getTicketTypeCounts().stream()
+                .mapToDouble(t -> t.getCount() * typeCosts.getOrDefault(t.getTypeCode(), 0.0))
+                .sum());
 
         return reservation;
     }
