@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>Reservation Confirmation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style>
+        :root {
+            --background: #465a71;
+            --max-width: 1000px;
+        }
+
+        .big-text {
+            font-size: 1.3em;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            background-color: ghostwhite;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .center {
+            margin: auto;
+            text-align: center;
+        }
+
+        body {
+            background-color: var(--background);
+        }
+
+        th, td {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container" th:object="${reservation}">
+    <p>Thank you very much for supporting the Omaha Lithuanian-American Community! This message confirms that we have
+        received your reservation and payment for the event.</p>
+
+    <p>We look forward to seeing you at our 70th Anniversary celebration on April 26th!</p>
+
+    <hr/>
+
+    <p>Tickets reserved for:</p>
+
+    <div>
+        <div class="big-text">[[*{firstName}]] [[*{lastName}]]</div>
+        <div>[[*{email}]]</div>
+        <div th:if="*{!#strings.isEmpty(phone)}">[[*{phone}]]</div>
+    </div>
+    <p/>
+    <div>
+        <table class="center" style="width: 300px;">
+            <tr>
+                <th style="text-align: left;">Ticket Type</th>
+                <th style="text-align: center;">Count</th>
+                <th style="text-align: right;">Subtotal</th>
+            </tr>
+
+            <th:block th:each="c: ${ticketCounts}">
+                <tr>
+                    <td style="text-align: left;">[[${c.description}]]</td>
+                    <td style="text-align: center;">[[${c.count}]]</td>
+                    <td style="text-align: right;">[[${tutil.currency(c.total)}]]</td>
+                </tr>
+            </th:block>
+
+            <tr></tr>
+
+            <tr>
+                <th colspan="2" style="text-align: right;">Total:</th>
+                <th style="text-align: right;">[[${tutil.currency(totalCharges)}]]</th>
+            </tr>
+            <tr>
+                <th colspan="2" style="text-align: right;">Paid:</th>
+                <th style="text-align: right;">[[${tutil.currency(paymentReceived)}]]</th>
+            </tr>
+            <tr>
+                <th colspan="2" style="text-align: right;">Amount due:</th>
+                <th style="text-align: right;">[[${tutil.currency(amountDue)}]]</th>
+            </tr>
+
+        </table>
+    </div>
+</div>
+</body>
+</html>

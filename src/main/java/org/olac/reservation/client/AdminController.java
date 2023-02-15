@@ -37,10 +37,9 @@ public class AdminController {
     }
 
     private List<TicketType> getSortedTicketTypes() {
-        List<TicketType> ticketTypes = reservationManager.getTicketTypes().stream()
+        return reservationManager.getTicketTypes().stream()
                 .sorted(comparing(TicketType::getCostPerTicket).reversed())
                 .toList();
-        return ticketTypes;
     }
 
     @PostMapping("/admin/ticketTypes")

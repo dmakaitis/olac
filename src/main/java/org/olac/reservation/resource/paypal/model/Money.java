@@ -26,6 +26,6 @@ public class Money {
      * For the required number of decimal places for a currency code, see Currency Codes.
      * (required)
      */
-    private String value;
+    private Double value;
 
 }

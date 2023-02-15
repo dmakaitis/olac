@@ -4,6 +4,7 @@ import org.olac.reservation.resource.model.Payment;
 import org.olac.reservation.resource.model.Reservation;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationDatastoreAccess {
 
@@ -12,5 +13,7 @@ public interface ReservationDatastoreAccess {
     List<Reservation> getReservations();
 
     void addPaymentToReservation(String reservationId, Payment payment);
+
+    Optional<Reservation> getReservation(String reservationId);
 
 }

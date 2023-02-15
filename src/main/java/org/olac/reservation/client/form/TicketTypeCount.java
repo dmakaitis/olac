@@ -14,10 +14,10 @@ public class TicketTypeCount {
     @NotBlank
     private String typeCode;
     private String description;
-    private String costPerTicket;
+    private double costPerTicket;
     @PositiveOrZero
     private Integer count;
 
-    private String total;
+    private double total;
 
 }

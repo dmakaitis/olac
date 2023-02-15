@@ -45,14 +45,14 @@ public class PurchaseUnitRequest {
     /**
      * The merchant who receives payment for this transaction.
      */
-    // private Payee payee;
+    private Payee payee;
 
     /**
      * Any additional payment instructions to be consider during payment processing. This processing instruction is
      * applicable for Capturing an order or Authorizing an Order.
      */
-    // @JsonProperty("payment_instruction")
-    // private PaymentInstruction paymentInstruction;
+    @JsonProperty("payment_instruction")
+    private PaymentInstruction paymentInstruction;
 
     /**
      * The API caller-provided external ID for the purchase unit. Required for multiple purchase units when you must
@@ -65,7 +65,7 @@ public class PurchaseUnitRequest {
     /**
      * The name and address of the person to whom to ship the items.
      */
-    // private ShippingDetail shipping;
+    private ShippingDetail shipping;
 
     /**
      * The soft descriptor is the dynamic text used to construct the statement descriptor that appears on a payer's card

@@ -8,9 +8,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class OlacProperties {
 
     private int maxTickets;
+    private String email;
+    private PayPal paypal;
 
-    private String paypalApiBase;
-    private String paypalClient;
-    private String paypalSecret;
+    @Data
+    public static class PayPal {
+
+        private String apiBase;
+        private String client;
+        private String secret;
+
+    }
 
 }

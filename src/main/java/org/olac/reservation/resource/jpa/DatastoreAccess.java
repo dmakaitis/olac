@@ -85,6 +85,12 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         });
     }
 
+    @Override
+    public Optional<Reservation> getReservation(String reservationId) {
+        return reservationRepository.findByReservationId(reservationId)
+                .map(this::toReservation);
+    }
+
     private TicketTypeEntity getTicketTypeEntity(String code) {
         TicketTypeEntity entity;
         if (isBlank(code)) {

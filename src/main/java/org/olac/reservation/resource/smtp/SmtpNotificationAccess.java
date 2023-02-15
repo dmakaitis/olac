@@ -3,12 +3,12 @@ package org.olac.reservation.resource.smtp;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.resource.NotificationAccess;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
 
 import java.nio.charset.StandardCharsets;
 
@@ -17,8 +17,8 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class SmtpNotificationAccess implements NotificationAccess {
 
+    private final OlacProperties properties;
     private final JavaMailSender javaMailSender;
-    private final TemplateEngine templateEngine;
 
     @Override
     @Async
@@ -27,7 +27,7 @@ public class SmtpNotificationAccess implements NotificationAccess {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
             message.setSubject(subject);
-            message.setFrom("omahalac@gmail.com");
+            message.setFrom(properties.getEmail());
             message.setTo(recipient);
 
             message.setText(htmlMessage, true);

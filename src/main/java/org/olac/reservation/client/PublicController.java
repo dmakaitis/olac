@@ -102,7 +102,7 @@ public class PublicController {
 
         List<PurchaseUnitRequest> purchaseUnits = toPurchaseUnits(reservation.getReservationId(), reservationForm);
         model.addAttribute("purchaseUnits", purchaseUnits);
-        model.addAttribute("paypalClient", properties.getPaypalClient());
+        model.addAttribute("paypalClient", properties.getPaypal().getClient());
 
         session.removeAttribute(ATTRIB_RESERVATION_FORM);
         session.setAttribute(ATTRIB_RESERVATION_ID, reservation.getReservationId());
@@ -117,6 +117,8 @@ public class PublicController {
 
         boolean success = reservationManager.validateAndAddPayment(reservationId, transactionId);
 
+        session.removeAttribute(ATTRIB_RESERVATION_ID);
+
         if (success) {
             log.info("Payment was confirmed!");
             return TEMPLATE_THANKS;
@@ -126,8 +128,24 @@ public class PublicController {
         }
     }
 
+    @GetMapping("/payByCheck")
+    public String payByCheck(Model model, HttpSession session) {
+        String reservationId = (String) session.getAttribute(ATTRIB_RESERVATION_ID);
+
+        reservationManager.sendPaymentReminder(reservationId);
+
+        session.removeAttribute(ATTRIB_RESERVATION_ID);
+
+        reservationManager.getReservation(reservationId).ifPresent(r -> {
+            model.addAttribute("amount", r.getAmountDue());
+            model.addAttribute(ATTRIB_RESERVATION_ID, r.getId());
+        });
+
+        return "thanks-check";
+    }
+
     private List<PurchaseUnitRequest> toPurchaseUnits(String paypalId, ReservationForm reservationForm) {
-        String totalAmount = reservationForm.getTotal().replaceAll("[$]", "");
+        double totalAmount = reservationForm.getTotal();
 
         PurchaseUnitRequest purchaseUnit = PurchaseUnitRequest.builder()
                 .customId(paypalId)
@@ -142,7 +160,7 @@ public class PublicController {
                                 .build())
                         .build())
                 .description("Omaha Lithuanian Community's 70th Anniversary Celebration on Saturday, April 22, 2023")
-                .softDescriptor("OLAC 70th Anniversary")
+                .softDescriptor("70th Anniversary")
                 .items(reservationForm.getTicketTypeCounts().stream()
                         .filter(c -> c.getCount() > 0)
                         .map(this::toItem)
@@ -157,7 +175,7 @@ public class PublicController {
                 .name(ticketTypeCount.getDescription())
                 .unitAmount(Money.builder()
                         .currencyCode("USD")
-                        .value(ticketTypeCount.getCostPerTicket().replaceAll("[$]", ""))
+                        .value(ticketTypeCount.getCostPerTicket())
                         .build())
                 .quantity(ticketTypeCount.getCount().toString())
                 .build();
@@ -208,11 +226,11 @@ public class PublicController {
 
                     grandTotal.accumulateAndGet(total, Double::sum);
 
-                    return new TicketTypeCount(t.getCode(), t.getDescription(), format(t.getCostPerTicket()), count, format(total));
+                    return new TicketTypeCount(t.getCode(), t.getDescription(), t.getCostPerTicket(), count, total);
                 })
                 .toList());
 
-        reservationForm.setTotal(format(grandTotal.get()));
+        reservationForm.setTotal(grandTotal.get());
     }
 
 }

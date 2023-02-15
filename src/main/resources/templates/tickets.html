@@ -60,7 +60,7 @@
                 <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}"/>
 
                 <label>[[*{ticketTypeCounts[__${itemStat.index}__].description}]] @
-                    [[*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}]] each</label>
+                    [[*{@tutil.currency(ticketTypeCounts[__${itemStat.index}__].costPerTicket)}]] each</label>
                 <input type="text" th:field="*{ticketTypeCounts[__${itemStat.index}__].count}"/>
                 <div class="error" th:if="${#fields.hasErrors('*{ticketTypeCounts[__${itemStat.index}__].count}')}"
                      th:errors="*{ticketTypeCounts[__${itemStat.index}__].count}">Ticket Count Error

@@ -24,6 +24,6 @@ public class ReservationForm {
     @Valid
     private List<TicketTypeCount> ticketTypeCounts;
 
-    private String total;
+    private double total;
 
 }

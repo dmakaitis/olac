@@ -41,8 +41,7 @@
 </div>
 
 <div class="container" th:object="${reservationForm}">
-    <p>Thank you for reserving tickets to the Omaha Lithuanian Community 70th Anniversary Event! Your reservation number
-        is: <b>[[${reservationId}]]</b></p>
+    <p>Thank you for reserving tickets to the Omaha Lithuanian Community 70th Anniversary Event!</p>
 
     <p>How would you like to pay?</p>
 
@@ -58,19 +57,15 @@
                 <div th:replace="~{fragments/paypal.html :: paypal}">PayPal</div>
             </div>
             <div id="check-info">
-                <p>Please make checks payable to <b>Omaha Lithuanian-American Community</b>, write your reservation
-                    number, <b>[[${reservationId}]]</b>, on the memo line, and send your check to:</p>
-
-                <p style="margin-left: 4em;">
-                    Darius Makaitis<br/>
-                    1343 Quarry Circle<br/>
-                    Ashland, NE 68003
-                </p>
-
                 <p>Please note that your tickets will not be reserved until payment has been received, so be sure to
-                    mail the check as soon as possible, or to ensure that your reservation is held immediately, please
-                    use one of the online payment options. You will receive an email notification at the address you
-                    provided once payment has been received.</p>
+                    send your payment by check as soon as possible to ensure your reservation for the event.</p>
+
+                <p>If you would prefer to pay online, please select the online option on the left at this time. If you
+                    would still prefer to pay by check, click the button below.</p>
+
+                <div class="button-container">
+                    <div><a class="button" th:href="@{/payByCheck}">Pay by Check</a></div>
+                </div>
             </div>
         </div>
         <script>initRadioButtons();</script>

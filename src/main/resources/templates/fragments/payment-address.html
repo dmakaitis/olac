@@ -9,23 +9,12 @@
     <link rel="stylesheet" type="text/css"
           href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz@6..96&display=swap">
     <link rel="stylesheet" type="text/css" href="/olac.css">
-    <link rel="icon" href="/olac-logo.svg" type="image/svg+xml">
 </head>
 <body>
-<div th:replace="~{fragments/header.html :: header}">
-    Header
-</div>
-
-<div class="container">
-    <p>Thank you very much for supporting the Omaha Lithuanian-American Community! A confirmation has been sent to the
-        email address you provided.</p>
-
-    <p>We look forward to seeing you at our 70th Anniversary celebration on April 26th!</p>
-</div>
-
-<div th:replace="~{fragments/footer.html :: footer}">
-    Footer
-</div>
-
+<p style="margin-left: 4em;" th:fragment="payment-address">
+    Darius Makaitis<br/>
+    1343 Quarry Circle<br/>
+    Ashland, NE 68003
+</p>
 </body>
 </html>

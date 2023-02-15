@@ -30,7 +30,7 @@ public class Item {
     @JsonProperty("unit_amount")
     private Money unitAmount;
 
-    // private Category category;
+    private String category;
 
     /**
      * The detailed item description.

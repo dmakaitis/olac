@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.engine.TemplateEngine;
+import org.olac.reservation.exception.OlacException;
 import org.olac.reservation.manager.ReservationManager;
 import org.olac.reservation.resource.NotificationAccess;
 import org.olac.reservation.resource.PaymentProcessorAccess;
@@ -45,21 +46,20 @@ public class ReservationManagerImpl implements ReservationManager {
     @Override
     public long createReservation(Reservation reservation) {
         if (!areTicketsAvailable(getTicketCount(reservation))) {
-            throw new RuntimeException("Temporary exception");
+            throw new OlacException("Temporary exception");
         }
 
-        long reservationId = reservationDatastoreAccess.createReservation(reservation);
-
-//        double amount = reservation.getAmountDue();
-//        String message = templateEngine.createReservationNotificationMessage(reservationId, amount);
-//        notificationAccess.sentNotification(reservation.getEmail(), "Reservation Confirmation", message);
-
-        return reservationId;
+        return reservationDatastoreAccess.createReservation(reservation);
     }
 
     @Override
     public List<Reservation> getReservations() {
         return reservationDatastoreAccess.getReservations();
+    }
+
+    @Override
+    public Optional<Reservation> getReservation(String reservationId) {
+        return reservationDatastoreAccess.getReservation(reservationId);
     }
 
     @Override
@@ -102,8 +102,25 @@ public class ReservationManagerImpl implements ReservationManager {
                 .build();
 
         reservationDatastoreAccess.addPaymentToReservation(reservationId, payment);
+        reservationDatastoreAccess.getReservation(reservationId).ifPresent(r -> {
+            String message = templateEngine.createPaymentReceivedConfirmation(r);
+            notificationAccess.sentNotification(r.getEmail(), "Reservation Confirmation", message);
+        });
 
         return true;
+    }
+
+    @Override
+    public void sendPaymentReminder(String reservationId) {
+        if (isBlank(reservationId)) {
+            return;
+        }
+
+        Optional<Reservation> reservation = reservationDatastoreAccess.getReservation(reservationId);
+        reservation.ifPresent(r -> {
+            String message = templateEngine.createPaymentInstructions(r);
+            notificationAccess.sentNotification(r.getEmail(), "Reservation Confirmation", message);
+        });
     }
 
     private static double getPaymentAmount(String reservationId, CreateOrderResponse response) {
@@ -112,17 +129,12 @@ public class ReservationManagerImpl implements ReservationManager {
             purchaseUnits = emptyList();
         }
 
-        double amount = 0.0;
-
-        for (PurchaseUnit purchaseUnit : purchaseUnits) {
-            if (reservationId.equals(purchaseUnit.getCustomId())) {
-                if (purchaseUnit.getAmount() != null && purchaseUnit.getAmount().getValue() != null) {
-                    amount = Double.parseDouble(purchaseUnit.getAmount().getValue());
-                    break;
-                }
-            }
-        }
-        return amount;
+        return purchaseUnits.stream()
+                .filter(p -> reservationId.equals(p.getCustomId()))
+                .filter(p -> p.getAmount() != null)
+                .filter(p -> p.getAmount().getValue() != null)
+                .mapToDouble(p -> p.getAmount().getValue())
+                .sum();
     }
 
     @Override

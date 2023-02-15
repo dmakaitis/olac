@@ -20,8 +20,8 @@ public class PayPalConfig {
         return Feign.builder()
                 .encoder(new FormEncoder(new JacksonEncoder(mapper)))
                 .decoder(new JacksonDecoder(mapper))
-                .requestInterceptor(new BasicAuthRequestInterceptor(properties.getPaypalClient(), properties.getPaypalSecret()))
-                .target(OAuthClient.class, properties.getPaypalApiBase());
+                .requestInterceptor(new BasicAuthRequestInterceptor(properties.getPaypal().getClient(), properties.getPaypal().getSecret()))
+                .target(OAuthClient.class, properties.getPaypal().getApiBase());
     }
 
     @Bean
@@ -30,7 +30,7 @@ public class PayPalConfig {
                 .encoder(new JacksonEncoder(mapper))
                 .decoder(new JacksonDecoder(mapper))
                 .requestInterceptor(new OAuth2RequestInterceptor(oAuthClient))
-                .target(PayPalClient.class, properties.getPaypalApiBase());
+                .target(PayPalClient.class, properties.getPaypal().getApiBase());
     }
 
 }

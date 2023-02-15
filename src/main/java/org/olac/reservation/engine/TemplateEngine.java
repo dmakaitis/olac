@@ -1,7 +1,11 @@
 package org.olac.reservation.engine;
 
+import org.olac.reservation.resource.model.Reservation;
+
 public interface TemplateEngine {
 
-    String createReservationNotificationMessage(long reservationId, double totalAmount);
+    String createPaymentReceivedConfirmation(Reservation reservation);
+
+    String createPaymentInstructions(Reservation reservation);
 
 }

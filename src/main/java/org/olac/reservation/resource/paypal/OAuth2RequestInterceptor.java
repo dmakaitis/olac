@@ -12,7 +12,7 @@ public class OAuth2RequestInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate template) {
         AccessToken accessToken = oAuthClient.getAccessToken("client_credentials");
-        String token = accessToken.getAccessToken();
+        String token = accessToken.getToken();
         template.header("Authorization", "Bearer " + token);
     }
 

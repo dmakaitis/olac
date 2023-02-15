@@ -30,7 +30,7 @@ public class AmountWithBreakdown {
      * <p>
      * (required)
      */
-    private String value;
+    private Double value;
 
     /**
      * The breakdown of the amount. Breakdown provides details such as total item amount, total tax amount, shipping,
