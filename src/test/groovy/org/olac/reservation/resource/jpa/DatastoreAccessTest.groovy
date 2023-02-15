@@ -139,6 +139,7 @@ class DatastoreAccessTest extends Specification {
           def expectedId = 903845
 
           def reservation = new Reservation(
+                  reservationId: 'abcd',
                   firstName: "Darius",
                   lastName: "Makaitis",
                   email: "dmakaitis@gmail.com",
@@ -172,20 +173,25 @@ class DatastoreAccessTest extends Specification {
           result == expectedId
 
           1 * reservationRepository.save(new ReservationEntity(
+                  reservationId: 'abcd',
                   firstName: "Darius",
                   lastName: "Makaitis",
                   email: "dmakaitis@gmail.com",
                   phone: "402-880-8442",
+                  amountDue: 0.0,
                   tickets: [
                           new ReservationTicketsEntity(ticketType: typeA, count: 7),
                           new ReservationTicketsEntity(ticketType: typeB, count: 12)
-                  ]
+                  ],
+                  payments: []
           )) >> new ReservationEntity(
                   id: expectedId,
+                  reservationId: 'abcd',
                   firstName: "Darius",
                   lastName: "Makaitis",
                   email: "dmakaitis@gmail.com",
                   phone: "402-880-8442",
+                  amountDue: 0.0,
                   tickets: [
                           new ReservationTicketsEntity(id: 63, ticketType: typeA, count: 7),
                           new ReservationTicketsEntity(id: 64, ticketType: typeB, count: 12)

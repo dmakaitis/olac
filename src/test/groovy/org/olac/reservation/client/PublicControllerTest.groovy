@@ -3,6 +3,7 @@ package org.olac.reservation.client
 import jakarta.servlet.http.HttpSession
 import org.olac.reservation.client.form.ReservationForm
 import org.olac.reservation.client.form.TicketTypeCount
+import org.olac.reservation.config.OlacProperties
 import org.olac.reservation.manager.ReservationManager
 import org.olac.reservation.resource.model.TicketType
 import org.springframework.ui.Model
@@ -19,7 +20,9 @@ class PublicControllerTest extends Specification {
         _ * getTicketTypes() >> [type1, type2, type3]
     }
 
-    def controller = new PublicController(manager)
+    def properties = new OlacProperties()
+
+    def controller = new PublicController(manager, properties)
 
     def model = Mock(Model)
     def session = Mock(HttpSession)
@@ -28,9 +31,9 @@ class PublicControllerTest extends Specification {
         given:
           def expectedForm = new ReservationForm(
                   ticketTypeCounts: [
-                          new TicketTypeCount(type3.code, type3.description, '$75.00', 0, '$0.00'),
-                          new TicketTypeCount(type1.code, type1.description, '$25.00', 0, '$0.00'),
-                          new TicketTypeCount(type2.code, type2.description, '$15.00', 0, '$0.00'),
+                          new TicketTypeCount(type3.code, type3.description, 75.0, 0, 0.0),
+                          new TicketTypeCount(type1.code, type1.description, 25.0, 0, 0.0),
+                          new TicketTypeCount(type2.code, type2.description, 15.0, 0, 0.0),
                   ]
           )
 
