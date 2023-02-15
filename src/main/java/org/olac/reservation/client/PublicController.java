@@ -35,10 +35,13 @@ public class PublicController {
 
     private static final String ATTRIB_RESERVATION_FORM = "reservationForm";
     private static final String ATTRIB_RESERVATION_ID = "reservationId";
+
     public static final String TEMPLATE_HOME = "home";
     public static final String TEMPLATE_TICKETS = "tickets";
     public static final String TEMPLATE_PAYMENT = "payment";
     public static final String TEMPLATE_CONFIRMATION = "confirmation";
+    public static final String TEMPLATE_THANKS = "thanks";
+    public static final String TEMPLATE_ERROR = "error";
 
     private final ReservationManager reservationManager;
     private final OlacProperties properties;
@@ -94,7 +97,7 @@ public class PublicController {
 
         long reservationId = reservationManager.createReservation(reservation);
 
-        model.addAttribute("reservationId", reservationId);
+        model.addAttribute(ATTRIB_RESERVATION_ID, reservationId);
         model.addAttribute("amount", reservationForm.getTotal());
 
         List<PurchaseUnitRequest> purchaseUnits = toPurchaseUnits(reservation.getReservationId(), reservationForm);
@@ -116,10 +119,10 @@ public class PublicController {
 
         if (success) {
             log.info("Payment was confirmed!");
-            return "thanks";
+            return TEMPLATE_THANKS;
         } else {
             log.error("Failed to validate payment");
-            return "paymenterror";
+            return TEMPLATE_ERROR;
         }
     }
 
@@ -141,6 +144,7 @@ public class PublicController {
                 .description("Omaha Lithuanian Community's 70th Anniversary Celebration on Saturday, April 22, 2023")
                 .softDescriptor("OLAC 70th Anniversary")
                 .items(reservationForm.getTicketTypeCounts().stream()
+                        .filter(c -> c.getCount() > 0)
                         .map(this::toItem)
                         .toList())
                 .build();

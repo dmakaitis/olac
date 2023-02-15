@@ -27,7 +27,7 @@ public class SmtpNotificationAccess implements NotificationAccess {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
             message.setSubject(subject);
-            message.setFrom("dmakaitis@gmail.com");
+            message.setFrom("omahalac@gmail.com");
             message.setTo(recipient);
 
             message.setText(htmlMessage, true);

@@ -21,16 +21,16 @@ public class PayPalConfig {
                 .encoder(new FormEncoder(new JacksonEncoder(mapper)))
                 .decoder(new JacksonDecoder(mapper))
                 .requestInterceptor(new BasicAuthRequestInterceptor(properties.getPaypalClient(), properties.getPaypalSecret()))
-                .target(OAuthClient.class, "https://api-m.sandbox.paypal.com");
+                .target(OAuthClient.class, properties.getPaypalApiBase());
     }
 
     @Bean
-    public PayPalClient payPalClient(OAuthClient oAuthClient, ObjectMapper mapper) {
+    public PayPalClient payPalClient(OlacProperties properties, OAuthClient oAuthClient, ObjectMapper mapper) {
         return Feign.builder()
                 .encoder(new JacksonEncoder(mapper))
                 .decoder(new JacksonDecoder(mapper))
                 .requestInterceptor(new OAuth2RequestInterceptor(oAuthClient))
-                .target(PayPalClient.class, "https://api.sandbox.paypal.com");
+                .target(PayPalClient.class, properties.getPaypalApiBase());
     }
 
 }
