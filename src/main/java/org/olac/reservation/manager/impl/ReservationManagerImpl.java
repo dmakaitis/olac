@@ -99,7 +99,14 @@ public class ReservationManagerImpl implements ReservationManager {
         Payment payment = Payment.builder()
                 .amount(amount)
                 .status(PaymentStatus.SUCCESSFUL)
+                .method(PaymentMethod.ONLINE)
+                .notes("PayPal Transaction ID: " + paymentProcessorTransactionId)
+                .enteredBy("Automatic")
                 .build();
+
+        if (response.getCreateTime() != null) {
+            payment.setCreatedTimestamp(response.getCreateTime());
+        }
 
         reservationDatastoreAccess.addPaymentToReservation(reservationId, payment);
         reservationDatastoreAccess.getReservation(reservationId).ifPresent(r -> {

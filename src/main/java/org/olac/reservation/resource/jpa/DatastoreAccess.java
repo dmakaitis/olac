@@ -164,6 +164,10 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         entity.setReservation(reservation);
         entity.setAmount(payment.getAmount());
         entity.setStatus(payment.getStatus());
+        entity.setMethod(payment.getMethod());
+        entity.setNotes(payment.getNotes());
+        entity.setEnteredBy(payment.getEnteredBy());
+        entity.setCreatedTimestamp(payment.getCreatedTimestamp());
 
         return entity;
     }
@@ -173,6 +177,10 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
                 .id(entity.getId())
                 .amount(entity.getAmount())
                 .status(entity.getStatus())
+                .method(entity.getMethod())
+                .notes(entity.getNotes())
+                .enteredBy(entity.getEnteredBy())
+                .createdTimestamp(entity.getCreatedTimestamp())
                 .build();
     }
 

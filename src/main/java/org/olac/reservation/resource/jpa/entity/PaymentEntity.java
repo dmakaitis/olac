@@ -5,7 +5,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.olac.reservation.resource.model.PaymentMethod;
 import org.olac.reservation.resource.model.PaymentStatus;
+
+import java.util.Date;
 
 @Entity
 @Data
@@ -24,5 +27,8 @@ public class PaymentEntity {
 
     private double amount;
     private PaymentStatus status;
-
+    private PaymentMethod method;
+    private String notes;
+    private String enteredBy;
+    private Date createdTimestamp = new Date();
 }
