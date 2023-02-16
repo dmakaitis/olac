@@ -10,4 +10,6 @@ public interface TicketDatastoreAccess {
 
     TicketType saveTicketType(TicketType ticketType);
 
+    void deleteTicketType(String ticketTypeCode);
+
 }

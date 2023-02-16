@@ -61,6 +61,12 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     }
 
     @Override
+    public void deleteTicketType(String ticketTypeCode) {
+        Optional<TicketTypeEntity> type = ticketTypeRepository.findByCode(ticketTypeCode);
+        type.ifPresent(ticketTypeRepository::delete);
+    }
+
+    @Override
     public long createReservation(Reservation reservation) {
         ReservationEntity reservationEntity = toEntity(reservation);
 

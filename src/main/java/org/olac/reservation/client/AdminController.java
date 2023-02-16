@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.function.Function;
 import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Controller()
 @RequiredArgsConstructor
@@ -27,13 +29,23 @@ public class AdminController {
     private final ReservationManager reservationManager;
 
     @GetMapping("/admin/ticketTypes")
-    public String getTicketTypes(Model model) {
+    public String getTicketTypes(@RequestParam(name = "code", required = false) String ticketTypeCode, Model model) {
         List<TicketType> ticketTypes = getSortedTicketTypes();
 
-        model.addAttribute("ticketTypes", ticketTypes);
-        model.addAttribute("form", new TicketTypeForm());
+        TicketTypeForm form = new TicketTypeForm();
+        ticketTypes.stream()
+                .filter(t -> t.getCode().equals(ticketTypeCode))
+                .findFirst()
+                .ifPresent(t -> {
+                    form.setCost(t.getCostPerTicket());
+                    form.setDescription(t.getDescription());
+                    form.setCode(t.getCode());
+                });
 
-        return "ticketTypes";
+        model.addAttribute("ticketTypes", ticketTypes);
+        model.addAttribute("form", form);
+
+        return "admin/ticket-types";
     }
 
     private List<TicketType> getSortedTicketTypes() {
@@ -44,10 +56,31 @@ public class AdminController {
 
     @PostMapping("/admin/ticketTypes")
     public String addTicketType(@ModelAttribute TicketTypeForm form, Model model) {
-        TicketType newType = new TicketType(form.getDescription(), form.getCost());
-        reservationManager.saveTicketType(newType);
+        TicketType newType = isNotBlank(form.getCode()) ? new TicketType(form.getCode(), form.getDescription(), form.getCost()) :
+                new TicketType(form.getDescription(), form.getCost());
 
-        return getTicketTypes(model);
+        newType = reservationManager.saveTicketType(newType);
+
+        return getTicketTypes(newType.getCode(), model);
+    }
+
+    @GetMapping("/admin/deleteTicketType")
+    public String deleteTicketType(@RequestParam(name = "code") String code, @RequestParam(name = "confirm", required = false) String confirm, Model model) {
+        if ("Y".equalsIgnoreCase(confirm)) {
+            reservationManager.deleteTicketType(code);
+            return "redirect:/admin/ticketTypes";
+        }
+
+        Optional<TicketType> type = reservationManager.getTicketTypes().stream()
+                .filter(t -> code.equals(t.getCode()))
+                .findFirst();
+
+        if (type.isPresent()) {
+            model.addAttribute("ticketType", type.get());
+            return "admin/ticket-type-delete";
+        } else {
+            return "redirect:/admin/ticketTypes";
+        }
     }
 
     @GetMapping("/admin/reservations")

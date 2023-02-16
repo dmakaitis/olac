@@ -22,10 +22,10 @@ class AdminControllerTest extends Specification {
 
     def "The admin page should list any defined ticket types in sorted order"() {
         when:
-          def result = controller.getTicketTypes(model)
+          def result = controller.getTicketTypes("", model)
 
         then:
-          result == "ticketTypes"
+          result == "admin/ticket-types"
 
           1 * model.addAttribute("ticketTypes", [type3, type1, type2])
           1 * model.addAttribute("form", new TicketTypeForm())
@@ -42,9 +42,9 @@ class AdminControllerTest extends Specification {
           def result = controller.addTicketType(form, model)
 
         then:
-          result == "ticketTypes"
+          result == "admin/ticket-types"
 
-          1 * manager.saveTicketType(new TicketType("My New Ticket Type", 42.0))
+          1 * manager.saveTicketType(new TicketType("My New Ticket Type", 42.0)) >> new TicketType("abcd", "My New Ticket Type", 42.0)
           1 * model.addAttribute("ticketTypes", [type3, type1, type2])
           1 * model.addAttribute("form", new TicketTypeForm())
     }

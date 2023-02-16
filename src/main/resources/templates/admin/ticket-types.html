@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Omaha Lithuanian American Community</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" type="text/css"
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz@6..96&display=swap">
+    <link rel="stylesheet" type="text/css" href="/css/olac.css">
+    <link rel="icon" href="/olac-logo.svg" type="image/svg+xml">
+</head>
+<body>
+<div th:replace="~{fragments/header.html :: header}">
+    Header
+</div>
+
+<div class="container">
+    <div class="flex-container">
+        <div>
+            <table style="width: 100%;">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Price</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${ticketTypes.empty}">
+                    <td colspan="3"> No Ticket Types Defined</td>
+                </tr>
+                <tr th:each="type : ${ticketTypes}">
+                    <td><a th:href="@{/admin/ticketTypes(code=${type.code})}" th:text="${type.description}"> Type </a>
+                    </td>
+                    <td><span th:text="${@tutil.currency(type.costPerTicket)}"> Cost </span></td>
+                    <td><a th:href="@{/admin/deleteTicketType(code=${type.code})}">Delete</a></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><a th:href="@{/admin/ticketTypes}">New Ticket Type</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            <form action="#" th:action="@{/admin/ticketTypes}" th:object="${form}" method="post">
+                <input type="hidden" th:field="*{code}"/>
+                <p>Type: <input type="text" th:field="*{description}"/></p>
+                <p>Cost: $<input type="text" th:field="*{cost}"/></p>
+                <p><input type="submit" value="Submit"></p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer.html :: footer}">
+    Footer
+</div>
+
+</body>
+</html>

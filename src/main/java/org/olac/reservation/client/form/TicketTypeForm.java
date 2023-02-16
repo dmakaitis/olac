@@ -8,6 +8,8 @@ import lombok.Data;
 @Data
 public class TicketTypeForm {
 
+    private String code;
+
     @NotBlank
     private String description;
     @PositiveOrZero

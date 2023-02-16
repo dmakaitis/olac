@@ -34,8 +34,8 @@ public class ReservationManagerImpl implements ReservationManager {
     private final OlacProperties properties;
 
     @Override
-    public void saveTicketType(TicketType ticketType) {
-        ticketDatastoreAccess.saveTicketType(ticketType);
+    public TicketType saveTicketType(TicketType ticketType) {
+        return ticketDatastoreAccess.saveTicketType(ticketType);
     }
 
     @Override
@@ -121,6 +121,11 @@ public class ReservationManagerImpl implements ReservationManager {
             String message = templateEngine.createPaymentInstructions(r);
             notificationAccess.sentNotification(r.getEmail(), "Reservation Confirmation", message);
         });
+    }
+
+    @Override
+    public void deleteTicketType(String ticketTypeCode) {
+        ticketDatastoreAccess.deleteTicketType(ticketTypeCode);
     }
 
     private static double getPaymentAmount(String reservationId, CreateOrderResponse response) {
