@@ -54,10 +54,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN")
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/login/**").anonymous()
-                        .anyRequest().anonymous())
-                .httpBasic(withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .requestMatchers("/login").anonymous()
+                        .anyRequest().permitAll())
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .permitAll())
+                .logout(withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
 
         return http.build();
     }

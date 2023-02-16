@@ -17,13 +17,28 @@
 </div>
 
 <div class="container">
-    <div th:replace="~{fragments/olac.html :: olac}">OLAC</div>
-    <hr/>
-    <div th:replace="~{fragments/ausra.html :: ausra}">Ausra</div>
-    <hr/>
-    <div th:replace="~{fragments/womens-club.html :: womens-club}">Women's Club</div>
-    <hr/>
-    <div th:replace="~{fragments/sister-city.html :: sister-city}">Sister City</div>
+
+    <form action="#" th:action="@{/login}" method="post">
+
+        <div class="center">
+            <h1>Login</h1>
+        </div>
+
+        <div class="center" style="padding: 12px;">
+            <label>Username:</label>
+            <input type="text" name="username" value=""/>
+        </div>
+
+        <div class="center" style="padding: 12px;">
+            <label>Password:</label>
+            <input type="password" name="password"/>
+        </div>
+
+        <div class="center" style="padding: 12px;">
+            <input name="submit" type="submit" value="Submit">
+        </div>
+
+    </form>
 </div>
 
 <div th:replace="~{fragments/footer.html :: footer}">
