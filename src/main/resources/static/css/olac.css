@@ -121,6 +121,17 @@
     width: 100%;
 }
 
+.invoice th, .invoice td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.schedule td {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
 .shadow {
     box-shadow: 5px 5px 5px #999;
 }
@@ -173,10 +184,4 @@ li a {
 li a:hover {
     color: var(--background);
     background-color: ghostwhite;
-}
-
-th, td {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    padding-top: 8px;
-    padding-bottom: 8px;
 }

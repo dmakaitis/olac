@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css"
           href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz@6..96&display=swap">
     <link rel="stylesheet" type="text/css" href="/css/olac.css">
-    <link rel="icon" href="/olac-logo.svg" type="image/svg+xml">
+    <link rel="icon" href="/img/olac-logo.svg" type="image/svg+xml">
 </head>
 <body>
 <div th:replace="~{fragments/header.html :: header}">
@@ -18,16 +18,71 @@
 
 <div class="container">
 
-    <p>The Lithuanian American Community of Omaha is proudly celebrating its 70th year as an organization since its
-        founding on April 26th, 1953. A home to Lithuanians for decades, Omaha has more than just supported the
-        Lithuanian community, the city has helped the organization thrive.</p>
+    <p>The Omaha Lithuanian-American Community will be hosting a gala event, celebrating 70 years of preserving
+        Lithuanian language, culture, customs, and traditions in Omaha. Please join us and our distinguished
+        honorees.</p>
 
-    <p>The Lithuanian American Community has been an integral part of Omaha history for over a century. We look forward
-        to sharing this celebration with you, of not just culture, but the history that comes with it.</p>
+    <p style="margin-left: 4em;">
+        <b>Omaha Lithuanian-American Community Gala Event</b><br/>
+        <i>April 22nd, 2023</i><br/>
+        <br/>
+        <b>The Belvedere</b> (Polish Home)<br/>
+        201 East 1st Street<br/>
+        Papillion, NE 68046
+    </p>
+
+    <p><i>Cocktail attire is recommended.</i></p>
+
+    <table class="schedule">
+        <tr>
+            <td>Cocktails</td>
+            <td>5:30pm</td>
+        </tr>
+        <tr>
+            <td>Opening Remarks</td>
+            <td>6:15pm</td>
+        </tr>
+        <tr>
+            <td>Dinner</td>
+            <td>6:30pm</td>
+        </tr>
+        <tr>
+            <td>Special Greetings</td>
+            <td>7:15pm</td>
+        </tr>
+        <tr>
+            <td>Program and Entertainment</td>
+            <td>9:00pm</td>
+        </tr>
+    </table>
+
+    <p>Dinner will be catered by Aron Mackevicius and the Lithuanian Bakery who bring over 60 years of culinary
+        experience to celebrate the Lithuanian American Community Anniversary. Owner and Executive Chef of <b>Talus
+            Spirits and Sustenance</b>, Aron will share his flavors and techniques for us to savor and enjoy, including
+        baked salmon, prime rib, potato and vegetable dishes. Little ones will enjoy delicious children’s options.
+        Dessert will feature world-famous Napoleon torte.</p>
+
+    <p>Entertainment will be provided by DJ Arthur Bereisa, Nida Grigalaviciute, and the Aušra dance group.</p>
+
+    <p>Nida has been nominated for and received awards for her musical talent across a range of music from classical and
+        blues to rock and jazz.</p>
+
+    <p>The Aušra dance group and their supporters have been an integral part of the Omaha Lithuanian community for over
+        50 years, sharing their love of dance and the desire to preserve their culture.</p>
+
+    <p>DJ Arthur Bereisa will be providing well known Lithuanian music to the audience.</p>
+
+    <p>An open cash bar will be hosted by the Polish American Community.</p>
+
+    <p>Kindly RSVP below by April 8th, 2023.</p>
 
     <p>Can’t attend but would still like to make a donation? Click here: <a
             href="https://www.paypal.com/donate/?hosted_button_id=N4ZY3QGD6CMVN" target="_"><img
             src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="Donate Button"></a></p>
+
+    <hr/>
+
+    <h2>Ticket Reservations:</h2>
 
     <form action="#" th:action="@{/tickets}" th:object="${reservationForm}" method="post" autocomplete="on">
         <div class="flex-container">

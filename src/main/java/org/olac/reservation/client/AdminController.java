@@ -102,6 +102,7 @@ public class AdminController {
 
         headers.add("Total");
         headers.add("Paid");
+        headers.add("Status");
 
         model.addAttribute("headers", headers);
 
@@ -139,13 +140,15 @@ public class AdminController {
                             .mapToDouble(Payment::getAmount)
                             .sum()));
 
+                    values.add(r.getStatus().toString());
+
                     return values;
                 })
                 .toList();
 
         model.addAttribute("reservations", reservations);
 
-        return "reservations";
+        return "admin/reservations";
     }
 
 }

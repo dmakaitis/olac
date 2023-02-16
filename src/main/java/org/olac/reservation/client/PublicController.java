@@ -9,6 +9,7 @@ import org.olac.reservation.client.form.TicketTypeCount;
 import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.manager.ReservationManager;
 import org.olac.reservation.resource.model.Reservation;
+import org.olac.reservation.resource.model.ReservationStatus;
 import org.olac.reservation.resource.model.TicketCounts;
 import org.olac.reservation.resource.model.TicketType;
 import org.olac.reservation.resource.paypal.model.*;
@@ -194,6 +195,7 @@ public class PublicController {
         reservation.setLastName(form.getLastName());
         reservation.setEmail(form.getEmail());
         reservation.setPhone(form.getPhone());
+        reservation.setStatus(ReservationStatus.PENDING_PAYMENT);
 
         reservation.setTicketCounts(form.getTicketTypeCounts().stream()
                 .map(t -> new TicketCounts(t.getTypeCode(), t.getCount()))

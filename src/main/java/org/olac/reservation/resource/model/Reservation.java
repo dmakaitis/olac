@@ -15,6 +15,7 @@ public class Reservation {
     private String lastName;
     private String email;
     private String phone;
+    private ReservationStatus status;
     private Date reservationTimestamp;
     private List<TicketCounts> ticketCounts = new ArrayList<>();
     private double amountDue;

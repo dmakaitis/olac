@@ -110,6 +110,18 @@ public class ReservationManagerImpl implements ReservationManager {
 
         reservationDatastoreAccess.addPaymentToReservation(reservationId, payment);
         reservationDatastoreAccess.getReservation(reservationId).ifPresent(r -> {
+            // Update payment status if needed
+            if (r.getStatus() == ReservationStatus.PENDING_PAYMENT) {
+                double totalPaid = r.getPayments().stream()
+                        .mapToDouble(Payment::getAmount)
+                        .sum();
+
+                if (totalPaid >= r.getAmountDue()) {
+                    reservationDatastoreAccess.updateReservationStatus(reservationId, ReservationStatus.RESERVED);
+                }
+            }
+
+            // Send confirmation email
             String message = templateEngine.createPaymentReceivedConfirmation(r);
             notificationAccess.sentNotification(r.getEmail(), "Reservation Confirmation", message);
         });

@@ -10,10 +10,7 @@ import org.olac.reservation.resource.jpa.entity.ReservationTicketsEntity;
 import org.olac.reservation.resource.jpa.entity.TicketTypeEntity;
 import org.olac.reservation.resource.jpa.repository.ReservationRepository;
 import org.olac.reservation.resource.jpa.repository.TicketTypeRepository;
-import org.olac.reservation.resource.model.Payment;
-import org.olac.reservation.resource.model.Reservation;
-import org.olac.reservation.resource.model.TicketCounts;
-import org.olac.reservation.resource.model.TicketType;
+import org.olac.reservation.resource.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -97,6 +94,14 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
                 .map(this::toReservation);
     }
 
+    @Override
+    public void updateReservationStatus(String reservationId, ReservationStatus newStatus) {
+        reservationRepository.findByReservationId(reservationId).ifPresent(r -> {
+            r.setStatus(newStatus);
+            reservationRepository.save(r);
+        });
+    }
+
     private TicketTypeEntity getTicketTypeEntity(String code) {
         TicketTypeEntity entity;
         if (isBlank(code)) {
@@ -121,6 +126,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         entity.setLastName(reservation.getLastName());
         entity.setEmail(reservation.getEmail());
         entity.setPhone(reservation.getPhone());
+        entity.setStatus(reservation.getStatus());
         entity.setReservationTimestamp(reservation.getReservationTimestamp());
         entity.setAmountDue(reservation.getAmountDue());
         entity.setTickets(reservation.getTicketCounts().stream()
@@ -144,6 +150,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         reservation.setLastName(entity.getLastName());
         reservation.setEmail(entity.getEmail());
         reservation.setPhone(entity.getPhone());
+        reservation.setStatus(entity.getStatus());
         reservation.setReservationTimestamp(entity.getReservationTimestamp());
         reservation.setAmountDue(entity.getAmountDue());
 

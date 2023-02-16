@@ -29,11 +29,17 @@
             background-color: var(--background);
         }
 
-        th, td {
+        .schedule td {
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        .invoice th, .invoice td {
             border-bottom: 1px solid rgba(0, 0, 0, 0.12);
             padding-top: 8px;
             padding-bottom: 8px;
         }
+
     </style>
 </head>
 <body>
@@ -41,7 +47,38 @@
     <p>Thank you very much for supporting the Omaha Lithuanian-American Community! This message confirms that we have
         received your reservation and payment for the event.</p>
 
-    <p>We look forward to seeing you at our 70th Anniversary celebration on April 22nd!</p>
+    <p>We look forward to seeing you at our 70th Anniversary celebration on April 22nd.</p>
+
+    <p style="margin-left: 4em;">
+        <b>The Belvedere</b><br/>
+        201 East 1st Street<br/>
+        Papillion, NE 68046
+    </p>
+
+    <p><i>Cocktail attire is recommended.</i></p>
+
+    <table class="schedule">
+        <tr>
+            <td>Cocktails</td>
+            <td>5:30pm</td>
+        </tr>
+        <tr>
+            <td>Opening Remarks</td>
+            <td>6:15pm</td>
+        </tr>
+        <tr>
+            <td>Dinner</td>
+            <td>6:30pm</td>
+        </tr>
+        <tr>
+            <td>Special Greetings</td>
+            <td>7:15pm</td>
+        </tr>
+        <tr>
+            <td>Program and Entertainment</td>
+            <td>9:00pm</td>
+        </tr>
+    </table>
 
     <hr/>
 
@@ -54,7 +91,7 @@
     </div>
     <p/>
     <div>
-        <table class="center" style="width: 300px;">
+        <table class="invoice center" style="width: 300px;">
             <tr>
                 <th style="text-align: left;">Ticket Type</th>
                 <th style="text-align: center;">Count</th>
