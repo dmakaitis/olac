@@ -1,4 +1,4 @@
-package org.olac.reservation.config;
+package org.olac.reservation.client.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

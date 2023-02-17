@@ -102,13 +102,18 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         });
     }
 
+    @Override
+    public Reservation saveReservation(Reservation reservation) {
+        return toReservation(reservationRepository.save(toEntity(reservation)));
+    }
+
     private TicketTypeEntity getTicketTypeEntity(String code) {
         TicketTypeEntity entity;
         if (isBlank(code)) {
             entity = new TicketTypeEntity(codeSupplier.get(), "unknown", 0.0);
         } else {
             entity = ticketTypeRepository.findByCode(code)
-                    .orElseGet(() -> new TicketTypeEntity(codeSupplier.get(), "unknown", 0.0));
+                    .orElseGet(() -> new TicketTypeEntity(code, "unknown", 0.0));
         }
         return entity;
     }

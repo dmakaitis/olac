@@ -1,6 +1,10 @@
 package org.olac.reservation.client;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.client.form.TicketTypeForm;
 import org.olac.reservation.manager.ReservationManager;
 import org.olac.reservation.resource.model.*;
@@ -24,6 +28,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Controller()
 @RequiredArgsConstructor
+@Slf4j
 public class AdminController {
 
     private final ReservationManager reservationManager;
@@ -90,25 +95,21 @@ public class AdminController {
         // Calculate headers:
 
         List<String> headers = new ArrayList<>();
-        headers.add("ID");
+        headers.add("Number");
         headers.add("Last Name");
         headers.add("First Name");
         headers.add("Email");
         headers.add("Phone");
-
-        for (TicketType ticketType : ticketTypes) {
-            headers.add(ticketType.getDescription());
-        }
-
-        headers.add("Total");
-        headers.add("Paid");
         headers.add("Status");
+
+        headers.add("Total Due");
+        headers.add("Total Paid");
 
         model.addAttribute("headers", headers);
 
         // Calculate all reservation rows:
 
-        List<List<String>> reservations = reservationManager.getReservations().stream()
+        List<ReservationRowValues> rows = reservationManager.getReservations().stream()
                 .sorted(comparing(Reservation::getLastName)
                         .thenComparing(Reservation::getFirstName)
                         .thenComparing(Reservation::getId))
@@ -118,8 +119,11 @@ public class AdminController {
                             r.getLastName(),
                             r.getFirstName(),
                             r.getEmail(),
-                            r.getPhone()
+                            r.getPhone(),
+                            r.getStatus().toString()
                     ));
+
+                    // Add ticket type counts:
 
                     Map<String, TicketCounts> typesMap = r.getTicketCounts().stream()
                             .collect(toMap(TicketCounts::getTicketTypeCode, Function.identity()));
@@ -130,9 +134,9 @@ public class AdminController {
                         Optional<TicketCounts> counts = Optional.ofNullable(typesMap.get(ticketType.getCode()));
                         int amt = counts.map(TicketCounts::getCount).orElse(0);
                         total += amt * ticketType.getCostPerTicket();
-
-                        values.add(Integer.toString(amt));
                     }
+
+                    // Add total due and total paid:
 
                     values.add(PublicController.format(total));
                     values.add(PublicController.format(r.getPayments().stream()
@@ -140,15 +144,102 @@ public class AdminController {
                             .mapToDouble(Payment::getAmount)
                             .sum()));
 
-                    values.add(r.getStatus().toString());
-
-                    return values;
+                    return new ReservationRowValues(r.getReservationId(), values);
                 })
                 .toList();
 
-        model.addAttribute("reservations", reservations);
+        model.addAttribute("rows", rows);
 
         return "admin/reservations";
+    }
+
+    @GetMapping("/admin/reservation")
+    public String viewReservation(@RequestParam("id") String reservationId, Model model) {
+        Optional<Reservation> reservation = reservationManager.getReservation(reservationId);
+
+        if (!reservation.isPresent()) {
+            return "redirect:/admin/reservations";
+        }
+
+        Map<String, TicketType> typeMap = reservationManager.getTicketTypes().stream()
+                .collect(toMap(TicketType::getCode, Function.identity()));
+        ReservationDetailForm form = new ReservationDetailForm(reservation.get(), typeMap);
+
+        model.addAttribute("form", form);
+        return "admin/reservation";
+    }
+
+    @PostMapping("/admin/reservation")
+    public String saveReservation(ReservationDetailForm form) {
+        log.info("Saving reservation: {}", form);
+        reservationManager.getReservation(form.getReservationId()).ifPresent(reservation -> {
+            reservation.setFirstName(form.getFirstName());
+            reservation.setLastName(form.getLastName());
+            reservation.setEmail(form.getEmail());
+            reservation.setPhone(form.getPhone());
+            reservation.setStatus(form.getStatus());
+
+            reservationManager.saveReservation(reservation);
+        });
+        return "redirect:/admin/reservations";
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class ReservationRowValues {
+
+        private String id;
+        private List<String> values;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ReservationDetailForm {
+
+        private long id;
+        private String reservationId;
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String phone;
+        private ReservationStatus status;
+        private List<TicketCount> ticketCounts;
+        private List<Payment> payments;
+
+        public ReservationDetailForm(Reservation reservation, Map<String, TicketType> ticketTypes) {
+            this.reservationId = reservation.getReservationId();
+            this.firstName = reservation.getFirstName();
+            this.lastName = reservation.getLastName();
+            this.email = reservation.getEmail();
+            this.phone = reservation.getPhone();
+            this.status = reservation.getStatus();
+
+            this.ticketCounts = reservation.getTicketCounts().stream()
+                    .map(t -> new TicketCount(t.getTicketTypeCode(), ticketTypes.get(t.getTicketTypeCode()).getDescription(), t.getCount()))
+                    .toList();
+            this.payments = reservation.getPayments().stream()
+                    .map(p -> new Payment(p.getAmount(), p.getStatus(), p.getMethod(), p.getNotes(), p.getEnteredBy()))
+                    .toList();
+        }
+
+        @Data
+        @AllArgsConstructor
+        public static class TicketCount {
+            private String code;
+            private String description;
+            private int count;
+        }
+
+        @Data
+        @AllArgsConstructor
+        public static class Payment {
+            private double amount;
+            private PaymentStatus status;
+            private PaymentMethod method;
+            private String notes;
+            private String enteredBy;
+        }
     }
 
 }

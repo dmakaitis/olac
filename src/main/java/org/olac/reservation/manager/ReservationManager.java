@@ -29,4 +29,6 @@ public interface ReservationManager {
 
     void deleteTicketType(String ticketTypeCode);
 
+    Reservation saveReservation(Reservation reservation);
+
 }

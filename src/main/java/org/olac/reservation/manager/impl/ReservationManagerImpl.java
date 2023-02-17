@@ -147,6 +147,11 @@ public class ReservationManagerImpl implements ReservationManager {
         ticketDatastoreAccess.deleteTicketType(ticketTypeCode);
     }
 
+    @Override
+    public Reservation saveReservation(Reservation reservation) {
+        return reservationDatastoreAccess.saveReservation(reservation);
+    }
+
     private static double getPaymentAmount(String reservationId, CreateOrderResponse response) {
         List<PurchaseUnit> purchaseUnits = response.getPurchaseUnits();
         if (purchaseUnits == null) {

@@ -48,6 +48,16 @@
     padding: 20px;
 }
 
+.data {
+    width: 100%;
+}
+
+.data th, .data td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
 .error {
     color: darkred;
 }

@@ -19,4 +19,6 @@ public interface ReservationDatastoreAccess {
 
     void updateReservationStatus(String reservationId, ReservationStatus newStatus);
 
+    Reservation saveReservation(Reservation reservation);
+
 }
