@@ -1,0 +1,55 @@
+security:
+  debug: false
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: '${MAIL_USERNAME}'
+    password: '${MAIL_PASSWORD}'
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+olac:
+  max-tickets: 250
+  email: ${MAIL_USERNAME}
+  paypal:
+    api-base: ${PAYPAL_API_BASE}
+    client: '${PAYPAL_CLIENT}'
+    secret: '${PAYPAL_SECRET}'
+
+  test-data:
+    load: ${LOAD_TEST_DATA:false}
+    ticket-types:
+      - code: type1
+        description: Adult
+        cost-per-ticket: 50.0
+      - code: type2
+        description: Child (10 and under)
+        cost-per-ticket: 20.0
+    reservations:
+      - first-name: Darius
+        last-name: Makaitis
+        email: dmakaitis@gmail.com
+        phone: (402) 201-2132
+        status: pending-payment
+        ticket-counts:
+          - ticket-type-code: type1
+            count: 3
+          - ticket-type-code: type2
+            count: 2
+      - first-name: Ingrida
+        last-name: Pakalniskyte
+        email: ingridpak@cox.net
+        phone: (402) 613-0725
+        status: reserved
+        ticket-counts:
+          - ticket-type-code: type1
+            count: 2
+        payments:
+          - amount: 100.0
+            status: successful
+            method: online
+            notes: My test note
+            entered-by: Test
