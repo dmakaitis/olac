@@ -13,11 +13,7 @@
         <b>[[${@tutil.currency(amount)}]]</b> payable to the <b>Omaha Lithuanian-American Community</b> and send it to:
     </p>
 
-    <p style="margin-left: 4em;">
-        Darius Makaitis<br/>
-        1343 Quarry Circle<br/>
-        Ashland, NE 68003
-    </p>
+    <p th:replace="~{fragments/payment-address.html :: payment-address}">
 
     <p>Be sure to include your reservation number, <b>[[${reservationId}]]</b>, on the memo line of the check.</p>
 
