@@ -120,7 +120,7 @@ public class AdminController {
                             r.getFirstName(),
                             r.getEmail(),
                             r.getPhone(),
-                            r.getStatus().toString()
+                            r.getStatus() == null ? "" : r.getStatus().toString()
                     ));
 
                     // Add ticket type counts:
