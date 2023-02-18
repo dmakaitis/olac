@@ -12,6 +12,8 @@ import java.util.List;
 @Data
 public class OlacProperties {
 
+    private boolean disableSecurity = false;
+
     private int maxTickets;
     private String email;
     private PayPal paypal;

@@ -46,22 +46,27 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, OlacProperties properties) throws Exception {
         http
                 .csrf(CsrfConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico").permitAll()
-                        .requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
-                        .requestMatchers("/admin/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/login").anonymous()
-                        .anyRequest().permitAll())
                 .formLogin(login -> login
                         .loginPage("/login")
                         .permitAll())
                 .logout(withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
 
+        if (properties.isDisableSecurity()) {
+            http.authorizeHttpRequests(auth -> auth
+                    .anyRequest().permitAll());
+        } else {
+            http.authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico").permitAll()
+                    .requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
+                    .requestMatchers("/admin.html", "/api/admin/**", "/admin/**").hasAnyRole("ADMIN")
+                    .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers("/login").anonymous()
+                    .anyRequest().permitAll());
+        }
         return http.build();
     }
 

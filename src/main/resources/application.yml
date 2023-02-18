@@ -12,6 +12,7 @@ spring:
       mail.smtp.starttls.enable: true
 
 olac:
+  disable-security: ${DISABLE_SECURITY:false}
   max-tickets: 250
   email: ${MAIL_USERNAME}
   paypal:
