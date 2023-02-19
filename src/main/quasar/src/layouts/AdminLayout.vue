@@ -2,7 +2,12 @@
   <q-layout view="hHh lpr fFf">
 
     <q-header elevated class="bg-primary">
-      <q-tabs>
+      <div class="q-mx-auto text-center">
+        <img class="headerimage" src="~assets/olac-logo-noback.svg" alt="Omaha Lithuanian-American Community"/>
+      </div>
+      <q-tabs no-caps>
+        <q-route-tab href="/" target="_top" label="About Us"/>
+        <q-route-tab href="/tickets" target="_top" label="OLAC 70th Anniversary Reservations"/>
         <q-route-tab to="/reservations" replace label="Reservations"/>
         <q-route-tab to="/ticket-types" replace label="Ticket Types"/>
       </q-tabs>
@@ -36,3 +41,10 @@ export default {
   // }
 }
 </script>
+
+<style scoped>
+.headerimage {
+  padding: 10px;
+  height: 150px;
+}
+</style>

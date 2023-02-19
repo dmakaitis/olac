@@ -1,12 +1,34 @@
 <template>
-  <q-page padding>
-    <q-table title="Reservations" :rows="state.rows" :columns="columns" row-key="code">
+  <q-page padding class="q-gutter-md">
+    <q-table title="Reservations" :rows="state.rows" :columns="columns" row-key="reservationId" @row-click="onRowClick"
+             selection="single" v-model:selected="selected">
     </q-table>
+    <q-btn label="New Reservation"/>
+    <q-btn label="Delete Selected Reservation"/>
   </q-page>
+
+  <q-dialog v-model="showDetail">
+    <q-card>
+      <div class="q-pa-md">
+        <q-card-section>
+          <b>Reservation</b>
+        </q-card-section>
+        <q-card-section>
+          <q-form class="q-gutter-md" @reset="onCancel">
+            <div>
+              <q-btn label="Save" type="submit" color="primary"/>
+              <q-btn label="Cancel" type="reset" color="primary" flat class="q-ml-sm"/>
+            </div>
+          </q-form>
+        </q-card-section>
+      </div>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
-import {reactive} from 'vue'
+import {reactive, ref} from 'vue'
+import {currency} from "boot/helper";
 
 const columns = [
   {
@@ -25,7 +47,7 @@ const columns = [
     align: 'left',
     field: row => row.reservationId,
     format: val => `${val}`,
-    sortable: true
+    sortable: false
   },
   {
     name: 'first-name',
@@ -43,7 +65,7 @@ const columns = [
     align: 'left',
     field: row => row.lastName,
     format: val => `${val}`,
-    sortable: false
+    sortable: true
   },
   {
     name: 'email',
@@ -52,7 +74,7 @@ const columns = [
     align: 'left',
     field: row => row.email,
     format: val => `${val}`,
-    sortable: false
+    sortable: true
   },
   {
     name: 'phone',
@@ -70,16 +92,7 @@ const columns = [
     align: 'left',
     field: row => row.status,
     format: val => `${val}`,
-    sortable: false
-  },
-  {
-    name: 'timestamp',
-    required: true,
-    label: 'Timestamp',
-    align: 'left',
-    field: row => row.reservationTimestamp,
-    format: val => `${val}`,
-    sortable: false
+    sortable: true
   },
   {
     name: 'tickets',
@@ -96,7 +109,7 @@ const columns = [
     label: 'Amount Due',
     align: 'right',
     field: row => row.amountDue,
-    format: val => `${val}`,
+    format: val => `${currency(val)}`,
     sortable: false
   },
   {
@@ -105,7 +118,7 @@ const columns = [
     label: 'Amount Due',
     align: 'right',
     field: row => row.payments,
-    format: val => `${val.reduce((a, b) => a + b.amount, 0.0)}`,
+    format: val => `${currency(val.reduce((a, b) => a + b.amount, 0.0))}`,
     sortable: false
   }
 ];
@@ -113,6 +126,14 @@ const columns = [
 
 export default {
   name: 'AdminTicketTypes',
+  methods: {
+    onRowClick(event, row, index) {
+      this.showDetail = true;
+    },
+    onCancel() {
+      this.showDetail = false;
+    },
+  },
   setup() {
     const state = reactive({rows: []})
 
@@ -129,7 +150,9 @@ export default {
 
     return {
       columns,
-      state
+      state,
+      showDetail: ref(false),
+      selected: ref([])
     }
   }
 }

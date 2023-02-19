@@ -15,7 +15,7 @@
         <q-card-section>
           <q-form @submit="onSave" @reset="onCancel" class="q-gutter-md">
             <q-input outlined v-model="detail.description" label="Description"/>
-            <q-input outlined v-model="detail.costPerTicket" label="Cost per Ticket"/>
+            <q-input outlined v-model="detail.costPerTicket" label="Cost per Ticket" prefix="$"/>
             <div>
               <q-btn label="Save" type="submit" color="primary"/>
               <q-btn label="Cancel" type="reset" color="primary" flat class="q-ml-sm"/>
@@ -25,10 +25,15 @@
       </div>
     </q-card>
   </q-dialog>
+  <ConfirmationDialog v-model="confirmDelete" @yes="onConfirmDelete">
+    Are you sure you want to delete the ticket type '<b>{{ selected[0].description }}</b>'?
+  </ConfirmationDialog>
 </template>
 
 <script>
 import {reactive, ref} from 'vue'
+import {currency} from "boot/helper";
+import ConfirmationDialog from "components/ConfirmationDialog.vue";
 
 const columns = [
   {
@@ -55,13 +60,14 @@ const columns = [
     label: 'Cost per Ticket',
     align: 'right',
     field: row => row.costPerTicket,
-    format: val => `${val}`,
+    format: val => `${currency(val)}`,
     sortable: false
   }
 ];
 
 export default {
   name: 'AdminTicketTypes',
+  components: {ConfirmationDialog},
   methods: {
     onRowClick(event, row, index) {
       this.detail.code = row.code;
@@ -87,6 +93,9 @@ export default {
       this.showDetail = false;
     },
     onDelete() {
+      this.confirmDelete = true;
+    },
+    onConfirmDelete() {
       fetch(`/api/admin/ticket-types?code=${this.selected[0].code}`, {
         method: 'DELETE'
       })
@@ -123,7 +132,8 @@ export default {
       state,
       showDetail: ref(false),
       detail,
-      selected: ref([])
+      selected: ref([]),
+      confirmDelete: ref(false)
     }
   },
   mounted() {

@@ -17,6 +17,7 @@
     <ul th:if="${showMenu != false}">
         <li><a href="/">About Us</a></li>
         <li><a href="/tickets">OLAC 70th Anniversary Reservations</a></li>
+        <li sec:authorize="isAuthenticated()"><a href="/admin.html">Admin</a></li>
         <li sec:authorize="isAuthenticated()"><a href="/logout">Logout</a></li>
     </ul>
 </div>
