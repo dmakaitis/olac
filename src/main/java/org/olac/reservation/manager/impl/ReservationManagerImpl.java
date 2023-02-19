@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.engine.TemplateEngine;
 import org.olac.reservation.exception.OlacException;
+import org.olac.reservation.manager.AdministrationManager;
 import org.olac.reservation.manager.ReservationManager;
 import org.olac.reservation.resource.NotificationAccess;
 import org.olac.reservation.resource.PaymentProcessorAccess;
@@ -24,7 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ReservationManagerImpl implements ReservationManager {
+public class ReservationManagerImpl implements ReservationManager, AdministrationManager {
 
     private final TicketDatastoreAccess ticketDatastoreAccess;
     private final ReservationDatastoreAccess reservationDatastoreAccess;

@@ -2,7 +2,7 @@ package org.olac.reservation.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.olac.reservation.manager.ReservationManager;
+import org.olac.reservation.manager.AdministrationManager;
 import org.olac.reservation.resource.model.Reservation;
 import org.olac.reservation.resource.model.TicketType;
 import org.springframework.web.bind.annotation.*;
@@ -17,30 +17,30 @@ import static java.util.Comparator.comparing;
 @Slf4j
 public class AdminApiController {
 
-    private final ReservationManager reservationManager;
+    private final AdministrationManager administrationManager;
 
     @GetMapping("ticket-types")
     List<TicketType> getTicketTypes() {
         log.info("Retrieving ticket types for admin");
-        return reservationManager.getTicketTypes().stream()
+        return administrationManager.getTicketTypes().stream()
                 .sorted(comparing(TicketType::getCostPerTicket).reversed())
                 .toList();
     }
 
     @PostMapping("ticket-types")
     void saveTicketType(@RequestBody TicketType type) {
-        reservationManager.saveTicketType(type);
+        administrationManager.saveTicketType(type);
     }
 
     @DeleteMapping("ticket-types")
     void deleteTicketType(@RequestParam String code) {
-        reservationManager.deleteTicketType(code);
+        administrationManager.deleteTicketType(code);
     }
 
     @GetMapping("reservations")
     List<Reservation> getReservations() {
         log.info("Retrieving reservations for admin");
-        return reservationManager.getReservations().stream()
+        return administrationManager.getReservations().stream()
                 .sorted(comparing(Reservation::getLastName)
                         .thenComparing(Reservation::getFirstName)
                         .thenComparing(Reservation::getId))
