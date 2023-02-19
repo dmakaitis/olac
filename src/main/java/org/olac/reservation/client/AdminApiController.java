@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.manager.ReservationManager;
 import org.olac.reservation.resource.model.Reservation;
 import org.olac.reservation.resource.model.TicketType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,7 +19,7 @@ public class AdminApiController {
 
     private final ReservationManager reservationManager;
 
-    @GetMapping(value = "ticket-types", produces = "application/json")
+    @GetMapping("ticket-types")
     List<TicketType> getTicketTypes() {
         log.info("Retrieving ticket types for admin");
         return reservationManager.getTicketTypes().stream()
@@ -29,7 +27,17 @@ public class AdminApiController {
                 .toList();
     }
 
-    @GetMapping(value = "reservations", produces = "application/json")
+    @PostMapping("ticket-types")
+    void saveTicketType(@RequestBody TicketType type) {
+        reservationManager.saveTicketType(type);
+    }
+
+    @DeleteMapping("ticket-types")
+    void deleteTicketType(@RequestParam String code) {
+        reservationManager.deleteTicketType(code);
+    }
+
+    @GetMapping("reservations")
     List<Reservation> getReservations() {
         log.info("Retrieving reservations for admin");
         return reservationManager.getReservations().stream()
