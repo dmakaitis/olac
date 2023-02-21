@@ -110,55 +110,60 @@
 
     <h2 style="color: #475971;">Ticket Reservations:</h2>
 
-    <form action="#" th:action="@{/tickets}" th:object="${reservationForm}" method="post" autocomplete="on">
-        <div class="flex-container">
-            <div class="input-container">
-                <label>First Name:</label>
-                <input type="text" th:field="*{firstName}"/>
-                <div class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Name Error</div>
-            </div>
-            <div class="input-container">
-                <label>Last Name:</label>
-                <input type="text" th:field="*{lastName}"/>
-                <div class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Last Name Error
+    <div style="text-align: left;">
+        <form action="#" th:action="@{/tickets}" th:object="${reservationForm}" method="post" autocomplete="on">
+            <div class="flex-container">
+                <div class="input-container">
+                    <label>First Name:</label>
+                    <input type="text" th:field="*{firstName}"/>
+                    <div class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Name Error
+                    </div>
+                </div>
+                <div class="input-container">
+                    <label>Last Name:</label>
+                    <input type="text" th:field="*{lastName}"/>
+                    <div class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Last Name Error
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <label>Email:</label>
+                    <input type="text" th:field="*{email}"/>
+                    <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</div>
+                </div>
+                <div class="input-container">
+                    <label>Phone:</label>
+                    <input type="text" th:field="*{phone}"/>
+                    <div class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Phone Number Error
+                    </div>
+                </div>
+
+                <div th:each="type, itemStat : *{ticketTypeCounts}" class="input-container">
+                    <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].typeCode}"/>
+                    <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].description}"/>
+                    <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}"/>
+
+                    <label>[[*{ticketTypeCounts[__${itemStat.index}__].description}]] @
+                        [[*{@tutil.currency(ticketTypeCounts[__${itemStat.index}__].costPerTicket)}]] each</label>
+                    <input type="text" th:field="*{ticketTypeCounts[__${itemStat.index}__].count}"/>
+                    <div class="error" th:if="${#fields.hasErrors('*{ticketTypeCounts[__${itemStat.index}__].count}')}"
+                         th:errors="*{ticketTypeCounts[__${itemStat.index}__].count}">Ticket Count Error
+                    </div>
                 </div>
             </div>
 
-            <div class="input-container">
-                <label>Email:</label>
-                <input type="text" th:field="*{email}"/>
-                <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</div>
-            </div>
-            <div class="input-container">
-                <label>Phone:</label>
-                <input type="text" th:field="*{phone}"/>
-                <div class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Phone Number Error</div>
+            <div class="error" th:if="${not #strings.isEmpty(ticketCountError)}" th:text="${ticketCountError}">Not
+                enough
+                tickets
             </div>
 
-            <div th:each="type, itemStat : *{ticketTypeCounts}" class="input-container">
-                <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].typeCode}"/>
-                <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].description}"/>
-                <input type="hidden" th:field="*{ticketTypeCounts[__${itemStat.index}__].costPerTicket}"/>
-
-                <label>[[*{ticketTypeCounts[__${itemStat.index}__].description}]] @
-                    [[*{@tutil.currency(ticketTypeCounts[__${itemStat.index}__].costPerTicket)}]] each</label>
-                <input type="text" th:field="*{ticketTypeCounts[__${itemStat.index}__].count}"/>
-                <div class="error" th:if="${#fields.hasErrors('*{ticketTypeCounts[__${itemStat.index}__].count}')}"
-                     th:errors="*{ticketTypeCounts[__${itemStat.index}__].count}">Ticket Count Error
+            <div class="row">
+                <div class="col-12 center">
+                    <input type="submit" value="Submit">
                 </div>
             </div>
-        </div>
-
-        <div class="error" th:if="${not #strings.isEmpty(ticketCountError)}" th:text="${ticketCountError}">Not enough
-            tickets
-        </div>
-
-        <div class="row">
-            <div class="col-12 center">
-                <input type="submit" value="Submit">
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
 <div th:replace="~{fragments/footer.html :: footer}">
