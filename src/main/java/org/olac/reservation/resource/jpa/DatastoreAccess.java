@@ -1,7 +1,10 @@
 package org.olac.reservation.resource.jpa;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.olac.reservation.client.PublicController;
 import org.olac.reservation.resource.ReservationDatastoreAccess;
 import org.olac.reservation.resource.TicketDatastoreAccess;
 import org.olac.reservation.resource.jpa.entity.PaymentEntity;
@@ -11,13 +14,13 @@ import org.olac.reservation.resource.jpa.entity.TicketTypeEntity;
 import org.olac.reservation.resource.jpa.repository.ReservationRepository;
 import org.olac.reservation.resource.jpa.repository.TicketTypeRepository;
 import org.olac.reservation.resource.model.*;
+import org.olac.reservation.utility.AuditUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toSet;
@@ -30,15 +33,17 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     private final TicketTypeRepository ticketTypeRepository;
     private final ReservationRepository reservationRepository;
+    private final AuditUtility auditUtility;
 
     private final Supplier<String> codeSupplier;
 
     @Autowired
-    public DatastoreAccess(TicketTypeRepository ticketTypeRepository, ReservationRepository reservationRepository) {
-        this(ticketTypeRepository, reservationRepository, () -> UUID.randomUUID().toString());
+    public DatastoreAccess(TicketTypeRepository ticketTypeRepository, ReservationRepository reservationRepository, AuditUtility auditUtility) {
+        this(ticketTypeRepository, reservationRepository, auditUtility, () -> UUID.randomUUID().toString());
     }
 
     @Override
+    @Transactional
     public List<TicketType> getTicketTypes() {
         return StreamSupport.stream(ticketTypeRepository.findAll().spliterator(), false)
                 .map(DatastoreAccess::toTicketType)
@@ -46,6 +51,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     }
 
     @Override
+    @Transactional
     public TicketType saveTicketType(TicketType ticketType) {
         TicketTypeEntity entity = getTicketTypeEntity(ticketType.getCode());
 
@@ -58,21 +64,28 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     }
 
     @Override
+    @Transactional
     public void deleteTicketType(String ticketTypeCode) {
         Optional<TicketTypeEntity> type = ticketTypeRepository.findByCode(ticketTypeCode);
         type.ifPresent(ticketTypeRepository::delete);
     }
 
     @Override
+    @Transactional
     public long createReservation(Reservation reservation) {
         ReservationEntity reservationEntity = toEntity(reservation);
 
         reservationEntity = reservationRepository.save(reservationEntity);
 
+        auditUtility.logReservationEvent(reservation.getReservationId(), String.format("New reservation created for %s %s",
+                reservation.getFirstName(),
+                reservation.getLastName()));
+
         return reservationEntity.getId();
     }
 
     @Override
+    @Transactional
     public List<Reservation> getReservations() {
         return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
                 .map(this::toReservation)
@@ -80,31 +93,93 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     }
 
     @Override
+    @Transactional
     public void addPaymentToReservation(String reservationId, Payment payment) {
         Optional<ReservationEntity> reservationEntity = reservationRepository.findByReservationId(reservationId);
         reservationEntity.ifPresent(e -> {
             e.getPayments().add(toPaymentEntity(payment, e));
             reservationRepository.save(e);
+
+            auditUtility.logReservationEvent(reservationId, String.format("Added payment of %s, paid  by %s",
+                    PublicController.format(payment.getAmount()),
+                    payment.getMethod()));
         });
     }
 
     @Override
+    @Transactional
     public Optional<Reservation> getReservation(String reservationId) {
         return reservationRepository.findByReservationId(reservationId)
                 .map(this::toReservation);
     }
 
     @Override
+    @Transactional
     public void updateReservationStatus(String reservationId, ReservationStatus newStatus) {
         reservationRepository.findByReservationId(reservationId).ifPresent(r -> {
+            ReservationStatus oldStatus = r.getStatus();
             r.setStatus(newStatus);
             reservationRepository.save(r);
+
+            auditUtility.logReservationEvent(reservationId, String.format("Updated reservation status: %s => %s",
+                    oldStatus,
+                    newStatus));
         });
     }
 
     @Override
     public Reservation saveReservation(Reservation reservation) {
+        boolean newReservation = true;
+
+        if (reservation.getId() != null) {
+            Optional<ReservationEntity> reservationEntity = reservationRepository.findById(reservation.getId());
+            if (reservationEntity.isPresent()) {
+                auditUtility.logReservationEvent(reservation.getReservationId(), String.format("Updating reservation with changes - %s",
+                        getChangedFields(reservation, reservationEntity.get())));
+
+                newReservation = false;
+            }
+        }
+
+        if (newReservation) {
+            auditUtility.logReservationEvent(reservation.getReservationId(), String.format("Saving new reservation for %s %s",
+                    reservation.getFirstName(),
+                    reservation.getLastName()));
+        }
+
         return toReservation(reservationRepository.save(toEntity(reservation)));
+    }
+
+    @NotNull
+    private String getChangedFields(Reservation reservation, ReservationEntity entity) {
+        // Figure out what changed
+        List<String> changedFields = new ArrayList<>();
+
+        addFieldIfChanged(changedFields, "reservationId", reservation.getReservationId(), entity.getReservationId());
+        addFieldIfChanged(changedFields, "firstName", reservation.getFirstName(), entity.getFirstName());
+        addFieldIfChanged(changedFields, "lastName", reservation.getLastName(), entity.getLastName());
+        addFieldIfChanged(changedFields, "email", reservation.getEmail(), entity.getEmail());
+        addFieldIfChanged(changedFields, "phone", reservation.getPhone(), entity.getPhone());
+        addFieldIfChanged(changedFields, "status", reservation.getStatus(), entity.getStatus());
+        addFieldIfChanged(changedFields, "timestamp", reservation.getReservationTimestamp(), entity.getReservationTimestamp());
+        addFieldIfChanged(changedFields, "amount due", reservation.getAmountDue(), entity.getAmountDue());
+
+        // These require a bit more logic...
+//                addFieldIfChanged(changedFields, "ticket counts", reservation.getTicketCounts(), entity.getTickets());
+//                addFieldIfChanged(changedFields, "payments", reservation.getPayments(), entity.getPayments());
+
+        String formattedChanges = changedFields.stream()
+                .collect(Collectors.joining(", "));
+        if (formattedChanges.length() > 1024) {
+            formattedChanges = formattedChanges.substring(0, 1020) + "...";
+        }
+        return formattedChanges;
+    }
+
+    private void addFieldIfChanged(List<String> changedFields, String fieldName, Object oldValue, Object newValue) {
+        if (!Objects.equals(oldValue, newValue)) {
+            changedFields.add(String.format("%s: %s => %s", fieldName, oldValue, newValue));
+        }
     }
 
     private TicketTypeEntity getTicketTypeEntity(String code) {

@@ -31,4 +31,5 @@ public class PaymentEntity {
     private String notes;
     private String enteredBy;
     private Date createdTimestamp = new Date();
+
 }

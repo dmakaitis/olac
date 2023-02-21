@@ -14,6 +14,7 @@ import org.olac.reservation.resource.TicketDatastoreAccess;
 import org.olac.reservation.resource.model.*;
 import org.olac.reservation.resource.paypal.model.CreateOrderResponse;
 import org.olac.reservation.resource.paypal.model.PurchaseUnit;
+import org.olac.reservation.utility.SecurityUtility;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
     private final NotificationAccess notificationAccess;
     private final PaymentProcessorAccess paymentProcessorAccess;
     private final OlacProperties properties;
+    private final SecurityUtility securityUtility;
 
     @Override
     public TicketType saveTicketType(TicketType ticketType) {
@@ -102,7 +104,7 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
                 .status(PaymentStatus.SUCCESSFUL)
                 .method(PaymentMethod.ONLINE)
                 .notes("PayPal Transaction ID: " + paymentProcessorTransactionId)
-                .enteredBy("Automatic")
+                .enteredBy(securityUtility.getCurrentUserName())
                 .build();
 
         if (response.getCreateTime() != null) {
@@ -169,6 +171,7 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
 
     @Override
     public void addPayment(String reservationId, Payment payment) {
+        payment.setEnteredBy(securityUtility.getCurrentUserName());
         reservationDatastoreAccess.addPaymentToReservation(reservationId, payment);
     }
 
