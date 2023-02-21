@@ -3,7 +3,7 @@
 
     <q-header elevated class="bg-primary">
       <div class="q-mx-auto text-center">
-        <img class="headerimage" src="~assets/olac-logo-noback.svg" alt="Omaha Lithuanian-American Community"/>
+        <img class="headerimage" src="~assets/olac-logo.svg" alt="Omaha Lithuanian-American Community"/>
       </div>
       <q-tabs no-caps>
         <q-route-tab href="/" target="_top" label="About Us"/>

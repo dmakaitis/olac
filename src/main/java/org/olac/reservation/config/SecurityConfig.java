@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .formLogin(login -> login
                         .loginPage("/login")
+                        .defaultSuccessUrl("/admin.html")
                         .permitAll())
                 .logout(withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
