@@ -111,7 +111,6 @@
 }
 
 .header {
-    height: 220px;
     max-width: var(--max-width);
     margin: auto;
     background-color: var(--background)
