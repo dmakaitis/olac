@@ -1,12 +1,15 @@
 package org.olac.reservation;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.resource.ReservationDatastoreAccess;
 import org.olac.reservation.resource.TicketDatastoreAccess;
 import org.olac.reservation.resource.model.Payment;
 import org.olac.reservation.resource.model.Reservation;
 import org.olac.reservation.resource.model.TicketType;
+import org.olac.reservation.utility.SecurityUtility;
+import org.olac.reservation.utility.jpa.entity.AccountEntity;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -26,11 +29,13 @@ import static java.util.stream.Collectors.toMap;
 @EnableAsync
 @EnableConfigurationProperties
 @ConfigurationPropertiesScan
+@Slf4j
 public class ReservationApplication implements ApplicationRunner {
 
     private final OlacProperties properties;
     private final TicketDatastoreAccess ticketDatastoreAccess;
     private final ReservationDatastoreAccess reservationDatastoreAccess;
+    private final SecurityUtility securityUtility;
 
     public static void main(String[] args) {
         SpringApplication.run(ReservationApplication.class, args);
@@ -38,6 +43,20 @@ public class ReservationApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        // Make sure we at least have an admin account...
+        if (securityUtility.getAccounts().isEmpty()) {
+            log.warn("Creating default admin account. Be sure to change the password!");
+            AccountEntity adminAccount = new AccountEntity();
+            adminAccount.setUsername("admin");
+            adminAccount.setPassword("$2a$10$5.Ni6.0mF08Py2JH65B0L.6Gc/tFI7IlzTk3AD52pL7ygpRYU/eFC");
+            securityUtility.createAccount("admin", "Passw0rd", true);
+        }
+
+        // Verify that we have the admin account created...
+        if (!securityUtility.getAccounts().isEmpty()) {
+            log.info("Verified that we now have at least one account");
+        }
+
         if (properties.getTestData().isLoad()) {
             for (TicketType ticketType : properties.getTestData().getTicketTypes()) {
                 ticketDatastoreAccess.saveTicketType(ticketType);

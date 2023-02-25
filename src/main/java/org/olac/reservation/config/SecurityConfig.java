@@ -10,10 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -29,20 +26,6 @@ public class SecurityConfig {
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername("user")
-                .password("$2a$10$K2r2Jqr.zgGefnoKbK//we2bNrtKduUXTTrsf.wj3L//zOtvIJOHm")
-                .roles("USER")
-                .build());
-        manager.createUser(User.withUsername("admin")
-                .password("$2a$10$5.Ni6.0mF08Py2JH65B0L.6Gc/tFI7IlzTk3AD52pL7ygpRYU/eFC")
-                .roles("USER", "ADMIN")
-                .build());
-        return manager;
     }
 
     @Bean

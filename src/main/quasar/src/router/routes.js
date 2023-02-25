@@ -1,6 +1,7 @@
 import AdminLayout from "layouts/AdminLayout.vue";
 import AdminTicketTypes from "pages/AdminTicketTypes.vue";
 import AdminReservations from "pages/AdminReservations.vue";
+import AdminUsers from "pages/AdminUsers.vue";
 
 const routes = [
   {
@@ -18,6 +19,10 @@ const routes = [
       {
         path: 'reservations',
         component: AdminReservations
+      },
+      {
+        path: 'users',
+        component: AdminUsers
       }
     ]
   }

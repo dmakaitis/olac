@@ -6,7 +6,7 @@
     <q-btn label="Delete Selected Ticket Type" @click="onDelete"/>
   </q-page>
 
-  <q-dialog v-model="showDetail">
+  <q-dialog persistent v-model="showDetail">
     <q-card>
       <div class="q-pa-md">
         <q-card-section>
