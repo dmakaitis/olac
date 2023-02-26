@@ -28,7 +28,9 @@
 
 <script>
 import {reactive, ref} from 'vue'
+import {useStore} from 'vuex'
 import {currency} from "boot/helper";
+import {api} from 'boot/axios.js'
 
 const columns = [
   {
@@ -133,27 +135,26 @@ export default {
     onCancel() {
       this.showDetail = false;
     },
+    loadTicketTypeData() {
+      api.get('/api/admin/reservations')
+        .then(response => this.state.rows = response.data)
+        .catch(error => alert(error))
+    }
   },
   setup() {
+    const store = useStore()
     const state = reactive({rows: []})
 
-    function loadTicketTypeData() {
-      fetch("/api/admin/reservations", {method: 'GET'})
-        .then(response => response.json())
-        .then(data => (state.rows = data))
-        .catch(err => {
-          console.log(err);
-        });
-    }
-
-    loadTicketTypeData();
-
     return {
+      store,
       columns,
       state,
       showDetail: ref(false),
       selected: ref([])
     }
+  },
+  mounted() {
+    this.loadTicketTypeData();
   }
 }
 </script>

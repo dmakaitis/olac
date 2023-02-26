@@ -30,6 +30,8 @@
 
 <script>
 import {reactive, ref} from 'vue';
+import {useStore} from 'vuex'
+import {api} from "boot/axios";
 
 const columns = [
   {
@@ -83,29 +85,15 @@ export default {
       }
 
       if (this.state.detail.id) {
-        fetch(`/api/admin/accounts/${this.state.detail.username}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(request)
-        })
-          .then(response => response.text())
-          .then(text => this.loadAccounts())
-          .catch(err => alert(err));
+        api.put(`/api/admin/accounts/${this.state.detail.username}`, request)
+          .then(response => this.loadAccounts())
+          .catch(error => alert(error))
       } else {
         request.username = this.state.detail.username
 
-        fetch(`/api/admin/accounts`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(request)
-        })
-          .then(response => response.text())
-          .then(text => this.loadAccounts())
-          .catch(err => alert(err));
+        api.post('/api/admin/accounts', request)
+          .then(response => this.loadAccounts())
+          .catch(error => alert(error))
       }
 
       this.showDetail = false;
@@ -120,15 +108,13 @@ export default {
     },
 
     loadAccounts() {
-      fetch("/api/admin/accounts", {method: 'GET'})
-        .then(response => response.json())
-        .then(data => (this.state.rows = data))
-        .catch(err => {
-          console.log(err);
-        });
+      api.get('/api/admin/accounts')
+        .then(response => this.state.rows = response.data)
+        .catch(error => alert(error))
     }
   },
   setup() {
+    const store = useStore()
     const state = reactive({
       rows: [],
       detail: {
@@ -138,6 +124,7 @@ export default {
       }
     })
     return {
+      store,
       state,
       showDetail: ref(false),
       columns

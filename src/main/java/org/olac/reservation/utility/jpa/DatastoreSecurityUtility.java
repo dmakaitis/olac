@@ -1,6 +1,7 @@
 package org.olac.reservation.utility.jpa;
 
 import lombok.RequiredArgsConstructor;
+import org.olac.reservation.exception.OlacException;
 import org.olac.reservation.utility.SecurityUtility;
 import org.olac.reservation.utility.jpa.entity.AccountEntity;
 import org.olac.reservation.utility.jpa.repository.AccountRepository;
@@ -63,6 +64,12 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
 
     @Override
     public Account createAccount(String username, String password, boolean admin) {
+        // Ensure the username is unique
+        Optional<AccountEntity> check = repository.findByUsername(username);
+        if (check.isPresent()) {
+            throw new OlacException("Username muse be unique");
+        }
+
         AccountEntity entity = new AccountEntity();
         entity.setUsername(username);
         entity.setPassword(passwordEncoder.encode(password));
@@ -136,10 +143,10 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
     @RequiredArgsConstructor
     public static class UserDetailsImpl implements UserDetails {
 
-        private static final GrantedAuthority USER_ROLE = new SimpleGrantedAuthority("USER");
-        private static final GrantedAuthority ADMIN_ROLE = new SimpleGrantedAuthority("ADMIN");
+        private static final GrantedAuthority USER_ROLE = new SimpleGrantedAuthority("ROLE_USER");
+        private static final GrantedAuthority ADMIN_ROLE = new SimpleGrantedAuthority("ROLE_ADMIN");
 
-        private final AccountEntity account;
+        private final transient AccountEntity account;
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {

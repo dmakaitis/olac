@@ -2,11 +2,26 @@ import AdminLayout from "layouts/AdminLayout.vue";
 import AdminTicketTypes from "pages/AdminTicketTypes.vue";
 import AdminReservations from "pages/AdminReservations.vue";
 import AdminUsers from "pages/AdminUsers.vue";
+import LoginUser from "pages/LoginUser.vue";
+import LogoutUser from "pages/LogoutUser.vue";
 
 const routes = [
   {
+    name: 'login',
+    path: '/login',
+    component: LoginUser
+  },
+  {
+    name: 'logout',
+    path: '/logout',
+    component: LogoutUser
+  },
+  {
     path: '/',
     component: AdminLayout,
+    meta: {
+      requiresAuth: true
+    },
     children: [
       {
         path: '',

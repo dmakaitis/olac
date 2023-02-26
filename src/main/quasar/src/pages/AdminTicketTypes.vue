@@ -32,8 +32,10 @@
 
 <script>
 import {reactive, ref} from 'vue'
+import {useStore} from 'vuex'
 import {currency} from "boot/helper";
 import ConfirmationDialog from "components/ConfirmationDialog.vue";
+import {api} from "boot/axios";
 
 const columns = [
   {
@@ -79,16 +81,9 @@ export default {
       this.showDetail = false;
     },
     onSave() {
-      fetch("/api/admin/ticket-types", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(this.detail)
-      })
-        .then(response => response.text())
-        .then(text => this.loadTicketTypeData())
-        .catch(err => alert(err));
+      api.post("/api/admin/ticket-types", this.detail)
+        .then(response => this.loadTicketTypeData())
+        .catch(error => alert(error))
 
       this.showDetail = false;
     },
@@ -96,12 +91,9 @@ export default {
       this.confirmDelete = true;
     },
     onConfirmDelete() {
-      fetch(`/api/admin/ticket-types?code=${this.selected[0].code}`, {
-        method: 'DELETE'
-      })
-        .then(response => response.text())
-        .then(text => this.loadTicketTypeData())
-        .catch(err => alert(err));
+      api.delete(`/api/admin/ticket-types?code=${this.selected[0].code}`)
+        .then(response => this.loadTicketTypeData())
+        .catch(error => alert(error))
     },
     onNewTicketType() {
       this.detail.code = null;
@@ -111,15 +103,13 @@ export default {
     },
 
     loadTicketTypeData() {
-      fetch("/api/admin/ticket-types", {method: 'GET'})
-        .then(response => response.json())
-        .then(data => (this.state.rows = data))
-        .catch(err => {
-          console.log(err);
-        });
+      api.get('/api/admin/ticket-types')
+        .then(response => this.state.rows = response.data)
+        .catch(error => alert(error))
     }
   },
   setup() {
+    const store = useStore()
     const state = reactive({rows: []})
     const detail = reactive({
       code: '',
@@ -128,6 +118,7 @@ export default {
     })
 
     return {
+      store,
       columns,
       state,
       showDetail: ref(false),

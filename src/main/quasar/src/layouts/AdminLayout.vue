@@ -14,7 +14,7 @@
         <q-route-tab href="/" target="_top" label="About Us"/>
         <q-route-tab href="/tickets" target="_top" label="OLAC 70th Anniversary Reservations"/>
         <q-route-tab to="/" replace label="Admin"/>
-        <q-route-tab href="/logout" target="_top" Label="Logout"/>
+        <q-route-tab to="/logout" replace label="Logout"/>
       </q-tabs>
     </q-header>
 
