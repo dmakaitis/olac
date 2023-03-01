@@ -1,11 +1,16 @@
 package org.olac.reservation.utility.jpa;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import org.olac.reservation.exception.OlacException;
 import org.olac.reservation.utility.SecurityUtility;
 import org.olac.reservation.utility.jpa.entity.AccountEntity;
 import org.olac.reservation.utility.jpa.repository.AccountRepository;
 import org.olac.reservation.utility.model.Account;
+import org.olac.reservation.utility.spring.JwtUtility;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +22,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -30,8 +37,10 @@ import static java.util.Collections.singleton;
 @RequiredArgsConstructor
 public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsService {
 
+    public static final String UNRECOGNIZED_USER_OR_CREDENTIALS = "Unrecognized user or credentials";
     private final AccountRepository repository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtility jwtUtility;
 
     @Override
     public String getCurrentUserName() {
@@ -63,44 +72,13 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
     }
 
     @Override
-    public Account createAccount(String username, String password, boolean admin) {
-        // Ensure the username is unique
-        Optional<AccountEntity> check = repository.findByUsername(username);
-        if (check.isPresent()) {
-            throw new OlacException("Username muse be unique");
-        }
-
+    public Account createAccount(String username, String email, boolean admin) {
         AccountEntity entity = new AccountEntity();
         entity.setUsername(username);
-        entity.setPassword(passwordEncoder.encode(password));
+        entity.setEmail(email);
         entity.setAdmin(admin);
+
         return toAccount(repository.save(entity));
-    }
-
-    @Override
-    public boolean setPassword(String username, String newPassword) {
-        Optional<AccountEntity> accountOptional = repository.findByUsername(username);
-        if (accountOptional.isEmpty()) {
-            return false;
-        }
-        AccountEntity account = accountOptional.get();
-
-        account.setPassword(passwordEncoder.encode(newPassword));
-
-        repository.save(account);
-
-        return true;
-    }
-
-    @Override
-    public boolean validatePassword(String username, String password) {
-        Optional<AccountEntity> accountOptional = repository.findByUsername(username);
-        if (accountOptional.isEmpty()) {
-            return false;
-        }
-        AccountEntity account = accountOptional.get();
-
-        return passwordEncoder.matches(password, account.getPassword());
     }
 
     @Override
@@ -117,9 +95,7 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
         }
         AccountEntity entity = accountOptional.get();
 
-        entity.setExpired(account.isExpired());
-        entity.setLocked(account.isLocked());
-        entity.setCredentialsExpired(account.isCredentialsExpired());
+        entity.setEmail(account.getEmail());
         entity.setEnabled(account.isEnabled());
         entity.setAdmin(account.isAdmin());
 
@@ -128,13 +104,38 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
         return true;
     }
 
+    @Override
+    public String validateUserWithGoogleIdentity(String credential) {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(asList("192542427030-lo0r4n23ecl4bl35v1rq0ejhn3gfffgj.apps.googleusercontent.com"))
+                .build();
+
+        try {
+            GoogleIdToken token = verifier.verify(credential);
+            if (token != null) {
+                GoogleIdToken.Payload payload = token.getPayload();
+
+                // Get the username associated with the email address...
+                Optional<String> jwtToken = repository.findByEmailIgnoreCase(payload.getEmail())
+                        .map(AccountEntity::getUsername)
+                        .map(jwtUtility::generateJwtToken);
+
+                if (jwtToken.isPresent()) {
+                    return jwtToken.get();
+                }
+            }
+
+            throw new OlacException(UNRECOGNIZED_USER_OR_CREDENTIALS);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new OlacException(UNRECOGNIZED_USER_OR_CREDENTIALS, e);
+        }
+    }
+
     private Account toAccount(AccountEntity accountEntity) {
         return Account.builder()
                 .id(accountEntity.getId())
                 .username(accountEntity.getUsername())
-                .expired(accountEntity.isExpired())
-                .locked(accountEntity.isLocked())
-                .credentialsExpired(accountEntity.isCredentialsExpired())
+                .email(accountEntity.getEmail())
                 .enabled(accountEntity.isEnabled())
                 .admin(accountEntity.isAdmin())
                 .build();
@@ -155,7 +156,7 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
 
         @Override
         public String getPassword() {
-            return account.getPassword();
+            return "";
         }
 
         @Override
@@ -165,17 +166,17 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
 
         @Override
         public boolean isAccountNonExpired() {
-            return !account.isExpired();
+            return true;
         }
 
         @Override
         public boolean isAccountNonLocked() {
-            return !account.isLocked();
+            return true;
         }
 
         @Override
         public boolean isCredentialsNonExpired() {
-            return !account.isCredentialsExpired();
+            return true;
         }
 
         @Override

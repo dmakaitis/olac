@@ -1,5 +1,6 @@
 package org.olac.reservation.client;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static feign.Util.isNotBlank;
 import static java.util.Comparator.comparing;
 
 @RestController
@@ -61,7 +61,7 @@ public class AdminApiController {
 
     @PostMapping("accounts")
     Account createAccount(@RequestBody NewAccountRequest request) {
-        Account rVal = securityUtility.createAccount(request.getUsername(), request.getPassword(), request.isAdmin());
+        Account rVal = securityUtility.createAccount(request.getUsername(), request.getEmail(), request.isAdmin());
         if (rVal.isEnabled() != request.isEnabled()) {
             rVal.setEnabled(request.isEnabled());
             securityUtility.updateAccount(rVal);
@@ -72,9 +72,6 @@ public class AdminApiController {
 
     @PutMapping("accounts/{username}")
     void updateAccount(@PathVariable String username, @RequestBody UpdateAccountRequest request) {
-        if (isNotBlank(request.getPassword())) {
-            securityUtility.setPassword(username, request.getPassword());
-        }
         if (!"admin".equals(username) && (request.getAdmin() != null || request.getEnabled() != null)) {
             securityUtility.findAccount(username).ifPresent(account -> {
                 if (request.getAdmin() != null) {
@@ -89,16 +86,18 @@ public class AdminApiController {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class NewAccountRequest {
         private String username;
-        private String password;
+        private String email;
         private boolean admin;
         private boolean enabled;
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class UpdateAccountRequest {
-        private String password;
+        private String email;
         private Boolean admin;
         private Boolean enabled;
     }

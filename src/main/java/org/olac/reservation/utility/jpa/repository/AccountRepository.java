@@ -9,4 +9,6 @@ public interface AccountRepository extends CrudRepository<AccountEntity, Long> {
 
     Optional<AccountEntity> findByUsername(String username);
 
+    Optional<AccountEntity> findByEmailIgnoreCase(String email);
+
 }

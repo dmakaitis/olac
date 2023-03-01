@@ -1,37 +1,31 @@
 package org.olac.reservation.client;
 
-import jakarta.validation.Valid;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.utility.SecurityUtility;
 import org.olac.reservation.utility.spring.JwtUtility;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final SecurityUtility securityUtility;
     private final JwtUtility jwtUtility;
-
-    @PostMapping("login")
-    public ResponseEntity<String> authenticateUser(@Valid @RequestBody LoginRequest request) {
-        if (!securityUtility.validatePassword(request.getUsername(), request.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .build();
-        }
-
-        return ResponseEntity.ok(jwtUtility.generateJwtToken(request.getUsername()));
-    }
 
     @GetMapping("who-am-i")
     public ResponseEntity<WhoAmIResponse> whoAmI() {
@@ -42,6 +36,11 @@ public class AuthController {
                         .map(GrantedAuthority::getAuthority)
                         .toList()
         ));
+    }
+
+    @PostMapping("google-id")
+    public ResponseEntity<String> authenticateUsingGoogleIdentity(@RequestBody CredentialResponse response) throws GeneralSecurityException, IOException {
+        return ResponseEntity.ok(securityUtility.validateUserWithGoogleIdentity(response.getCredential()));
     }
 
     @Data
@@ -56,4 +55,13 @@ public class AuthController {
         private String username;
         private List<String> grants;
     }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class CredentialResponse {
+        private String credential;
+        @JsonProperty("select_by")
+        private String selectBy;
+    }
+
 }

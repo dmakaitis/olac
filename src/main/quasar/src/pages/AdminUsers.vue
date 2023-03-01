@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="q-gutter-md">
-    <q-table grid title="Users" :rows="state.rows" :columns="columns" row-key="id" @row-click="onRowClick"/>
+    <q-table title="Users" :rows="state.rows" :columns="columns" row-key="id" @row-click="onRowClick"/>
     <q-btn label="New User" @click="onNewAccount"/>
   </q-page>
 
@@ -14,7 +14,7 @@
         <q-card-section>
           <q-form @submit="onSave" @reset="onCancel" class="q-gutter-md">
             <q-input outlined v-model="state.detail.username" label="Username"/>
-            <q-input outlined v-model="state.detail.password" label="Password" type="password"/>
+            <q-input outlined v-model="state.detail.email" label="Email"/>
             <q-checkbox v-model="state.detail.admin" label="Administrator"/>
             <q-checkbox v-model="state.detail.enabled" label="Enabled"/>
             <div>
@@ -44,6 +44,15 @@ const columns = [
     sortable: true
   },
   {
+    name: 'email',
+    required: true,
+    label: 'Email',
+    align: 'left',
+    field: row => row.email,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
     name: 'admin',
     required: true,
     label: 'Administrator',
@@ -69,7 +78,7 @@ export default {
     onRowClick(event, row, index) {
       this.state.detail.id = row.id;
       this.state.detail.username = row.username;
-      this.state.detail.password = null;
+      this.state.detail.email = row.email;
       this.state.detail.enabled = row.enabled;
       this.state.detail.admin = row.admin;
       this.showDetail = true;
@@ -79,7 +88,7 @@ export default {
     },
     onSave() {
       let request = {
-        password: this.state.detail.password,
+        email: this.state.detail.email,
         enabled: this.state.detail.enabled,
         admin: this.state.detail.admin
       }
@@ -101,7 +110,7 @@ export default {
     onNewAccount() {
       this.state.detail.id = null;
       this.state.detail.username = "";
-      this.state.detail.password = "";
+      this.state.detail.email = "";
       this.state.detail.enabled = true;
       this.state.detail.admin = false;
       this.showDetail = true;

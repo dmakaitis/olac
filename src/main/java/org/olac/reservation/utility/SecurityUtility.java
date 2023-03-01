@@ -11,14 +11,12 @@ public interface SecurityUtility {
 
     List<Account> getAccounts();
 
-    Account createAccount(String username, String password, boolean admin);
-
-    boolean setPassword(String username, String newPassword);
-
-    boolean validatePassword(String username, String password);
+    Account createAccount(String username, String email, boolean admin);
 
     Optional<Account> findAccount(String username);
 
     boolean updateAccount(Account account);
+
+    String validateUserWithGoogleIdentity(String credential);
 
 }

@@ -8,14 +8,18 @@
 
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="toggleDrawer()"/>
+
+        <q-toolbar-title>
+          <q-tabs align="center" no-caps>
+            <q-route-tab href="/" target="_top" label="About Us"/>
+            <q-route-tab href="/tickets" target="_top" label="OLAC 70th Anniversary Reservations"/>
+            <q-route-tab to="/" replace label="Admin"/>
+          </q-tabs>
+        </q-toolbar-title>
+
+        <q-btn align="right" dense flat round icon="logout" to="/logout"/>
       </q-toolbar>
 
-      <q-tabs align="left" no-caps>
-        <q-route-tab href="/" target="_top" label="About Us"/>
-        <q-route-tab href="/tickets" target="_top" label="OLAC 70th Anniversary Reservations"/>
-        <q-route-tab to="/" replace label="Admin"/>
-        <q-route-tab to="/logout" replace label="Logout"/>
-      </q-tabs>
     </q-header>
 
     <q-drawer show-if-above v-model="drawerOpen" side="left" bordered>

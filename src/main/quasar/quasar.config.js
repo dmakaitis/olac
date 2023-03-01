@@ -94,7 +94,10 @@ module.exports = configure(function (ctx) {
           changeOrigin: true
         }
       },
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically,
+      headers: {
+        'Referrer-Policy': 'no-referrer-when-downgrade'
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
