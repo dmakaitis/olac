@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.olac.reservation.utility.AuditUtility;
 import org.olac.reservation.utility.DateTimeUtility;
 import org.olac.reservation.utility.SecurityUtility;
-import org.olac.reservation.utility.jpa.entity.ReservationEventEntity;
+import org.olac.reservation.utility.jpa.entity.ReservationAuditEventEntity;
 import org.olac.reservation.utility.jpa.repository.ReservationEventRepository;
-import org.olac.reservation.utility.model.ReservationEvent;
+import org.olac.reservation.utility.model.ReservationAuditEvent;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,14 +25,14 @@ public class DatastoreAuditUtility implements AuditUtility {
     }
 
     @Override
-    public List<ReservationEvent> getReservationEvents(String reservationId) {
+    public List<ReservationAuditEvent> getReservationEvents(String reservationId) {
         return repository.getByReservationId(reservationId).stream()
                 .map(this::toReservationEvent)
                 .toList();
     }
 
-    private ReservationEventEntity buildReservationEventEntity(String reservationId, String description) {
-        ReservationEventEntity entity = new ReservationEventEntity();
+    private ReservationAuditEventEntity buildReservationEventEntity(String reservationId, String description) {
+        ReservationAuditEventEntity entity = new ReservationAuditEventEntity();
         entity.setReservationId(reservationId);
         entity.setTimestamp(dateTimeUtility.getCurrentTime());
         entity.setUsername(securityUtility.getCurrentUserName());
@@ -41,8 +41,8 @@ public class DatastoreAuditUtility implements AuditUtility {
         return entity;
     }
 
-    private ReservationEvent toReservationEvent(ReservationEventEntity reservationEventEntity) {
-        return ReservationEvent.builder()
+    private ReservationAuditEvent toReservationEvent(ReservationAuditEventEntity reservationEventEntity) {
+        return ReservationAuditEvent.builder()
                 .reservationId(reservationEventEntity.getReservationId())
                 .timestamp(reservationEventEntity.getTimestamp())
                 .user(reservationEventEntity.getUsername())

@@ -10,7 +10,7 @@ import java.util.Date;
 @Table(name = "AUDIT_EVENT")
 @Data
 @NoArgsConstructor
-public class ReservationEventEntity {
+public class ReservationAuditEventEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

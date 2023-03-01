@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Data
 @Builder
-public class ReservationEvent {
+public class ReservationAuditEvent {
 
     private String reservationId;
     private Date timestamp;
