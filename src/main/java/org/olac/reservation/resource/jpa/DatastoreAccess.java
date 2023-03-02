@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -161,12 +162,22 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         addFieldIfChanged(changedFields, "email", reservation.getEmail(), entity.getEmail());
         addFieldIfChanged(changedFields, "phone", reservation.getPhone(), entity.getPhone());
         addFieldIfChanged(changedFields, "status", reservation.getStatus(), entity.getStatus());
-        addFieldIfChanged(changedFields, "timestamp", reservation.getReservationTimestamp(), entity.getReservationTimestamp());
         addFieldIfChanged(changedFields, "amount due", reservation.getAmountDue(), entity.getAmountDue());
 
         // These require a bit more logic...
-//                addFieldIfChanged(changedFields, "ticket counts", reservation.getTicketCounts(), entity.getTickets());
-//                addFieldIfChanged(changedFields, "payments", reservation.getPayments(), entity.getPayments());
+        if (didTicketCountsChange(reservation.getTicketCounts(), entity.getTickets())) {
+            changedFields.add("ticket counts");
+        }
+        if (didPaymentsChange(reservation.getPayments(), entity.getPayments())) {
+            double oldTotal = entity.getPayments().stream()
+                    .mapToDouble(PaymentEntity::getAmount)
+                    .sum();
+            double newTotal = reservation.getPayments().stream()
+                    .mapToDouble(Payment::getAmount)
+                    .sum();
+
+            changedFields.add(String.format("payments: %s => %s", oldTotal, newTotal));
+        }
 
         String formattedChanges = changedFields.stream()
                 .collect(Collectors.joining(", "));
@@ -176,7 +187,25 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         return formattedChanges;
     }
 
-    private void addFieldIfChanged(List<String> changedFields, String fieldName, Object oldValue, Object newValue) {
+    private boolean didTicketCountsChange(List<TicketCounts> newValue, Set<ReservationTicketsEntity> oldValue) {
+        Set<TicketCounts> newTicketCounts = new HashSet<>(newValue);
+        Set<TicketCounts> oldTicketCounts = oldValue.stream()
+                .map(c -> new TicketCounts(c.getTicketType().getCode(), c.getCount()))
+                .collect(toSet());
+
+        return !newTicketCounts.equals(oldTicketCounts);
+    }
+
+    private boolean didPaymentsChange(List<Payment> newValue, Set<PaymentEntity> oldValue) {
+        Set<Payment> newPayments = new HashSet<>(newValue);
+        Set<Payment> oldPayments = oldValue.stream()
+                .map(this::toPayment)
+                .collect(toSet());
+
+        return !newPayments.equals(oldPayments);
+    }
+
+    private void addFieldIfChanged(List<String> changedFields, String fieldName, Object newValue, Object oldValue) {
         if (!Objects.equals(oldValue, newValue)) {
             changedFields.add(String.format("%s: %s => %s", fieldName, oldValue, newValue));
         }
@@ -239,6 +268,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
                 .toList());
         reservation.setPayments(entity.getPayments().stream()
                 .map(this::toPayment)
+                .sorted(comparing(Payment::getCreatedTimestamp))
                 .toList());
 
         return reservation;
@@ -247,7 +277,6 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     private PaymentEntity toPaymentEntity(Payment payment, ReservationEntity reservation) {
         PaymentEntity entity = new PaymentEntity();
 
-        entity.setId(payment.getId());
         entity.setReservation(reservation);
         entity.setAmount(payment.getAmount());
         entity.setStatus(payment.getStatus());
@@ -261,7 +290,6 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     private Payment toPayment(PaymentEntity entity) {
         return Payment.builder()
-                .id(entity.getId())
                 .amount(entity.getAmount())
                 .status(entity.getStatus())
                 .method(entity.getMethod())

@@ -17,6 +17,7 @@ import org.olac.reservation.resource.paypal.model.PurchaseUnit;
 import org.olac.reservation.utility.SecurityUtility;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -154,6 +155,15 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
 
     @Override
     public Reservation saveReservation(Reservation reservation) {
+        // Make sure we document who entered any new payments and when:
+        String currentUser = securityUtility.getCurrentUserName();
+        reservation.getPayments().stream()
+                .filter(p -> isBlank(p.getEnteredBy()))
+                .forEach(p -> {
+                    p.setEnteredBy(currentUser);
+                    p.setCreatedTimestamp(new Date());
+                });
+
         // Update our amount due...
         Map<String, Double> ticketTypes = getTicketTypes().stream()
                 .collect(toMap(TicketType::getCode, TicketType::getCostPerTicket));

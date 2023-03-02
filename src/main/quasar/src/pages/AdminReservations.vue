@@ -38,9 +38,11 @@
 
                 <q-expansion-item group="reservation" label="Payments" header-class="text-primary">
                   <q-card>
-                    <q-card-section>
-                      <q-table title="Payments" :rows="detail.row.payments" :columns="paymentColumns" row-key="id">
+                    <q-card-section class="q-gutter-md">
+                      <q-table title="Payments" :rows="detail.row.payments" :columns="paymentColumns" row-key="id"
+                               @row-click="onSelectPaymentRow">
                       </q-table>
+                      <q-btn label="Add New Payment" @click="onAddNewPayment"/>
                     </q-card-section>
                   </q-card>
                 </q-expansion-item>
@@ -66,14 +68,18 @@
       </q-form>
     </q-card>
   </q-dialog>
+
+  <PaymentDialog :payment="selectedPayment" v-model="showPaymentDialog" @save="onSavePayment"
+                 @cancel="onCancelPayment"/>
 </template>
 
 <script>
-import {reactive, ref} from 'vue'
-import {useStore} from 'vuex'
+import {reactive, ref} from 'vue';
+import {useStore} from 'vuex';
 import {currency} from "boot/helper";
-import {api} from 'boot/axios.js'
-import {date} from 'quasar'
+import {api} from 'boot/axios.js';
+import {date} from 'quasar';
+import PaymentDialog from "components/PaymentDialog.vue";
 
 const columns = [
   {
@@ -151,10 +157,10 @@ const columns = [
   {
     name: 'amount-paid',
     required: true,
-    label: 'Amount Due',
+    label: 'Amount Paid',
     align: 'right',
     field: row => row.payments,
-    format: val => `${currency(val.reduce((a, b) => a + b.amount, 0.0))}`,
+    format: val => `${currency(val.reduce((a, b) => a + parseFloat(b.amount), 0.0))}`,
     sortable: false
   }
 ];
@@ -190,15 +196,6 @@ const ticketTypeColumns = [
 ];
 
 const paymentColumns = [
-  {
-    name: 'id',
-    required: false,
-    label: 'ID',
-    align: 'left',
-    field: row => row.id,
-    format: val => `${val}`,
-    sortable: true
-  },
   {
     name: 'amount',
     required: false,
@@ -278,6 +275,7 @@ const auditColumns = [
 
 export default {
   name: 'AdminTicketTypes',
+  components: {PaymentDialog},
   methods: {
     onRowClick(event, row, index) {
       this.detail.row = row;
@@ -297,6 +295,7 @@ export default {
       this.showDetail = true;
     },
     onCancel() {
+      this.loadReservations();
       this.showDetail = false;
     },
     loadReservations() {
@@ -331,6 +330,38 @@ export default {
         .catch(error => alert(error));
 
       this.showDetail = false;
+    },
+    onSelectPaymentRow(event, row, index) {
+      this.paymentRow = index;
+      this.selectedPayment.value = row;
+      this.showPaymentDialog = true;
+    },
+    onAddNewPayment() {
+      this.paymentRow = -1;
+      this.selectedPayment.value = {};
+      this.showPaymentDialog = true;
+    },
+    onCancelPayment() {
+      this.paymentRow = -1;
+      this.showPaymentDialog = false;
+    },
+    onSavePayment(data) {
+      console.log(`Saving payment: ${JSON.stringify(data)}`);
+      if (this.paymentRow >= 0) {
+        this.detail.row.payments[this.paymentRow].amount = data.amount;
+        this.detail.row.payments[this.paymentRow].status = data.paymentStatus;
+        this.detail.row.payments[this.paymentRow].method = data.paymentMethod;
+        this.detail.row.payments[this.paymentRow].notes = data.notes;
+      } else {
+        this.detail.row.payments.push({
+          amount: data.amount,
+          status: data.paymentStatus,
+          method: data.paymentMethod,
+          notes: data.notes
+        });
+      }
+      this.paymentRow = -1;
+      this.showPaymentDialog = false;
     }
   },
   setup() {
@@ -348,8 +379,17 @@ export default {
       ],
       state,
       showDetail: ref(false),
+      showPaymentDialog: ref(false),
       detail: reactive({}),
-      selected: ref([])
+      selected: ref([]),
+      paymentRow: ref(-1),
+      selectedPayment: ref({}),
+      newPayment: reactive({
+        amount: 5,
+        paymentMethod: 'CHECK',
+        paymentStatus: 'SUCCESSFUL',
+        notes: ''
+      }),
     }
   },
   mounted() {
