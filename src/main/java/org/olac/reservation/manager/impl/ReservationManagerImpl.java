@@ -18,9 +18,11 @@ import org.olac.reservation.utility.SecurityUtility;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
@@ -152,6 +154,28 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
 
     @Override
     public Reservation saveReservation(Reservation reservation) {
+        // Update our amount due...
+        Map<String, Double> ticketTypes = getTicketTypes().stream()
+                .collect(toMap(TicketType::getCode, TicketType::getCostPerTicket));
+
+        reservation.setAmountDue(reservation.getTicketCounts().stream()
+                .mapToDouble(c -> c.getCount() * ticketTypes.getOrDefault(c.getTicketTypeCode(), 0.0))
+                .sum());
+
+        // Update status, if needed
+        if (reservation.getStatus() == ReservationStatus.PENDING_PAYMENT || reservation.getStatus() == ReservationStatus.RESERVED) {
+            double amountPaid = reservation.getPayments().stream()
+                    .filter(p -> p.getStatus() == PaymentStatus.SUCCESSFUL)
+                    .mapToDouble(Payment::getAmount)
+                    .sum();
+
+            if (amountPaid >= reservation.getAmountDue()) {
+                reservation.setStatus(ReservationStatus.RESERVED);
+            } else {
+                reservation.setStatus(ReservationStatus.PENDING_PAYMENT);
+            }
+        }
+
         return reservationDatastoreAccess.saveReservation(reservation);
     }
 

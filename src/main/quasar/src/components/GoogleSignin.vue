@@ -13,7 +13,7 @@ export default {
         .then(response => this.$emit('auth', response.data))
     }
   },
-  mounted: function () {
+  mounted() {
     window.google.accounts.id.initialize({
       client_id: "192542427030-lo0r4n23ecl4bl35v1rq0ejhn3gfffgj.apps.googleusercontent.com",
       callback: this.onLogin

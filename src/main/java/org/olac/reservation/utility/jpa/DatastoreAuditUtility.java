@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static java.util.Comparator.comparing;
+
 @Service
 @RequiredArgsConstructor
 public class DatastoreAuditUtility implements AuditUtility {
@@ -28,6 +30,7 @@ public class DatastoreAuditUtility implements AuditUtility {
     public List<ReservationAuditEvent> getReservationEvents(String reservationId) {
         return repository.getByReservationId(reservationId).stream()
                 .map(this::toReservationEvent)
+                .sorted(comparing(ReservationAuditEvent::getTimestamp))
                 .toList();
     }
 

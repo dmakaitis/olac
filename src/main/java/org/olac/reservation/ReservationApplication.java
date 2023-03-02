@@ -50,7 +50,7 @@ public class ReservationApplication implements ApplicationRunner {
 
         // Verify that we have the admin account created...
         if (!securityUtility.getAccounts().isEmpty()) {
-            log.info("Verified that we now have at least one account");
+            log.debug("Verified that we now have at least one account");
         }
 
         if (properties.getTestData().isLoad()) {

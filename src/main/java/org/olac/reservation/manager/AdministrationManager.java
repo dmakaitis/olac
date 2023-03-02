@@ -15,4 +15,6 @@ public interface AdministrationManager {
 
     List<Reservation> getReservations();
 
+    Reservation saveReservation(Reservation reservation);
+
 }

@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.manager.AdministrationManager;
 import org.olac.reservation.resource.model.Reservation;
 import org.olac.reservation.resource.model.TicketType;
+import org.olac.reservation.utility.AuditUtility;
 import org.olac.reservation.utility.SecurityUtility;
 import org.olac.reservation.utility.model.Account;
+import org.olac.reservation.utility.model.ReservationAuditEvent;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +25,11 @@ public class AdminApiController {
 
     private final AdministrationManager administrationManager;
     private final SecurityUtility securityUtility;
+    private final AuditUtility auditUtility;
 
     @GetMapping("ticket-types")
     List<TicketType> getTicketTypes() {
-        log.info("Retrieving ticket types for admin");
+        log.debug("Retrieving ticket types");
         return administrationManager.getTicketTypes().stream()
                 .sorted(comparing(TicketType::getCostPerTicket).reversed())
                 .toList();
@@ -44,7 +47,7 @@ public class AdminApiController {
 
     @GetMapping("reservations")
     List<Reservation> getReservations() {
-        log.info("Retrieving reservations for admin");
+        log.debug("Retrieving reservations");
         return administrationManager.getReservations().stream()
                 .sorted(comparing(Reservation::getLastName)
                         .thenComparing(Reservation::getFirstName)
@@ -52,8 +55,21 @@ public class AdminApiController {
                 .toList();
     }
 
+    @GetMapping("reservations/{reservationId}/audit")
+    public List<ReservationAuditEvent> getReservationAudit(@PathVariable String reservationId) {
+        log.debug("Retrieving audit events for reservation {}", reservationId);
+        return auditUtility.getReservationEvents(reservationId);
+    }
+
+    @PutMapping("reservations/{reservationId}")
+    public void saveReservation(@PathVariable String reservationId, @RequestBody Reservation reservation) {
+        log.debug("Updating reservation {}", reservationId);
+        administrationManager.saveReservation(reservation);
+    }
+
     @GetMapping("accounts")
     List<Account> getAccounts() {
+        log.debug("Retrieving accounts");
         return securityUtility.getAccounts().stream()
                 .sorted(comparing(Account::getUsername))
                 .toList();

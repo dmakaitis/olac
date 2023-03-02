@@ -1,6 +1,10 @@
 security:
   debug: false
 
+logging:
+  level:
+    org.olac: ${LOGGING_LEVEL:INFO}
+
 spring:
   mail:
     host: smtp.gmail.com
