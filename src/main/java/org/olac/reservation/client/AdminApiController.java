@@ -88,17 +88,15 @@ public class AdminApiController {
 
     @PutMapping("accounts/{username}")
     void updateAccount(@PathVariable String username, @RequestBody UpdateAccountRequest request) {
-        if (!"admin".equals(username) && (request.getAdmin() != null || request.getEnabled() != null)) {
-            securityUtility.findAccount(username).ifPresent(account -> {
-                if (request.getAdmin() != null) {
-                    account.setAdmin(request.getAdmin());
-                }
-                if (request.getEnabled() != null) {
-                    account.setEnabled(request.getEnabled());
-                }
-                securityUtility.updateAccount(account);
-            });
-        }
+        securityUtility.findAccount(username).ifPresent(account -> {
+            if (request.getAdmin() != null) {
+                account.setAdmin(request.getAdmin());
+            }
+            if (request.getEnabled() != null) {
+                account.setEnabled(request.getEnabled());
+            }
+            securityUtility.updateAccount(account);
+        });
     }
 
     @Data

@@ -9,6 +9,7 @@ import org.olac.reservation.resource.model.Payment;
 import org.olac.reservation.resource.model.Reservation;
 import org.olac.reservation.resource.model.TicketType;
 import org.olac.reservation.utility.SecurityUtility;
+import org.olac.reservation.utility.model.Account;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -19,6 +20,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toMap;
@@ -43,9 +45,21 @@ public class ReservationApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // Make sure we at least have an admin account...
-        if (securityUtility.getAccounts().isEmpty()) {
-            log.warn("Creating default admin account.");
-            securityUtility.createAccount("admin", "dmakaitis@gmail.com", true);
+        if (securityUtility.getAccounts().stream()
+                .noneMatch(Account::isAdmin)) {
+            log.warn("Ensuring at least one admin account exists.");
+
+            Optional<Account> adminAccount = securityUtility.getAccounts().stream()
+                    .filter(a -> "dmakaitis@gmail.com".equalsIgnoreCase(a.getEmail()))
+                    .findFirst();
+
+            if (adminAccount.isPresent()) {
+                adminAccount.get().setAdmin(true);
+                adminAccount.get().setEnabled(true);
+                securityUtility.updateAccount(adminAccount.get());
+            } else {
+                securityUtility.createAccount("darius", "dmakaitis@gmail.com", true);
+            }
         }
 
         // Verify that we have the admin account created...

@@ -95,6 +95,14 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
         }
         AccountEntity entity = accountOptional.get();
 
+        // Make sure we're not disabling our last active administrator...
+        if (isEnabledAdmin(entity) && !isEnabledAdmin(account) && StreamSupport.stream(repository.findAll().spliterator(), false)
+                .filter(a -> !a.getUsername().equals(account.getUsername()))
+                .noneMatch(DatastoreSecurityUtility::isEnabledAdmin)) {
+            account.setAdmin(true);
+            account.setEnabled(true);
+        }
+
         entity.setEmail(account.getEmail());
         entity.setEnabled(account.isEnabled());
         entity.setAdmin(account.isAdmin());
@@ -129,6 +137,14 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
         } catch (GeneralSecurityException | IOException e) {
             throw new OlacException(UNRECOGNIZED_USER_OR_CREDENTIALS, e);
         }
+    }
+
+    private static boolean isEnabledAdmin(Account account) {
+        return account.isAdmin() && account.isEnabled();
+    }
+
+    private static boolean isEnabledAdmin(AccountEntity account) {
+        return account.isAdmin() && account.isEnabled();
     }
 
     private Account toAccount(AccountEntity accountEntity) {
