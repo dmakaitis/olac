@@ -131,7 +131,6 @@ export default {
     return {
       columns,
       state,
-      isAdmin: ref(false),
       showDetail: ref(false),
       detail: reactive({}),
       selected: ref([]),

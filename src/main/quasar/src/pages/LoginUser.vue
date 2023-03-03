@@ -30,7 +30,7 @@ export default {
     onAuth(authentication) {
       console.log(`Received authentication: ${JSON.stringify(authentication)}`)
       this.store.commit('auth/storeAuthentication', authentication)
-      this.$router.push('/reservations')
+      this.$router.push('/main/reservations')
     }
   },
   setup() {

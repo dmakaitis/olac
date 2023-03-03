@@ -11,5 +11,5 @@ export function authHeader(state) {
 }
 
 export function isAdmin(state) {
-  return !state.grants.includes('ROLE_ADMIN')
+  return state.grants.includes('ROLE_ADMIN')
 }

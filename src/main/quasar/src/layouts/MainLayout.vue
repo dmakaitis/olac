@@ -1,116 +1,59 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+  <q-layout view="hHh lpR fFf">
 
+    <q-header elevated class="bg-primary">
+      <div class="q-mx-auto text-center">
+        <img class="headerimage" src="~assets/olac-logo.svg" alt="Omaha Lithuanian-American Community"/>
+      </div>
+
+      <q-toolbar>
         <q-toolbar-title>
-          Quasar App
+          <q-tabs align="center" no-caps>
+            <q-route-tab href="/" target="_top" label="About Us"/>
+            <q-route-tab href="/tickets" target="_top" label="OLAC 70th Anniversary Reservations"/>
+            <q-route-tab v-if="isLoggedIn" to="/main/reservations" replace label="Reservations"/>
+            <q-route-tab v-if="isAdmin" to="/admin/users" replace label="Admin"/>
+          </q-tabs>
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <q-btn v-if="isLoggedIn" align="right" dense flat round icon="logout" to="/logout"/>
       </q-toolbar>
+
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
+    <q-footer class="bg-primary text-center">
+      &copy; {{ new Date().getFullYear() }} Omaha Lithuanian-American Community
+    </q-footer>
 
     <q-page-container>
       <router-view/>
     </q-page-container>
+
   </q-layout>
 </template>
 
 <script>
-import {defineComponent, ref} from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import {ref} from 'vue';
+import {useStore} from "vuex";
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
-
-export default defineComponent({
-  name: 'MainLayout',
-
-  components: {
-    EssentialLink
-  },
-
+export default {
+  name: 'AdminLayout',
   setup() {
-    const leftDrawerOpen = ref(false)
-
     return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      }
+      isAdmin: ref(false),
+      isLoggedIn: ref(false)
     }
+  },
+  mounted() {
+    this.isAdmin = useStore().getters['auth/isAdmin']
+    this.isLoggedIn = useStore().getters['auth/isLoggedIn']
   }
-})
+}
 </script>
+
+<style scoped>
+.headerimage {
+  padding: 10px;
+  height: 150px;
+}
+</style>

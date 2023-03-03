@@ -1,3 +1,4 @@
+import MainLayout from "layouts/MainLayout.vue";
 import AdminLayout from "layouts/AdminLayout.vue";
 import AdminTicketTypes from "pages/AdminTicketTypes.vue";
 import AdminReservations from "pages/AdminReservations.vue";
@@ -18,22 +19,31 @@ const routes = [
   },
   {
     path: '/',
+    redirect: {path: '/main/reservations'}
+  },
+  {
+    path: '/main',
+    component: MainLayout,
+    children: [
+      {
+        path: 'reservations',
+        component: AdminReservations,
+        meta: {
+          requiresAuth: true
+        }
+      }
+    ]
+  },
+  {
+    path: '/admin',
     component: AdminLayout,
     meta: {
       requiresAuth: true
     },
     children: [
       {
-        path: '',
-        redirect: {path: 'reservations'}
-      },
-      {
         path: 'ticket-types',
         component: AdminTicketTypes
-      },
-      {
-        path: 'reservations',
-        component: AdminReservations
       },
       {
         path: 'users',
