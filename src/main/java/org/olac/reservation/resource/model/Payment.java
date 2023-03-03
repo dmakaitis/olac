@@ -1,9 +1,6 @@
 package org.olac.reservation.resource.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
@@ -19,6 +16,7 @@ public class Payment {
     private String notes;
     private String enteredBy;
     @Builder.Default
+    @EqualsAndHashCode.Exclude
     private Date createdTimestamp = new Date();
 
 }
