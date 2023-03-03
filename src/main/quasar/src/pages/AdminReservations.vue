@@ -7,7 +7,7 @@
     <q-btn label="Delete Selected Reservation"/>
   </q-page>
 
-  <ReservationDialog :reservation="detail.row" :ticket-types="state.ticketTypes"
+  <ReservationDialog :full-edit="isAdmin" :reservation="detail.row" :ticket-types="state.ticketTypes"
                      v-model="showDetail" @save="onSaveReservation" @cancel="onCancel" @edit-payment="onEditPayment"/>
   <PaymentDialog :payment="selectedPayment" v-model="showPaymentDialog" @save="onSavePayment"
                  @cancel="onCancelPayment"/>
@@ -44,7 +44,7 @@ const columns = [
 ];
 
 export default {
-  name: 'AdminTicketTypes',
+  name: 'AdminReservations',
   components: {ReservationDialog, PaymentDialog},
   methods: {
     onRowClick(event, row, index) {
@@ -131,6 +131,7 @@ export default {
     return {
       columns,
       state,
+      isAdmin: ref(false),
       showDetail: ref(false),
       detail: reactive({}),
       selected: ref([]),

@@ -7,11 +7,14 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.utility.SecurityUtility;
+import org.olac.reservation.utility.model.ValidateUserResponse;
 import org.olac.reservation.utility.spring.JwtUtility;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -26,6 +29,7 @@ public class AuthController {
 
     private final SecurityUtility securityUtility;
     private final JwtUtility jwtUtility;
+    private final UserDetailsService userDetailsService;
 
     @GetMapping("who-am-i")
     public ResponseEntity<WhoAmIResponse> whoAmI() {
@@ -39,19 +43,30 @@ public class AuthController {
     }
 
     @PostMapping("google-id")
-    public ResponseEntity<String> authenticateUsingGoogleIdentity(@RequestBody CredentialResponse response) throws GeneralSecurityException, IOException {
-        return ResponseEntity.ok(securityUtility.validateUserWithGoogleIdentity(response.getCredential()));
-    }
+    public ResponseEntity<AuthenticationResponse> authenticateUsingGoogleIdentity(@RequestBody CredentialResponse response) throws GeneralSecurityException, IOException {
+        ValidateUserResponse validateUserResponse = securityUtility.validateUserWithGoogleIdentity(response.getCredential());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(validateUserResponse.getUsername());
 
-    @Data
-    public static class LoginRequest {
-        private String username;
-        private String password;
+        return ResponseEntity.ok(new AuthenticationResponse(
+                validateUserResponse.getJwtToken(),
+                validateUserResponse.getUsername(),
+                userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList()
+        ));
     }
 
     @Data
     @AllArgsConstructor
     public static class WhoAmIResponse {
+        private String username;
+        private List<String> grants;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class AuthenticationResponse {
+        private String jwtToken;
         private String username;
         private List<String> grants;
     }

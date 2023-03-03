@@ -10,6 +10,7 @@ import org.olac.reservation.utility.SecurityUtility;
 import org.olac.reservation.utility.jpa.entity.AccountEntity;
 import org.olac.reservation.utility.jpa.repository.AccountRepository;
 import org.olac.reservation.utility.model.Account;
+import org.olac.reservation.utility.model.ValidateUserResponse;
 import org.olac.reservation.utility.spring.JwtUtility;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -113,7 +114,7 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
     }
 
     @Override
-    public String validateUserWithGoogleIdentity(String credential) {
+    public ValidateUserResponse validateUserWithGoogleIdentity(String credential) {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                 .setAudience(asList("192542427030-lo0r4n23ecl4bl35v1rq0ejhn3gfffgj.apps.googleusercontent.com"))
                 .build();
@@ -124,12 +125,15 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
                 GoogleIdToken.Payload payload = token.getPayload();
 
                 // Get the username associated with the email address...
-                Optional<String> jwtToken = repository.findByEmailIgnoreCase(payload.getEmail())
+                Optional<ValidateUserResponse> response = repository.findByEmailIgnoreCase(payload.getEmail())
                         .map(AccountEntity::getUsername)
-                        .map(jwtUtility::generateJwtToken);
+                        .map(username -> ValidateUserResponse.builder()
+                                .username(username)
+                                .jwtToken(jwtUtility.generateJwtToken(username))
+                                .build());
 
-                if (jwtToken.isPresent()) {
-                    return jwtToken.get();
+                if (response.isPresent()) {
+                    return response.get();
                 }
             }
 

@@ -1,6 +1,7 @@
 package org.olac.reservation.utility;
 
 import org.olac.reservation.utility.model.Account;
+import org.olac.reservation.utility.model.ValidateUserResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,6 @@ public interface SecurityUtility {
 
     boolean updateAccount(Account account);
 
-    String validateUserWithGoogleIdentity(String credential);
+    ValidateUserResponse validateUserWithGoogleIdentity(String credential);
 
 }

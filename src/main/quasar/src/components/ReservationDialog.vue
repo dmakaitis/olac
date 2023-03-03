@@ -6,11 +6,11 @@
           <q-card-section horizontal>
             <q-card-section class="q-gutter-md">
               <q-input readonly v-model="reservationData.id" label="Reservation Number"/>
-              <q-input outlined v-model="reservationData.firstName" label="First Name"/>
-              <q-input outlined v-model="reservationData.lastName" label="Last Name"/>
-              <q-input outlined v-model="reservationData.email" label="Email"/>
-              <q-input outlined v-model="reservationData.phone" label="Phone"/>
-              <q-select outlined v-model="reservationData.status" label="Status" :options="statusOptions"/>
+              <q-input :readonly="!fullEdit" v-model="reservationData.firstName" label="First Name"/>
+              <q-input :readonly="!fullEdit" v-model="reservationData.lastName" label="Last Name"/>
+              <q-input :readonly="!fullEdit" v-model="reservationData.email" label="Email"/>
+              <q-input :readonly="!fullEdit" v-model="reservationData.phone" label="Phone"/>
+              <q-select :readonly="!fullEdit" v-model="reservationData.status" label="Status" :options="statusOptions"/>
             </q-card-section>
             <q-card-section>
               <q-list bordered>
@@ -22,7 +22,7 @@
                                row-key="code">
                         <template #body-cell-count="props">
                           <q-td :props="props">
-                            <q-input borderless v-model="props.row.count"/>
+                            <q-input :readonly="!fullEdit" v-model="props.row.count"/>
                           </q-td>
                         </template>
                       </q-table>
@@ -41,7 +41,8 @@
                   </q-card>
                 </q-expansion-item>
 
-                <q-expansion-item group="reservation" label="History" header-class="text-primary">
+                <q-expansion-item :hidden="!fullEdit" :disable="!fullEdit" group="reservation" label="History"
+                                  header-class="text-primary">
                   <q-card>
                     <q-card-section>
                       <q-table title="History" :rows="auditData" :columns="auditColumns">
@@ -69,6 +70,7 @@ import {ref} from 'vue';
 import {currency} from "boot/helper";
 import {date} from "quasar";
 import {api} from "boot/axios";
+import {useStore} from "vuex";
 
 const statusOptions = ["PENDING_PAYMENT", "RESERVED", "CHECKED_IN", "CANCELLED"]
 const ticketTypeColumns = [
@@ -116,9 +118,13 @@ export default {
       this.reservationData = this.reservation
       this.ticketTypeData = this.ticketTypes
 
-      api.get(`/api/admin/reservations/${this.reservationData.reservationId}/audit`)
-        .then(response => this.auditData = response.data)
-        .catch(error => alert(error))
+      if (this.fullEdit) {
+        api.get(`/api/admin/reservations/${this.reservationData.reservationId}/audit`)
+          .then(response => this.auditData = response.data)
+          .catch(error => alert(error))
+      } else {
+        this.auditData = [];
+      }
     },
     onSaveReservation() {
       this.$emit('save', this.reservationData)
@@ -127,9 +133,11 @@ export default {
       this.$emit('cancel')
     },
     onSelectPaymentRow(event, row, index) {
-      let data = JSON.parse(JSON.stringify(row))
-      data.index = index
-      this.$emit('edit-payment', data)
+      if (this.fullEdit) {
+        let data = JSON.parse(JSON.stringify(row))
+        data.index = index
+        this.$emit('edit-payment', data)
+      }
     },
     onAddNewPayment() {
       let data = {
@@ -152,11 +160,15 @@ export default {
       reservationData: ref({}),
       ticketTypeData: ref([]),
       auditData: ref([]),
+      fullEdit: ref(false),
       statusOptions,
       ticketTypeColumns,
       paymentColumns,
       auditColumns
     }
+  },
+  mounted() {
+    this.fullEdit = useStore().getters['auth/isAdmin']
   }
 }
 </script>

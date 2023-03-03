@@ -27,9 +27,9 @@ export default {
   name: "LoginUser",
   components: {GoogleSignin},
   methods: {
-    onAuth(token) {
-      console.log("Received token: " + token)
-      this.store.commit('auth/storeJwtToken', token)
+    onAuth(authentication) {
+      console.log(`Received authentication: ${JSON.stringify(authentication)}`)
+      this.store.commit('auth/storeAuthentication', authentication)
       this.$router.push('/reservations')
     }
   },
