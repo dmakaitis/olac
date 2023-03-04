@@ -77,6 +77,12 @@ public class PublicApiController {
         return reservationManager.getReservation(newReservation.getReservationId()).orElseThrow();
     }
 
+    @GetMapping("reservations/_available")
+    boolean checkTicketAvailability(@RequestParam long ticketCount) {
+        log.debug("Checking for available ticket count: {}", ticketCount);
+        return reservationManager.areTicketsAvailable(ticketCount);
+    }
+
     @Data
     @Builder
     public static class ClientConfiguration {

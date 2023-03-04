@@ -90,19 +90,23 @@
         <span class="text-h5" style="color: #475971;">Ticket Reservations:</span>
 
         <div>
-          <q-form class="q-gutter-lg" @submit="onSubmit">
+          <q-form greedy class="q-gutter-lg" @submit="onSubmit">
             <div class="row justify-center q-gutter-md">
               <q-input class="width-400" label="First Name *" v-model="firstName" lazy-rules
                        :rules="[val => !!val || 'First name is required']"/>
               <q-input class="width-400" label="Last Name *" v-model="lastName" lazy-rules
                        :rules="[val => !!val || 'Last name is required']"/>
               <q-input class="width-400" label="Email *" v-model="email" lazy-rules
-                       :rules="[val => !!val || 'Email is required']"/>
-              <q-input class="width-400" label="Phone" v-model="phone" mask="(###) ###-####"/>
-
+                       :rules="[val => !!val || 'Email is required', isValidEmail]"/>
+              <q-input class="width-400" label="Phone" v-model="phone" mask="(###) ###-####" lazy-rules
+                       :rules="[val => !val || val.length == 14 || 'Please enter your full phone number']"/>
               <q-input v-for="type in ticketTypes" :key="type.code" class="width-400"
                        :label="type.description + ' @ ' + currency(type.costPerTicket) + ' each'"
-                       v-model="type.count"/>
+                       v-model="type.count" type="number" lazy-rules :rules="[
+                         val => val !== null && val !== '' || 'Ticket count must be a number',
+                         val => val >= 0 || 'Must be zero or more',
+                         validateTicketsAvailable
+                       ]"/>
             </div>
 
             <div v-if="notEnoughTickets" class="error">Not enough tickets are available.</div>
@@ -296,18 +300,35 @@ export default {
     }
   },
   setup() {
+    const ticketTypes = ref([])
+
     return {
       activePage: ref(1),
       firstName: ref(''),
       lastName: ref(''),
       email: ref(''),
       phone: ref(''),
-      ticketTypes: ref([]),
+      ticketTypes,
       notEnoughTickets: ref(false),
       paymentMethod: ref('online'),
       reservationId: ref(''),
       reservationNumber: ref(0),
-      purchaseUnits: ref([])
+      purchaseUnits: ref([]),
+
+      isValidEmail(val) {
+        console.log(`Validating email: ${val}`)
+        const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
+        return emailPattern.test(val) || 'Enter a valid email address';
+      },
+      validateTicketsAvailable(val) {
+        let total = ticketTypes.value.reduce((sum, type) => sum = sum + +type.count, 0)
+        console.log(`Checking if tickets are available: ${total}`)
+        return new Promise((resolve) => {
+          api.get(`/api/public/reservations/_available?ticketCount=${total}`)
+            .then(response => resolve(response.data || 'Not enough tickets are available'))
+            .catch(error => resolve('Unable to verify tickets available. Try again later.'))
+        })
+      },
     }
   },
   mounted() {
