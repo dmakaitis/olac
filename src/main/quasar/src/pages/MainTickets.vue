@@ -298,10 +298,10 @@ export default {
   setup() {
     return {
       activePage: ref(1),
-      firstName: ref('John'),
-      lastName: ref('Doe'),
-      email: ref('john.doe@nowhere.com'),
-      phone: ref('(123) 456-7890'),
+      firstName: ref(''),
+      lastName: ref(''),
+      email: ref(''),
+      phone: ref(''),
       ticketTypes: ref([]),
       notEnoughTickets: ref(false),
       paymentMethod: ref('online'),
@@ -314,7 +314,7 @@ export default {
     api.get("/api/public/ticket-types")
       .then(response => {
         this.ticketTypes = response.data
-        this.ticketTypes.forEach(t => t.count = 2)
+        this.ticketTypes.forEach(t => t.count = 0)
       })
 
     api.get("/api/public/new-reservation-id")

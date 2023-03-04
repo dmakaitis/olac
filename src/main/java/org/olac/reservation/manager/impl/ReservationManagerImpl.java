@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.engine.TemplateEngine;
-import org.olac.reservation.exception.OlacException;
 import org.olac.reservation.manager.AdministrationManager;
 import org.olac.reservation.manager.ReservationManager;
 import org.olac.reservation.resource.NotificationAccess;
@@ -47,15 +46,6 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
     @Override
     public List<TicketType> getTicketTypes() {
         return ticketDatastoreAccess.getTicketTypes();
-    }
-
-    @Override
-    public long createReservation(Reservation reservation) {
-        if (!areTicketsAvailable(getTicketCount(reservation))) {
-            throw new OlacException("Temporary exception");
-        }
-
-        return reservationDatastoreAccess.createReservation(reservation);
     }
 
     @Override
@@ -136,25 +126,17 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
     }
 
     @Override
-    public void sendPaymentReminder(String reservationId) {
-        if (isBlank(reservationId)) {
-            return;
-        }
-
-        Optional<Reservation> reservation = reservationDatastoreAccess.getReservation(reservationId);
-        reservation.ifPresent(r -> {
-            String message = templateEngine.createPaymentInstructions(r);
-            notificationAccess.sentNotification(r.getEmail(), "Reservation Confirmation", message);
-        });
-    }
-
-    @Override
     public void deleteTicketType(String ticketTypeCode) {
         ticketDatastoreAccess.deleteTicketType(ticketTypeCode);
     }
 
     @Override
     public Reservation saveReservation(Reservation reservation) {
+        return saveReservation(reservation, true);
+    }
+
+    @Override
+    public Reservation saveReservation(Reservation reservation, boolean sendNotification) {
         // Make sure we document who entered any new payments and when:
         String currentUser = securityUtility.getCurrentUserName();
         reservation.getPayments().stream()
@@ -191,7 +173,34 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
             reservation.setReservationTimestamp(new Date());
         }
 
+        // Send notifications if the reservation status has changed and notifications were requested
+        if (sendNotification && reservationStatusHasChanged(reservation)) {
+            switch (reservation.getStatus()) {
+                case PENDING_PAYMENT:
+                    notificationAccess.sentNotification(
+                            reservation.getEmail(),
+                            "Reservation Payment Reminder",
+                            templateEngine.createPaymentInstructions(reservation));
+                    break;
+                case RESERVED:
+                    notificationAccess.sentNotification(
+                            reservation.getEmail(),
+                            "Reservation Confirmation",
+                            templateEngine.createPaymentReceivedConfirmation(reservation));
+                    break;
+                default:
+                    log.debug("No notification sent for current reservation status: {}", reservation.getStatus());
+            }
+        }
+
         return reservationDatastoreAccess.saveReservation(reservation);
+    }
+
+    private boolean reservationStatusHasChanged(Reservation reservation) {
+        return reservationDatastoreAccess.getReservation(reservation.getReservationId())
+                .map(Reservation::getStatus)
+                .map(status -> status != reservation.getStatus())
+                .orElse(true);
     }
 
     private static double getPaymentAmount(String reservationId, CreateOrderResponse response) {
@@ -212,12 +221,6 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
     public void addPayment(String reservationId, Payment payment) {
         payment.setEnteredBy(securityUtility.getCurrentUserName());
         reservationDatastoreAccess.addPaymentToReservation(reservationId, payment);
-    }
-
-    private long getTicketCount(Reservation reservation) {
-        return reservation.getTicketCounts().stream()
-                .mapToLong(TicketCounts::getCount)
-                .sum();
     }
 
 }

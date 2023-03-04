@@ -29,11 +29,13 @@ public class AdminApiController {
 
     @PostMapping("ticket-types")
     void saveTicketType(@RequestBody TicketType type) {
+        log.debug("Saving ticket type: {}", type);
         administrationManager.saveTicketType(type);
     }
 
     @DeleteMapping("ticket-types")
     void deleteTicketType(@RequestParam String code) {
+        log.debug("Deleting ticket type: {}", code);
         administrationManager.deleteTicketType(code);
     }
 
@@ -55,7 +57,7 @@ public class AdminApiController {
 
     @PutMapping("reservations/{reservationId}")
     public void saveReservation(@PathVariable String reservationId, @RequestBody Reservation reservation) {
-        log.debug("Updating reservation {}", reservationId);
+        log.debug("Updating reservation {} => {}", reservationId, reservation);
         administrationManager.saveReservation(reservation);
     }
 
@@ -69,6 +71,7 @@ public class AdminApiController {
 
     @PostMapping("accounts")
     Account createAccount(@RequestBody NewAccountRequest request) {
+        log.debug("Creating new account: {}", request);
         Account rVal = securityUtility.createAccount(request.getUsername(), request.getEmail(), request.isAdmin());
         if (rVal.isEnabled() != request.isEnabled()) {
             rVal.setEnabled(request.isEnabled());
@@ -80,6 +83,7 @@ public class AdminApiController {
 
     @PutMapping("accounts/{username}")
     void updateAccount(@PathVariable String username, @RequestBody UpdateAccountRequest request) {
+        log.debug("Updating account: {} => {}", username, request);
         securityUtility.findAccount(username).ifPresent(account -> {
             if (request.getAdmin() != null) {
                 account.setAdmin(request.getAdmin());

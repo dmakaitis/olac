@@ -9,6 +9,7 @@ import org.olac.reservation.resource.model.Reservation
 import org.olac.reservation.resource.model.TicketCounts
 import org.olac.reservation.resource.model.TicketType
 import org.olac.reservation.utility.AuditUtility
+import org.olac.reservation.utility.FormatUtility
 import spock.lang.Specification
 
 import java.util.function.Supplier
@@ -18,9 +19,10 @@ class DatastoreAccessTest extends Specification {
     def ticketTypeRepository = Mock(TicketTypeRepository)
     def reservationRepository = Mock(ReservationRepository)
     def auditUtility = Mock(AuditUtility)
+    def formatUtility = Mock(FormatUtility)
     def codeSupplier = Mock(Supplier)
 
-    def service = new DatastoreAccess(ticketTypeRepository, reservationRepository, auditUtility, codeSupplier)
+    def service = new DatastoreAccess(ticketTypeRepository, reservationRepository, auditUtility, formatUtility, codeSupplier)
 
     def "Get ticket types should return an empty list if no types have been defined"() {
         given:

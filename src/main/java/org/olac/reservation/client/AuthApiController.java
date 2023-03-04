@@ -25,7 +25,7 @@ import java.util.List;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
-public class AuthController {
+public class AuthApiController {
 
     private final SecurityUtility securityUtility;
     private final JwtUtility jwtUtility;
@@ -33,6 +33,7 @@ public class AuthController {
 
     @GetMapping("who-am-i")
     public ResponseEntity<WhoAmIResponse> whoAmI() {
+        log.debug("Retrieving current user identity");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return ResponseEntity.ok(new WhoAmIResponse(
                 authentication.getName(),
@@ -44,6 +45,7 @@ public class AuthController {
 
     @PostMapping("google-id")
     public ResponseEntity<AuthenticationResponse> authenticateUsingGoogleIdentity(@RequestBody CredentialResponse response) throws GeneralSecurityException, IOException {
+        log.debug("Authenticating using Google Identity: {}", response);
         ValidateUserResponse validateUserResponse = securityUtility.validateUserWithGoogleIdentity(response.getCredential());
         UserDetails userDetails = userDetailsService.loadUserByUsername(validateUserResponse.getUsername());
 

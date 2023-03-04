@@ -56,6 +56,8 @@ public class PublicApiController {
 
     @PostMapping("reservations")
     Reservation createReservation(@RequestBody NewReservationRequest request) {
+        log.debug("Creating a new reservation: {}", request);
+
         Reservation newReservation = new Reservation();
         newReservation.setReservationId(request.getReservationId());
         newReservation.setFirstName(request.getFirstName());
@@ -66,7 +68,7 @@ public class PublicApiController {
 
         newReservation.setStatus(ReservationStatus.PENDING_PAYMENT);
 
-        newReservation = reservationManager.saveReservation(newReservation);
+        newReservation = reservationManager.saveReservation(newReservation, request.getPayPayPayment() == null);
 
         if (request.getPayPayPayment() != null) {
             reservationManager.validateAndAddPayment(newReservation.getReservationId(), request.getPayPayPayment().getId());

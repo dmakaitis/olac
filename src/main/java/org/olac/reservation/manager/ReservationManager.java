@@ -11,8 +11,6 @@ public interface ReservationManager {
 
     List<TicketType> getTicketTypes();
 
-    long createReservation(Reservation reservation);
-
     List<Reservation> getReservations();
 
     Optional<Reservation> getReservation(String reservationId);
@@ -23,8 +21,6 @@ public interface ReservationManager {
 
     void addPayment(String reservationId, Payment payment);
 
-    void sendPaymentReminder(String reservationId);
-
-    Reservation saveReservation(Reservation reservation);
+    Reservation saveReservation(Reservation reservation, boolean sendNotification);
 
 }

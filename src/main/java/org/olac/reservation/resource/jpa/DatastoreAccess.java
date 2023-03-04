@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.olac.reservation.client.PublicController;
 import org.olac.reservation.resource.ReservationDatastoreAccess;
 import org.olac.reservation.resource.TicketDatastoreAccess;
 import org.olac.reservation.resource.jpa.entity.PaymentEntity;
@@ -15,6 +14,7 @@ import org.olac.reservation.resource.jpa.repository.ReservationRepository;
 import org.olac.reservation.resource.jpa.repository.TicketTypeRepository;
 import org.olac.reservation.resource.model.*;
 import org.olac.reservation.utility.AuditUtility;
+import org.olac.reservation.utility.FormatUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,12 +35,13 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     private final TicketTypeRepository ticketTypeRepository;
     private final ReservationRepository reservationRepository;
     private final AuditUtility auditUtility;
+    private final FormatUtility formatUtility;
 
     private final Supplier<String> codeSupplier;
 
     @Autowired
-    public DatastoreAccess(TicketTypeRepository ticketTypeRepository, ReservationRepository reservationRepository, AuditUtility auditUtility) {
-        this(ticketTypeRepository, reservationRepository, auditUtility, () -> UUID.randomUUID().toString());
+    public DatastoreAccess(TicketTypeRepository ticketTypeRepository, ReservationRepository reservationRepository, AuditUtility auditUtility, FormatUtility formatUtility) {
+        this(ticketTypeRepository, reservationRepository, auditUtility, formatUtility, () -> UUID.randomUUID().toString());
     }
 
     @Override
@@ -102,7 +103,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
             reservationRepository.save(e);
 
             auditUtility.logReservationEvent(reservationId, String.format("Added payment of %s, paid  by %s",
-                    PublicController.format(payment.getAmount()),
+                    formatUtility.formatCurrencty(payment.getAmount()),
                     payment.getMethod()));
         });
     }
