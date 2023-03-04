@@ -92,17 +92,17 @@
         <div>
           <q-form greedy class="q-gutter-lg" @submit="onSubmit">
             <div class="row justify-center q-gutter-md">
-              <q-input class="width-400" label="First Name *" v-model="firstName" lazy-rules
+              <q-input class="width-400" label="First Name *" v-model.trim="firstName" lazy-rules
                        :rules="[val => !!val || 'First name is required']"/>
-              <q-input class="width-400" label="Last Name *" v-model="lastName" lazy-rules
+              <q-input class="width-400" label="Last Name *" v-model.trim="lastName" lazy-rules
                        :rules="[val => !!val || 'Last name is required']"/>
-              <q-input class="width-400" label="Email *" v-model="email" lazy-rules
+              <q-input class="width-400" label="Email *" v-model.trim="email" lazy-rules
                        :rules="[val => !!val || 'Email is required', isValidEmail]"/>
               <q-input class="width-400" label="Phone" v-model="phone" mask="(###) ###-####" lazy-rules
                        :rules="[val => !val || val.length == 14 || 'Please enter your full phone number']"/>
               <q-input v-for="type in ticketTypes" :key="type.code" class="width-400"
                        :label="type.description + ' @ ' + currency(type.costPerTicket) + ' each'"
-                       v-model="type.count" type="number" lazy-rules :rules="[
+                       v-model.number="type.count" type="number" lazy-rules :rules="[
                          val => val !== null && val !== '' || 'Ticket count must be a number',
                          val => val >= 0 || 'Must be zero or more',
                          validateTicketsAvailable
