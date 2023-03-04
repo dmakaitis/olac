@@ -71,7 +71,7 @@ export default {
         .catch(error => alert(error))
     },
     loadTicketTypeData() {
-      api.get('/api/admin/ticket-types')
+      api.get('/api/public/ticket-types')
         .then(response => {
           this.state.ticketTypes = response.data;
           this.state.ticketTypes.forEach(type => type.count = 0)

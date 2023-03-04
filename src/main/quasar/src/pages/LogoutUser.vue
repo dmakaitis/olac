@@ -30,7 +30,7 @@ export default {
   name: "LogoutUser",
   methods: {
     onConfirm() {
-      this.$router.push('/login')
+      this.$router.push('/main/about')
     }
   },
   setup() {

@@ -186,6 +186,11 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
             }
         }
 
+        // If we don't have a reservation timestamp, set it now...
+        if (reservation.getReservationTimestamp() == null) {
+            reservation.setReservationTimestamp(new Date());
+        }
+
         return reservationDatastoreAccess.saveReservation(reservation);
     }
 

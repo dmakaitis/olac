@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf" class="olac-font">
+  <q-layout view="hHh lpR fFf">
 
     <q-header elevated class="bg-primary">
       <div class="q-mx-auto text-center">
@@ -12,7 +12,7 @@
         <q-toolbar-title>
           <q-tabs align="center" no-caps>
             <q-route-tab to="/main/about" replace label="About Us"/>
-            <q-route-tab href="/tickets" target="_top" label="OLAC 70th Anniversary Reservations"/>
+            <q-route-tab to="/main/tickets" target="_top" label="OLAC 70th Anniversary Reservations"/>
             <q-route-tab v-if="isLoggedIn" to="/main/reservations" replace label="Reservations"/>
             <q-route-tab v-if="isAdmin" to="/admin/users" replace label="Admin"/>
           </q-tabs>

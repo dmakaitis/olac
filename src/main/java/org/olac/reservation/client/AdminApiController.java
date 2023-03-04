@@ -27,14 +27,6 @@ public class AdminApiController {
     private final SecurityUtility securityUtility;
     private final AuditUtility auditUtility;
 
-    @GetMapping("ticket-types")
-    List<TicketType> getTicketTypes() {
-        log.debug("Retrieving ticket types");
-        return administrationManager.getTicketTypes().stream()
-                .sorted(comparing(TicketType::getCostPerTicket).reversed())
-                .toList();
-    }
-
     @PostMapping("ticket-types")
     void saveTicketType(@RequestBody TicketType type) {
         administrationManager.saveTicketType(type);

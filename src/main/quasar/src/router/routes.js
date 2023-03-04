@@ -1,5 +1,6 @@
 import MainLayout from "layouts/MainLayout.vue";
 import MainAbout from "pages/MainAbout.vue";
+import MainTickets from "pages/MainTickets.vue";
 
 import AdminLayout from "layouts/AdminLayout.vue";
 import AdminTicketTypes from "pages/AdminTicketTypes.vue";
@@ -31,6 +32,10 @@ const routes = [
       {
         path: 'about',
         component: MainAbout
+      },
+      {
+        path: 'tickets',
+        component: MainTickets
       },
       {
         path: 'reservations',

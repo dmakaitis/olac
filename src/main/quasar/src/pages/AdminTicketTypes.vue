@@ -103,7 +103,7 @@ export default {
     },
 
     loadTicketTypeData() {
-      api.get('/api/admin/ticket-types')
+      api.get('/api/public/ticket-types')
         .then(response => this.state.rows = response.data)
         .catch(error => alert(error))
     }

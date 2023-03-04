@@ -1,5 +1,5 @@
 <template>
-  <q-page class="bg-primary">
+  <q-page class="bg-primary olac-font">
     <div class="container">
       <ArticleWithImages title="Omaha Lithuanian-American Community" right-images="/img/olac-2007.jpg">
         <p>For multiple generations, this organization has sustained its foundational existence to maintain Lithuanian
