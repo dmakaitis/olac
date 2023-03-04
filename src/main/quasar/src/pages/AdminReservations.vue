@@ -7,7 +7,7 @@
     <q-btn label="Delete Selected Reservation"/>
   </q-page>
 
-  <ReservationDialog :full-edit="isAdmin" :reservation="detail.row" :ticket-types="state.ticketTypes"
+  <ReservationDialog :reservation="detail.row" :ticket-types="state.ticketTypes"
                      v-model="showDetail" @save="onSaveReservation" @cancel="onCancel" @edit-payment="onEditPayment"/>
   <PaymentDialog :payment="selectedPayment" v-model="showPaymentDialog" @save="onSavePayment"
                  @cancel="onCancelPayment"/>

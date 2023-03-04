@@ -1,8 +1,11 @@
 import MainLayout from "layouts/MainLayout.vue";
+import MainAbout from "pages/MainAbout.vue";
+
 import AdminLayout from "layouts/AdminLayout.vue";
 import AdminTicketTypes from "pages/AdminTicketTypes.vue";
 import AdminReservations from "pages/AdminReservations.vue";
 import AdminUsers from "pages/AdminUsers.vue";
+
 import LoginUser from "pages/LoginUser.vue";
 import LogoutUser from "pages/LogoutUser.vue";
 
@@ -19,12 +22,16 @@ const routes = [
   },
   {
     path: '/',
-    redirect: {path: '/main/reservations'}
+    redirect: {path: '/main/about'}
   },
   {
     path: '/main',
     component: MainLayout,
     children: [
+      {
+        path: 'about',
+        component: MainAbout
+      },
       {
         path: 'reservations',
         component: AdminReservations,

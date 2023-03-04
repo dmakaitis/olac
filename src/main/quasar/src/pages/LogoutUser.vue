@@ -43,7 +43,7 @@ export default {
     }
   },
   mounted() {
-    this.store.commit('auth/storeJwtToken', '')
+    this.store.commit('auth/storeAuthentication', {})
   }
 }
 </script>
