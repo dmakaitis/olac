@@ -38,5 +38,12 @@ export default route(function ({store /*, ssrContext */}) {
     }
   })
 
+  Router.afterEach((to, from, next) => {
+    gtag('event', 'page_view', {
+      page_title: to.name,
+      page_location: to.fullPath
+    })
+  })
+
   return Router
 })

@@ -7,7 +7,6 @@ import {loadPayPalLibrary} from "boot/paypal";
 export default boot(async ({app, store}) => {
   api.get('/api/public/client-config')
     .then(response => {
-      console.log(`Storing config: ${JSON.stringify(response.data)}`);
       store.commit('config/storeConfig', response.data);
 
       loadPayPalLibrary(store)

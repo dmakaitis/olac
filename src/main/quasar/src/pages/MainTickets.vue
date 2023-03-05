@@ -11,7 +11,8 @@
             <p>
               <b class="text-h5" style="color: #d4bd9d;">The Belvedere</b><br/>
               201 East 1st Street<br/>
-              Papillion, NE 68046
+              Papillion, NE 68046<br/>
+              <b class="text-h6" style="color: #d4bd9d;">Saturday, April 22<sup>nd</sup></b>
             </p>
 
             <hr/>
@@ -100,13 +101,14 @@
                        :rules="[val => !!val || 'Email is required', isValidEmail]"/>
               <q-input class="width-400" label="Phone" v-model="phone" mask="(###) ###-####" lazy-rules
                        :rules="[val => !val || val.length == 14 || 'Please enter your full phone number']"/>
-              <q-input v-for="type in ticketTypes" :key="type.code" class="width-400"
+              <q-input v-for="type in ticketTypes" :key="type.code" ref="ticketFields" class="width-400"
                        :label="type.description + ' @ ' + currency(type.costPerTicket) + ' each'"
                        v-model.number="type.count" type="number" lazy-rules :rules="[
                          val => val !== null && val !== '' || 'Ticket count must be a number',
                          val => val >= 0 || 'Must be zero or more',
+                         atLeastOneTicket,
                          validateTicketsAvailable
-                       ]"/>
+                       ]" @focus="onTicketFieldFocus"/>
             </div>
 
             <div v-if="notEnoughTickets" class="error">Not enough tickets are available.</div>
@@ -160,7 +162,7 @@
 
       <div class="text-center q-gutter-lg">
         <q-btn label="Yes" @click="onConfirmation"/>
-        <q-btn label="No" @click="activePage = 1"/>
+        <q-btn label="No" @click="onMakeOrderChanges"/>
       </div>
     </div>
 
@@ -236,8 +238,33 @@ export default {
   components: {PayPalButton},
   methods: {
     currency,
+    sendGtagEvent(eventType, transactionId = null) {
+      console.log(`Tracking event: ${eventType}`)
+
+      gtag('event', eventType, {
+        currency: 'USD',
+        transaction_id: transactionId,
+        value: this.getGrandTotal(),
+        items: this.ticketTypes
+          .map(t => {
+            return {
+              item_name: t.description,
+              price: t.costPerTicket,
+              quantity: t.count
+            }
+          })
+      })
+    },
     onSubmit() {
+      this.sendGtagEvent('add_to_cart')
+      this.sendGtagEvent('view_cart')
+
       this.activePage = 2
+    },
+    onMakeOrderChanges() {
+      this.sendGtagEvent('remove_from_cart')
+
+      this.activePage = 1
     },
     getGrandTotal() {
       return this.ticketTypes
@@ -245,6 +272,8 @@ export default {
         .reduce((a, b) => a + b, 0)
     },
     onConfirmation() {
+      this.sendGtagEvent('begin_checkout')
+
       this.purchaseUnits = [{
         "amount": {
           "value": this.getGrandTotal(),
@@ -254,13 +283,15 @@ export default {
           "currency_code": "USD"
         },
         "description": "Omaha Lithuanian Community's 70th Anniversary Celebration on Saturday, April 22, 2023",
-        "items": this.ticketTypes.map(t => {
-          return {
-            "name": t.description,
-            "quantity": `${t.count}`,
-            "unit_amount": {"value": t.costPerTicket, "currency_code": "USD"}
-          }
-        }),
+        "items": this.ticketTypes
+          .filter(t => t.count > 0)
+          .map(t => {
+            return {
+              "name": t.description,
+              "quantity": `${t.count}`,
+              "unit_amount": {"value": t.costPerTicket, "currency_code": "USD"}
+            }
+          }),
         "custom_id": this.reservationId,
         "soft_descriptor": "70th Anniversary"
       }]
@@ -268,6 +299,8 @@ export default {
       this.activePage = 3
     },
     onPayPayPaymentAccepted(orderData) {
+      this.sendGtagEvent('purchase', this.reservationId)
+
       api.post("/api/public/reservations", {
         "reservationId": this.reservationId,
         "firstName": this.firstName,
@@ -284,6 +317,8 @@ export default {
         .then(response => this.activePage = 4)
     },
     onPayByCheck() {
+      this.sendGtagEvent('purchase', this.reservationId)
+
       api.post("/api/public/reservations", {
         "reservationId": this.reservationId,
         "firstName": this.firstName,
@@ -297,6 +332,9 @@ export default {
           })
       })
         .then(response => this.activePage = 5)
+    },
+    onTicketFieldFocus() {
+      this.$refs.ticketFields.forEach(f => f.resetValidation())
     }
   },
   setup() {
@@ -316,19 +354,21 @@ export default {
       purchaseUnits: ref([]),
 
       isValidEmail(val) {
-        console.log(`Validating email: ${val}`)
         const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
         return emailPattern.test(val) || 'Enter a valid email address';
       },
       validateTicketsAvailable(val) {
         let total = ticketTypes.value.reduce((sum, type) => sum = sum + +type.count, 0)
-        console.log(`Checking if tickets are available: ${total}`)
         return new Promise((resolve) => {
           api.get(`/api/public/reservations/_available?ticketCount=${total}`)
             .then(response => resolve(response.data || 'Not enough tickets are available'))
             .catch(error => resolve('Unable to verify tickets available. Try again later.'))
         })
       },
+      atLeastOneTicket(val) {
+        let total = ticketTypes.value.reduce((sum, type) => sum = sum + +type.count, 0)
+        return total > 0 || 'You must order at least one ticket'
+      }
     }
   },
   mounted() {

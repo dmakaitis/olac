@@ -12,32 +12,37 @@ import LogoutUser from "pages/LogoutUser.vue";
 
 const routes = [
   {
-    name: 'login',
+    name: 'Login',
     path: '/login',
     component: LoginUser
   },
   {
-    name: 'logout',
+    name: 'Logout',
     path: '/logout',
     component: LogoutUser
   },
   {
+    name: 'Home',
     path: '/',
     redirect: {path: '/main/about'}
   },
   {
+    name: 'Main',
     path: '/main',
     component: MainLayout,
     children: [
       {
+        name: 'About OLAC',
         path: 'about',
         component: MainAbout
       },
       {
+        name: 'Event Information and Registration',
         path: 'tickets',
         component: MainTickets
       },
       {
+        name: 'Reservation Administration',
         path: 'reservations',
         component: AdminReservations,
         meta: {
@@ -47,6 +52,7 @@ const routes = [
     ]
   },
   {
+    name: 'Admin',
     path: '/admin',
     component: AdminLayout,
     meta: {
@@ -54,10 +60,12 @@ const routes = [
     },
     children: [
       {
+        name: 'Ticket Types Administration',
         path: 'ticket-types',
         component: AdminTicketTypes
       },
       {
+        name: 'User Administration',
         path: 'users',
         component: AdminUsers
       }

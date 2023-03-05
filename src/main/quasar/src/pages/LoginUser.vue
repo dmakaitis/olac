@@ -30,6 +30,11 @@ export default {
     onAuth(authentication) {
       console.log(`Received authentication: ${JSON.stringify(authentication)}`)
       this.store.commit('auth/storeAuthentication', authentication)
+
+      gtag('event', 'login', {
+        method: 'Google'
+      })
+
       this.$router.push('/main/about')
     }
   },

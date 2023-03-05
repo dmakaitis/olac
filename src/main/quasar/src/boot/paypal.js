@@ -16,7 +16,6 @@ function loadScript(url, className) {
 function loadPayPalLibrary(store) {
   let config = store.state.config.config
   if (config && config.payPal && !window.paypal) {
-    console.log(`Client config: ${JSON.stringify(config)}`)
     loadScript(`https://www.paypal.com/sdk/js?client-id=${config.payPal.clientId}&enable-funding=venmo&currency=USD`, 'payPalScript')
   }
 }
