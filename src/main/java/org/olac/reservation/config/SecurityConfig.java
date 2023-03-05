@@ -35,9 +35,9 @@ public class SecurityConfig {
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/api/admin/**", "/admin/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/login", "/api/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/api/event/**").hasAnyRole("EVENT_COORDINATOR", "ADMIN")
+                        .requestMatchers("/api/public/**", "/api/auth/**").permitAll()
                         .anyRequest().permitAll());
 
         return http.build();

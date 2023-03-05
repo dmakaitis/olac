@@ -1,16 +1,20 @@
 <template>
   <q-page padding class="q-gutter-md">
     <q-table title="Reservations" :rows="state.rows" :columns="columns" row-key="reservationId" @row-click="onRowClick"
-             selection="single" v-model:selected="selected">
+             :selection="isAdmin() ? 'single' : 'none'" v-model:selected="selected">
     </q-table>
-    <q-btn label="New Reservation"/>
-    <q-btn label="Delete Selected Reservation"/>
+    <q-btn label="New Reservation" @click="onNewReservation"/>
+    <q-btn v-if="isAdmin()" label="Delete Selected Reservation" @click="onDelete"/>
   </q-page>
 
   <ReservationDialog :reservation="detail.row" :ticket-types="state.ticketTypes"
                      v-model="showDetail" @save="onSaveReservation" @cancel="onCancel" @edit-payment="onEditPayment"/>
   <PaymentDialog :payment="selectedPayment" v-model="showPaymentDialog" @save="onSavePayment"
                  @cancel="onCancelPayment"/>
+  <ConfirmationDialog v-model="confirmDelete" @yes="onConfirmDelete">
+    Are you sure you want to delete reservation number <b>{{ selected[0].id }}</b> for <b>{{ selected[0].firstName }}
+    {{ selected[0].lastName }}</b>'?
+  </ConfirmationDialog>
 </template>
 
 <script>
@@ -19,9 +23,20 @@ import {currency} from "boot/helper";
 import {api} from 'boot/axios.js';
 import ReservationDialog from "components/ReservationDialog.vue";
 import PaymentDialog from "components/PaymentDialog.vue";
+import {useStore} from "vuex";
+import {date} from 'quasar'
+import ConfirmationDialog from "components/ConfirmationDialog.vue";
 
 const columns = [
   {name: 'id', label: 'Reservation Number', field: row => row.id, align: 'left', sortable: true},
+  {
+    name: 'timestamp',
+    label: 'Date/Time Reserved',
+    field: row => row.reservationTimestamp,
+    align: 'left',
+    format: val => date.formatDate(val, 'MMM D, YYYY HH:mm:ss'),
+    sortable: true
+  },
   {name: 'first-name', label: 'First Name', field: row => row.firstName, align: 'left'},
   {name: 'last-name', label: 'Last Name', field: row => row.lastName, align: 'left', sortable: true},
   {name: 'email', label: 'Email', field: row => row.email, align: 'left', sortable: true},
@@ -45,7 +60,7 @@ const columns = [
 
 export default {
   name: 'AdminReservations',
-  components: {ReservationDialog, PaymentDialog},
+  components: {ReservationDialog, PaymentDialog, ConfirmationDialog},
   methods: {
     onRowClick(event, row, index) {
       this.detail.row = row;
@@ -61,12 +76,39 @@ export default {
 
       this.showDetail = true
     },
+    onNewReservation() {
+      this.detail.row = {
+        id: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        status: 'PENDING_PAYMENT',
+        payments: [],
+        ticketCounts: []
+      }
+
+      this.state.ticketTypes.forEach(type => {
+        type.count = 0
+      })
+
+      this.showDetail = true
+    },
     onCancel() {
       this.loadReservations();
       this.showDetail = false;
     },
+    onDelete() {
+      this.confirmDelete = true
+    },
+    onConfirmDelete() {
+      this.confirmDelete = false
+      api.delete(`/api/admin/reservations/${this.selected[0].reservationId}`)
+        .then(response => this.loadReservations())
+        .catch(error => alert(error))
+    },
     loadReservations() {
-      api.get('/api/admin/reservations')
+      api.get('/api/event/reservations')
         .then(response => this.state.rows = response.data)
         .catch(error => alert(error))
     },
@@ -92,8 +134,12 @@ export default {
         .map(t => t.count * t.costPerTicket)
         .reduce((t, n) => t + n);
 
+      if (reservationData.id == '') {
+        reservationData.id = null
+      }
+
       console.log(`Saving reservation: ${JSON.stringify(reservationData)}`);
-      api.put(`/api/admin/reservations/${this.detail.row.reservationId}`, reservationData)
+      api.put(`/api/event/reservations/${this.detail.row.reservationId}`, reservationData)
         .then(response => this.loadReservations())
         .catch(error => alert(error));
 
@@ -123,19 +169,25 @@ export default {
         });
       }
       this.showPaymentDialog = false;
+    },
+    isAdmin() {
+      return this.store.getters['auth/isAdmin']
     }
   },
   setup() {
+    const store = useStore()
     const state = reactive({rows: [], ticketTypes: []})
 
     return {
+      store,
       columns,
       state,
       showDetail: ref(false),
       detail: reactive({}),
       selected: ref([]),
       selectedPayment: ref({}),
-      showPaymentDialog: ref(false)
+      showPaymentDialog: ref(false),
+      confirmDelete: ref(false)
     }
   },
   mounted() {

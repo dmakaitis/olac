@@ -16,10 +16,7 @@ import org.olac.reservation.resource.paypal.model.PurchaseUnit;
 import org.olac.reservation.utility.SecurityUtility;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;
@@ -131,8 +128,36 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
     }
 
     @Override
+    public void deleteReservation(String reservationId) {
+        reservationDatastoreAccess.deleteReservation(reservationId);
+    }
+
+    @Override
     public Reservation saveReservation(Reservation reservation) {
-        return saveReservation(reservation, true);
+        if (securityUtility.isCurrentUserAdmin()) {
+            return saveReservation(reservation, true);
+        }
+
+        // If the user is not an admin, they can only save the full reservation if it doesn't already exist
+        Optional<Reservation> oldReservationOptional = reservationDatastoreAccess.getReservation(reservation.getReservationId());
+        if (oldReservationOptional.isEmpty()) {
+            return saveReservation(reservation, true);
+        }
+
+        // Non administrators can only add new payments...
+        Reservation oldReservation = oldReservationOptional.get();
+        List<Payment> payments = new ArrayList<>(oldReservation.getPayments());
+        int startPaymentsSize = payments.size();
+        reservation.getPayments().stream()
+                .filter(p -> p.getId() == null)
+                .forEach(payments::add);
+
+        if (startPaymentsSize != payments.size()) {
+            oldReservation.setPayments(payments);
+            return saveReservation(oldReservation, true);
+        }
+
+        return oldReservation;
     }
 
     @Override

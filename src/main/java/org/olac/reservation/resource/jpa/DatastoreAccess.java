@@ -68,8 +68,14 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     @Override
     @Transactional
     public void deleteTicketType(String ticketTypeCode) {
-        Optional<TicketTypeEntity> type = ticketTypeRepository.findByCode(ticketTypeCode);
-        type.ifPresent(ticketTypeRepository::delete);
+        ticketTypeRepository.findByCode(ticketTypeCode)
+                .ifPresent(ticketTypeRepository::delete);
+    }
+
+    @Override
+    public void deleteReservation(String reservationId) {
+        reservationRepository.findByReservationId(reservationId)
+                .ifPresent(reservationRepository::delete);
     }
 
     @Override
@@ -111,6 +117,10 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     @Override
     @Transactional
     public Optional<Reservation> getReservation(String reservationId) {
+        if (isBlank(reservationId)) {
+            return Optional.empty();
+        }
+
         return reservationRepository.findByReservationId(reservationId)
                 .map(this::toReservation);
     }
@@ -291,6 +301,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     private Payment toPayment(PaymentEntity entity) {
         return Payment.builder()
+                .id(entity.getId())
                 .amount(entity.getAmount())
                 .status(entity.getStatus())
                 .method(entity.getMethod())

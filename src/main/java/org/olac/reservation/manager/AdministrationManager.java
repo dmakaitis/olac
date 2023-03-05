@@ -17,4 +17,6 @@ public interface AdministrationManager {
 
     Reservation saveReservation(Reservation reservation);
 
+    void deleteReservation(String reservationId);
+
 }

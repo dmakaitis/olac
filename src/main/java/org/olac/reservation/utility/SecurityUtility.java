@@ -20,4 +20,6 @@ public interface SecurityUtility {
 
     ValidateUserResponse validateUserWithGoogleIdentity(String credential);
 
+    boolean isCurrentUserAdmin();
+
 }

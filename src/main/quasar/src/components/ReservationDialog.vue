@@ -6,11 +6,16 @@
           <q-card-section horizontal>
             <q-card-section class="q-gutter-md">
               <q-input readonly v-model="reservationData.id" label="Reservation Number"/>
-              <q-input :readonly="!fullEdit" v-model="reservationData.firstName" label="First Name"/>
-              <q-input :readonly="!fullEdit" v-model="reservationData.lastName" label="Last Name"/>
-              <q-input :readonly="!fullEdit" v-model="reservationData.email" label="Email"/>
-              <q-input :readonly="!fullEdit" v-model="reservationData.phone" label="Phone"/>
-              <q-select :readonly="!fullEdit" v-model="reservationData.status" label="Status" :options="statusOptions"/>
+              <q-input :readonly="!isFullEdit()" v-model.trim="reservationData.firstName" label="First Name" lazy-rules
+                       :rules="[val => !!val || 'First name is required']"/>
+              <q-input :readonly="!isFullEdit()" v-model.trim="reservationData.lastName" label="Last Name" lazy-rules
+                       :rules="[val => !!val || 'Last name is required']"/>
+              <q-input :readonly="!isFullEdit()" v-model.trim="reservationData.email" label="Email" lazy-rules
+                       :rules="[val => !!val || 'Email is required', isValidEmail]"/>
+              <q-input :readonly="!isFullEdit()" v-model="reservationData.phone" label="Phone" mask="(###) ###-####"
+                       lazy-rules :rules="[val => !val || val.length == 14 || 'Please enter your full phone number']"/>
+              <q-select :readonly="!isFullEdit()" v-model="reservationData.status" label="Status"
+                        :options="statusOptions"/>
             </q-card-section>
             <q-card-section>
               <q-list bordered>
@@ -22,7 +27,11 @@
                                row-key="code">
                         <template #body-cell-count="props">
                           <q-td :props="props">
-                            <q-input :readonly="!fullEdit" v-model="props.row.count"/>
+                            <q-input :readonly="!isFullEdit()" v-model.number="props.row.count" lazy-rules
+                                     :rules="[
+                                       val => val !== null && val !== '' || 'Ticket count must be a number',
+                                       val => val >= 0 || 'Must be zero or more'
+                                     ]"/>
                           </q-td>
                         </template>
                       </q-table>
@@ -55,7 +64,7 @@
           </q-card-section>
           <q-card-section>
             <div>
-              <q-btn v-close-popup label="Save" type="submit" color="primary"/>
+              <q-btn label="Save" type="submit" color="primary"/>
               <q-btn v-close-popup label="Cancel" type="reset" color="primary" flat class="q-ml-sm"/>
             </div>
           </q-card-section>
@@ -133,7 +142,7 @@ export default {
       this.$emit('cancel')
     },
     onSelectPaymentRow(event, row, index) {
-      if (this.fullEdit) {
+      if (this.isFullEdit()) {
         let data = JSON.parse(JSON.stringify(row))
         data.index = index
         this.$emit('edit-payment', data)
@@ -148,6 +157,9 @@ export default {
         notes: ""
       }
       this.$emit('edit-payment', data)
+    },
+    isFullEdit() {
+      return this.fullEdit || this.reservationData.id == ''
     }
   },
   props: {
@@ -164,7 +176,13 @@ export default {
       statusOptions,
       ticketTypeColumns,
       paymentColumns,
-      auditColumns
+      auditColumns,
+
+      isValidEmail(val) {
+        console.log(`Validating email: ${val}`)
+        const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
+        return emailPattern.test(val) || 'Enter a valid email address';
+      }
     }
   },
   mounted() {

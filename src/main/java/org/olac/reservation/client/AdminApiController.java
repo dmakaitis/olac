@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.manager.AdministrationManager;
-import org.olac.reservation.resource.model.Reservation;
 import org.olac.reservation.resource.model.TicketType;
 import org.olac.reservation.utility.AuditUtility;
 import org.olac.reservation.utility.SecurityUtility;
@@ -27,6 +26,8 @@ public class AdminApiController {
     private final SecurityUtility securityUtility;
     private final AuditUtility auditUtility;
 
+    //---------------------- Ticket Types ---------------------------
+
     @PostMapping("ticket-types")
     void saveTicketType(@RequestBody TicketType type) {
         log.debug("Saving ticket type: {}", type);
@@ -39,15 +40,7 @@ public class AdminApiController {
         administrationManager.deleteTicketType(code);
     }
 
-    @GetMapping("reservations")
-    List<Reservation> getReservations() {
-        log.debug("Retrieving reservations");
-        return administrationManager.getReservations().stream()
-                .sorted(comparing(Reservation::getLastName)
-                        .thenComparing(Reservation::getFirstName)
-                        .thenComparing(Reservation::getId))
-                .toList();
-    }
+    //---------------------- Reservations ---------------------------
 
     @GetMapping("reservations/{reservationId}/audit")
     public List<ReservationAuditEvent> getReservationAudit(@PathVariable String reservationId) {
@@ -55,11 +48,13 @@ public class AdminApiController {
         return auditUtility.getReservationEvents(reservationId);
     }
 
-    @PutMapping("reservations/{reservationId}")
-    public void saveReservation(@PathVariable String reservationId, @RequestBody Reservation reservation) {
-        log.debug("Updating reservation {} => {}", reservationId, reservation);
-        administrationManager.saveReservation(reservation);
+    @DeleteMapping("reservations/{reservationId}")
+    void deleteReservation(@PathVariable String reservationId) {
+        log.debug("Deleting reservation: {}", reservationId);
+        administrationManager.deleteReservation(reservationId);
     }
+
+    //----------------------------- Accounts ------------------------------
 
     @GetMapping("accounts")
     List<Account> getAccounts() {

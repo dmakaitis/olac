@@ -21,4 +21,6 @@ public interface ReservationDatastoreAccess {
 
     Reservation saveReservation(Reservation reservation);
 
+    void deleteReservation(String reservationId);
+
 }

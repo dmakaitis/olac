@@ -10,6 +10,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class Payment {
 
+    private Long id;
     private double amount;
     private PaymentStatus status;
     private PaymentMethod method;

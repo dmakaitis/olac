@@ -53,6 +53,13 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
     }
 
     @Override
+    public boolean isCurrentUserAdmin() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .map(auth -> auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(s -> s.equals("ROLE_ADMIN")))
+                .orElse(false);
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserDetailsImpl> userDetails = repository.findByUsername(username)
                 .map(UserDetailsImpl::new)
@@ -164,14 +171,14 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
     @RequiredArgsConstructor
     public static class UserDetailsImpl implements UserDetails {
 
-        private static final GrantedAuthority USER_ROLE = new SimpleGrantedAuthority("ROLE_USER");
+        private static final GrantedAuthority EVENT_COORDINATOR_ROLE = new SimpleGrantedAuthority("ROLE_EVENT_COORDINATOR");
         private static final GrantedAuthority ADMIN_ROLE = new SimpleGrantedAuthority("ROLE_ADMIN");
 
         private final transient AccountEntity account;
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return account.isAdmin() ? new HashSet<>(asList(USER_ROLE, ADMIN_ROLE)) : singleton(USER_ROLE);
+            return account.isAdmin() ? new HashSet<>(asList(EVENT_COORDINATOR_ROLE, ADMIN_ROLE)) : singleton(EVENT_COORDINATOR_ROLE);
         }
 
         @Override
