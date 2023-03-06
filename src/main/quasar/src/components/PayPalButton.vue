@@ -1,7 +1,7 @@
 <template>
   <div id="smart-button-container">
     <div class="text-center">
-      <div :hidden="paymentAccepted" id="paypal-button-container">PayPal button goes here</div>
+      <div :hidden="paymentAccepted" id="paypal-button-container"></div>
       <div :hidden="!paymentAccepted" class="text-h5">Thank you for your payment!</div>
     </div>
   </div>
@@ -26,6 +26,8 @@ export default {
       const emitPaymentApprovedEventFunc = this.emitPaymentApprovedEvent
 
       if (window.paypal) {
+        console.log("Initializing PayPal buttons")
+
         window.paypal.Buttons({
           style: {
             shape: 'rect',
@@ -52,6 +54,8 @@ export default {
             console.log(err);
           },
         }).render('#paypal-button-container');
+      } else {
+        console.error("PayPal library not loaded!!!")
       }
     }
   },
