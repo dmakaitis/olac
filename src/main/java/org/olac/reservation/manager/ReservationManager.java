@@ -1,8 +1,6 @@
 package org.olac.reservation.manager;
 
-import org.olac.reservation.resource.model.Payment;
-import org.olac.reservation.resource.model.Reservation;
-import org.olac.reservation.resource.model.TicketType;
+import org.olac.reservation.resource.model.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +9,7 @@ public interface ReservationManager {
 
     List<TicketType> getTicketTypes();
 
-    List<Reservation> getReservations();
+    Page<Reservation> getReservations(PageRequest pageRequest);
 
     Optional<Reservation> getReservation(String reservationId);
 

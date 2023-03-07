@@ -52,3 +52,4 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 /src/main/quasar/src/store/store-flag.d.ts
+/src/main/generated/

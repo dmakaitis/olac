@@ -18,20 +18,26 @@ public class OlacProperties {
     private String email;
     private PayPal paypal;
     private TestData testData;
+    private Jwt jwt;
 
     @Data
     public static class PayPal {
-
         private String apiBase;
         private String client;
         private String secret;
-
     }
 
     @Data
     public static class TestData {
-        boolean load = false;
-        List<TicketType> ticketTypes = new ArrayList<>();
-        List<Reservation> reservations = new ArrayList<>();
+        private boolean load = false;
+        private List<TicketType> ticketTypes = new ArrayList<>();
+        private List<Reservation> reservations = new ArrayList<>();
     }
+
+    @Data
+    public static class Jwt {
+        private String key;
+        private int timeoutMinutes;
+    }
+
 }

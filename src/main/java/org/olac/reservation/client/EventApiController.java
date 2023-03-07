@@ -3,12 +3,10 @@ package org.olac.reservation.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.manager.AdministrationManager;
+import org.olac.reservation.resource.model.Page;
+import org.olac.reservation.resource.model.PageRequest;
 import org.olac.reservation.resource.model.Reservation;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import static java.util.Comparator.comparing;
 
 @RestController
 @RequestMapping("/api/event")
@@ -19,13 +17,22 @@ public class EventApiController {
     private final AdministrationManager administrationManager;
 
     @GetMapping("reservations")
-    List<Reservation> getReservations() {
-        log.debug("Retrieving reservations");
-        return administrationManager.getReservations().stream()
-                .sorted(comparing(Reservation::getLastName)
-                        .thenComparing(Reservation::getFirstName)
-                        .thenComparing(Reservation::getId))
-                .toList();
+    Page<Reservation> getReservations(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int perPage,
+            @RequestParam(defaultValue = "reservationTimestamp") String sortBy,
+            @RequestParam(defaultValue = "true") boolean desc
+    ) {
+        log.debug("Retrieving reservations - page: {}, perPage: {}, sortBy: {}, desc: {}", page, perPage, sortBy, desc);
+
+        PageRequest pageRequest = PageRequest.builder()
+                .page(page)
+                .itemsPerPage(perPage)
+                .sortBy("null".equals(sortBy) ? null : sortBy)
+                .descending(desc)
+                .build();
+
+        return administrationManager.getReservations(pageRequest);
     }
 
     @PutMapping("reservations/{reservationId}")

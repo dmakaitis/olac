@@ -51,6 +51,7 @@ dependencies {
 
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    annotationProcessor 'org.hibernate:hibernate-jpamodelgen:6.1.7.Final'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.spockframework:spock-core:2.2-groovy-4.0'

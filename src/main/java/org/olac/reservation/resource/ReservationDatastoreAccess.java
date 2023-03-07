@@ -1,17 +1,16 @@
 package org.olac.reservation.resource;
 
-import org.olac.reservation.resource.model.Payment;
-import org.olac.reservation.resource.model.Reservation;
-import org.olac.reservation.resource.model.ReservationStatus;
+import org.olac.reservation.resource.model.*;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface ReservationDatastoreAccess {
 
     long createReservation(Reservation reservation);
 
-    List<Reservation> getReservations();
+    Page<Reservation> getReservations(PageRequest pageRequest);
+
+    long getTotalTicketsReserved();
 
     void addPaymentToReservation(String reservationId, Payment payment);
 

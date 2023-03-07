@@ -1,7 +1,8 @@
 <template>
   <q-page padding class="q-gutter-md">
     <q-table title="Reservations" :rows="state.rows" :columns="columns" row-key="reservationId" @row-click="onRowClick"
-             :selection="isAdmin() ? 'single' : 'none'" v-model:selected="selected">
+             :selection="isAdmin() ? 'single' : 'none'" v-model:selected="selected" v-model:pagination="pagination"
+             :loading="loading" @request="onTableRefresh">
     </q-table>
     <q-btn label="New Reservation" @click="onNewReservation"/>
     <q-btn v-if="isAdmin()" label="Delete Selected Reservation" @click="onDelete"/>
@@ -30,7 +31,7 @@ import ConfirmationDialog from "components/ConfirmationDialog.vue";
 const columns = [
   {name: 'id', label: 'Reservation Number', field: row => row.id, align: 'left', sortable: true},
   {
-    name: 'timestamp',
+    name: 'reservationTimestamp',
     label: 'Date/Time Reserved',
     field: row => row.reservationTimestamp,
     align: 'left',
@@ -38,7 +39,7 @@ const columns = [
     sortable: true
   },
   {name: 'first-name', label: 'First Name', field: row => row.firstName, align: 'left'},
-  {name: 'last-name', label: 'Last Name', field: row => row.lastName, align: 'left', sortable: true},
+  {name: 'lastName', label: 'Last Name', field: row => row.lastName, align: 'left', sortable: true},
   {name: 'email', label: 'Email', field: row => row.email, align: 'left', sortable: true},
   {name: 'phone', label: 'Phone', field: row => row.phone, align: 'left'},
   {name: 'status', label: 'Status', field: row => row.status, align: 'left', sortable: true},
@@ -107,9 +108,22 @@ export default {
         .then(response => this.loadReservations())
         .catch(error => alert(error))
     },
-    loadReservations() {
-      api.get('/api/event/reservations')
-        .then(response => this.state.rows = response.data)
+    loadReservations(pagination) {
+      this.loading = true
+
+      let {page, rowsPerPage, sortBy, descending} = pagination
+
+      api.get(`/api/event/reservations?page=${page - 1}&perPage=${rowsPerPage}&sortBy=${sortBy}&desc=${descending}`)
+        .then(response => {
+          this.state.rows = response.data.data
+          this.pagination.rowsNumber = response.data.totalItems
+          this.pagination.page = response.data.pageNumber + 1
+          this.pagination.rowsPerPage = response.data.itemsPerPage
+          this.pagination.sortBy = response.data.sortBy
+          this.pagination.descending = response.data.descending
+
+          this.loading = false
+        })
         .catch(error => alert(error))
     },
     loadTicketTypeData() {
@@ -117,7 +131,6 @@ export default {
         .then(response => {
           this.state.ticketTypes = response.data;
           this.state.ticketTypes.forEach(type => type.count = 0)
-          console.log("Ticket types loaded...")
         })
         .catch(error => alert(error))
     },
@@ -138,7 +151,6 @@ export default {
         reservationData.id = null
       }
 
-      console.log(`Saving reservation: ${JSON.stringify(reservationData)}`);
       api.put(`/api/event/reservations/${this.detail.row.reservationId}`, reservationData)
         .then(response => this.loadReservations())
         .catch(error => alert(error));
@@ -146,7 +158,6 @@ export default {
       this.showDetail = false;
     },
     onEditPayment(data) {
-      console.log(`Received edit payment event: ${JSON.stringify(data)}`)
       this.selectedPayment = data
       this.showPaymentDialog = true
     },
@@ -154,7 +165,6 @@ export default {
       this.showPaymentDialog = false;
     },
     onSavePayment(data) {
-      console.log(`Saving payment: ${JSON.stringify(data)}`);
       if (data.index >= 0) {
         this.detail.row.payments[data.index].amount = data.amount;
         this.detail.row.payments[data.index].status = data.status;
@@ -172,6 +182,9 @@ export default {
     },
     isAdmin() {
       return this.store.getters['auth/isAdmin']
+    },
+    onTableRefresh(props) {
+      this.loadReservations(props.pagination)
     }
   },
   setup() {
@@ -187,11 +200,19 @@ export default {
       selected: ref([]),
       selectedPayment: ref({}),
       showPaymentDialog: ref(false),
-      confirmDelete: ref(false)
+      confirmDelete: ref(false),
+      loading: ref(false),
+      pagination: ref({
+        sortBy: 'reservationTimestamp',
+        descending: true,
+        page: 1,
+        rowsPerPage: 5,
+        rowsNumber: 0
+      })
     }
   },
   mounted() {
-    this.loadReservations();
+    this.loadReservations(this.pagination);
     this.loadTicketTypeData();
   }
 }

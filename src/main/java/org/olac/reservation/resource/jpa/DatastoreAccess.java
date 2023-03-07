@@ -16,6 +16,10 @@ import org.olac.reservation.resource.model.*;
 import org.olac.reservation.utility.AuditUtility;
 import org.olac.reservation.utility.FormatUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,6 +30,7 @@ import java.util.stream.StreamSupport;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.olac.reservation.resource.jpa.specification.ReservationSpecification.withReservationId;
 
 @Service
 @RequiredArgsConstructor
@@ -74,8 +79,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     public void deleteReservation(String reservationId) {
-        reservationRepository.findByReservationId(reservationId)
-                .ifPresent(reservationRepository::delete);
+        reservationRepository.delete(withReservationId(reservationId));
     }
 
     @Override
@@ -94,16 +98,34 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
-    public List<Reservation> getReservations() {
-        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
-                .map(this::toReservation)
-                .toList();
+    public Page<Reservation> getReservations(org.olac.reservation.resource.model.PageRequest pageRequest) {
+        Specification<ReservationEntity> specification = null;
+
+        Sort.Direction direction = pageRequest.isDescending() ? Sort.Direction.DESC : Sort.Direction.ASC;
+        String property = pageRequest.getSortBy();
+
+        Pageable pageable = property == null ?
+                PageRequest.of(pageRequest.getPage(), pageRequest.getItemsPerPage()) :
+                PageRequest.of(pageRequest.getPage(), pageRequest.getItemsPerPage(), direction, property);
+
+        return toPage(reservationRepository.findAll(specification, pageable)
+                .map(this::toReservation));
+    }
+
+    @Override
+    public long getTotalTicketsReserved() {
+        return reservationRepository.findAll().stream()
+                .filter(r -> r.getStatus() == ReservationStatus.RESERVED)
+                .mapToInt(r -> r.getTickets().stream()
+                        .mapToInt(ReservationTicketsEntity::getCount)
+                        .sum())
+                .sum();
     }
 
     @Override
     @Transactional
     public void addPaymentToReservation(String reservationId, Payment payment) {
-        Optional<ReservationEntity> reservationEntity = reservationRepository.findByReservationId(reservationId);
+        Optional<ReservationEntity> reservationEntity = reservationRepository.findOne(withReservationId(reservationId));
         reservationEntity.ifPresent(e -> {
             e.getPayments().add(toPaymentEntity(payment, e));
             reservationRepository.save(e);
@@ -121,14 +143,14 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
             return Optional.empty();
         }
 
-        return reservationRepository.findByReservationId(reservationId)
+        return reservationRepository.findOne(withReservationId(reservationId))
                 .map(this::toReservation);
     }
 
     @Override
     @Transactional
     public void updateReservationStatus(String reservationId, ReservationStatus newStatus) {
-        reservationRepository.findByReservationId(reservationId).ifPresent(r -> {
+        reservationRepository.findOne(withReservationId(reservationId)).ifPresent(r -> {
             ReservationStatus oldStatus = r.getStatus();
             r.setStatus(newStatus);
             reservationRepository.save(r);
@@ -308,6 +330,23 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
                 .notes(entity.getNotes())
                 .enteredBy(entity.getEnteredBy())
                 .createdTimestamp(entity.getCreatedTimestamp())
+                .build();
+    }
+
+    private static <T> Page<T> toPage(org.springframework.data.domain.Page<T> page) {
+        return Page.<T>builder()
+                .pageNumber(page.getNumber())
+                .itemsPerPage(page.getSize())
+                .totalItems(page.getTotalElements())
+                .data(page.getContent())
+                .descending(page.getSort().stream()
+                        .map(Sort.Order::getDirection)
+                        .map(Sort.Direction::isDescending)
+                        .findFirst().orElse(false))
+                .sortBy(page.getSort().stream()
+                        .map(Sort.Order::getProperty)
+                        .findFirst()
+                        .orElse(null))
                 .build();
     }
 

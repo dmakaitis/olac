@@ -46,8 +46,8 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
     }
 
     @Override
-    public List<Reservation> getReservations() {
-        return reservationDatastoreAccess.getReservations();
+    public Page<Reservation> getReservations(PageRequest pageRequest) {
+        return reservationDatastoreAccess.getReservations(pageRequest);
     }
 
     @Override
@@ -57,12 +57,7 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
 
     @Override
     public boolean areTicketsAvailable(long requestedTicketCount) {
-        long availableTickets = properties.getMaxTickets() - reservationDatastoreAccess.getReservations().stream()
-                .map(Reservation::getTicketCounts)
-                .flatMap(List::stream)
-                .mapToLong(TicketCounts::getCount)
-                .sum();
-
+        long availableTickets = properties.getMaxTickets() - reservationDatastoreAccess.getTotalTicketsReserved();
         return requestedTicketCount <= availableTickets;
     }
 

@@ -1,5 +1,7 @@
 package org.olac.reservation.manager;
 
+import org.olac.reservation.resource.model.Page;
+import org.olac.reservation.resource.model.PageRequest;
 import org.olac.reservation.resource.model.Reservation;
 import org.olac.reservation.resource.model.TicketType;
 
@@ -13,7 +15,7 @@ public interface AdministrationManager {
 
     void deleteTicketType(String ticketTypeCode);
 
-    List<Reservation> getReservations();
+    Page<Reservation> getReservations(PageRequest pageRequest);
 
     Reservation saveReservation(Reservation reservation);
 
