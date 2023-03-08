@@ -1,8 +1,24 @@
 <template>
   <q-page padding class="q-gutter-md">
-    <q-table title="Reservations" :rows="state.rows" :columns="columns" row-key="reservationId" @row-click="onRowClick"
+    <q-table ref="table" title="Reservations" :rows="state.rows" :columns="columns" row-key="reservationId"
+             @row-click="onRowClick"
              :selection="isAdmin() ? 'single' : 'none'" v-model:selected="selected" v-model:pagination="pagination"
-             :loading="loading" @request="onTableRefresh">
+             :loading="loading" :filter="filter" @request="onTableRefresh">
+      <template v-slot:top-left>
+        <span class="q-table__title">{{ this.table.title }}</span><br/>
+        <q-input borderless dense debounce="300" placeholder="Search" v-model="filter">
+          <template v-slot:prepend>
+            <q-icon name="search"/>
+          </template>
+        </q-input>
+      </template>
+      <template v-slot:top-right>
+        <div class="text-right">
+          <q-btn color="primary" icon-right="archive" label="Export to CSV" no-caps @click="onExportTable"/>
+          <br/>
+          (export using current search and sort settings)
+        </div>
+      </template>
     </q-table>
     <q-btn label="New Reservation" @click="onNewReservation"/>
     <q-btn v-if="isAdmin()" label="Delete Selected Reservation" @click="onDelete"/>
@@ -25,7 +41,7 @@ import {api} from 'boot/axios.js';
 import ReservationDialog from "components/ReservationDialog.vue";
 import PaymentDialog from "components/PaymentDialog.vue";
 import {useStore} from "vuex";
-import {date} from 'quasar'
+import {date, exportFile, useQuasar} from 'quasar'
 import ConfirmationDialog from "components/ConfirmationDialog.vue";
 
 const columns = [
@@ -96,7 +112,7 @@ export default {
       this.showDetail = true
     },
     onCancel() {
-      this.loadReservations();
+      this.loadReservations(this.pagination);
       this.showDetail = false;
     },
     onDelete() {
@@ -105,7 +121,7 @@ export default {
     onConfirmDelete() {
       this.confirmDelete = false
       api.delete(`/api/admin/reservations/${this.selected[0].reservationId}`)
-        .then(response => this.loadReservations())
+        .then(response => this.loadReservations(this.pagination))
         .catch(error => alert(error))
     },
     loadReservations(pagination) {
@@ -113,7 +129,7 @@ export default {
 
       let {page, rowsPerPage, sortBy, descending} = pagination
 
-      api.get(`/api/event/reservations?page=${page - 1}&perPage=${rowsPerPage}&sortBy=${sortBy}&desc=${descending}`)
+      api.get(`/api/event/reservations?page=${page - 1}&perPage=${rowsPerPage}&sortBy=${sortBy}&desc=${descending}&filter=${this.filter}`)
         .then(response => {
           this.state.rows = response.data.data
           this.pagination.rowsNumber = response.data.totalItems
@@ -152,7 +168,7 @@ export default {
       }
 
       api.put(`/api/event/reservations/${this.detail.row.reservationId}`, reservationData)
-        .then(response => this.loadReservations())
+        .then(response => this.loadReservations(this.pagination))
         .catch(error => alert(error));
 
       this.showDetail = false;
@@ -185,6 +201,24 @@ export default {
     },
     onTableRefresh(props) {
       this.loadReservations(props.pagination)
+    },
+    onExportTable() {
+      console.log("Exporting table...")
+
+      let {sortBy, descending} = this.pagination
+
+      api.get(`/api/event/reservations.csv?sortBy=${sortBy}&desc=${descending}&filter=${this.filter}`)
+        .then(response => {
+          const status = exportFile('reservations.csv', response.data, 'text/csv')
+
+          if (status !== true) {
+            useQuasar().notify({
+              message: "Browser denied file download",
+              color: "negative",
+              icon: "warning"
+            })
+          }
+        })
     }
   },
   setup() {
@@ -195,6 +229,7 @@ export default {
       store,
       columns,
       state,
+      table: ref({}),
       showDetail: ref(false),
       detail: reactive({}),
       selected: ref([]),
@@ -208,7 +243,8 @@ export default {
         page: 1,
         rowsPerPage: 5,
         rowsNumber: 0
-      })
+      }),
+      filter: ref('')
     }
   },
   mounted() {

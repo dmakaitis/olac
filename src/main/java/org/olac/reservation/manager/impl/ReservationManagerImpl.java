@@ -46,8 +46,8 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
     }
 
     @Override
-    public Page<Reservation> getReservations(PageRequest pageRequest) {
-        return reservationDatastoreAccess.getReservations(pageRequest);
+    public Page<Reservation> getReservations(String filter, PageRequest pageRequest) {
+        return reservationDatastoreAccess.getReservations(filter, pageRequest);
     }
 
     @Override

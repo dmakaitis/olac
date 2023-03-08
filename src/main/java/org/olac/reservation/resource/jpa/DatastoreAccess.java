@@ -30,7 +30,8 @@ import java.util.stream.StreamSupport;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.olac.reservation.resource.jpa.specification.ReservationSpecification.withReservationId;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.olac.reservation.resource.jpa.specification.ReservationSpecification.*;
 
 @Service
 @RequiredArgsConstructor
@@ -98,8 +99,21 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
-    public Page<Reservation> getReservations(org.olac.reservation.resource.model.PageRequest pageRequest) {
+    public Page<Reservation> getReservations(String filter, org.olac.reservation.resource.model.PageRequest pageRequest) {
         Specification<ReservationEntity> specification = null;
+        if (isNotBlank(filter)) {
+            specification = withLastNameContaining(filter)
+                    .or(withFirstNameContaining(filter))
+                    .or(withEmailContaining(filter));
+
+            try {
+                long id = Long.parseLong(filter);
+                specification = specification.or(withId(id));
+            } catch (NumberFormatException e) {
+                // Ignore the exception
+                log.trace("Failed to parse filter '{}' as a long value", filter, e);
+            }
+        }
 
         Sort.Direction direction = pageRequest.isDescending() ? Sort.Direction.DESC : Sort.Direction.ASC;
         String property = pageRequest.getSortBy();
@@ -337,6 +351,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         return Page.<T>builder()
                 .pageNumber(page.getNumber())
                 .itemsPerPage(page.getSize())
+                .pageSize(page.getNumberOfElements())
                 .totalItems(page.getTotalElements())
                 .data(page.getContent())
                 .descending(page.getSort().stream()

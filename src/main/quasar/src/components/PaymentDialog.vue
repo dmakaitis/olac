@@ -5,10 +5,10 @@
         Add New Payment
       </q-card-section>
       <q-card-section class="q-gutter-md">
-        <q-input outlined label="Amount" v-model="data.amount" prefix="$"/>
+        <q-input outlined label="Amount" v-model.number="data.amount" prefix="$"/>
         <q-select outlined label="Payment Method" :options="methodOptions" v-model="data.method"/>
         <q-select outlined label="Payment Status" :options="statusOptions" v-model="data.status"/>
-        <q-input outlined label="Notes" v-model="data.notes"/>
+        <q-input outlined label="Notes" v-model.trim="data.notes"/>
       </q-card-section>
       <q-separator/>
       <q-card-actions>

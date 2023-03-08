@@ -9,7 +9,7 @@ public interface ReservationManager {
 
     List<TicketType> getTicketTypes();
 
-    Page<Reservation> getReservations(PageRequest pageRequest);
+    Page<Reservation> getReservations(String filter, PageRequest pageRequest);
 
     Optional<Reservation> getReservation(String reservationId);
 

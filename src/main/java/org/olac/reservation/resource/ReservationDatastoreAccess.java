@@ -8,7 +8,7 @@ public interface ReservationDatastoreAccess {
 
     long createReservation(Reservation reservation);
 
-    Page<Reservation> getReservations(PageRequest pageRequest);
+    Page<Reservation> getReservations(String filter, PageRequest pageRequest);
 
     long getTotalTicketsReserved();
 

@@ -15,7 +15,7 @@ public interface AdministrationManager {
 
     void deleteTicketType(String ticketTypeCode);
 
-    Page<Reservation> getReservations(PageRequest pageRequest);
+    Page<Reservation> getReservations(String filter, PageRequest pageRequest);
 
     Reservation saveReservation(Reservation reservation);
 

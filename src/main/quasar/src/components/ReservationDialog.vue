@@ -44,6 +44,13 @@
                     <q-card-section class="q-gutter-md">
                       <q-table title="Payments" :rows="reservationData.payments" :columns="paymentColumns" row-key="id"
                                @row-click="onSelectPaymentRow">
+                        <template v-slot:top-right>
+                          <div class="text-right">
+                            Total due: {{ currency(reservationData.amountDue) }}<br/>
+                            Total paid:
+                            {{ currency(reservationData.payments.map(p => p.amount).reduce((a, b) => a + b, 0)) }}
+                          </div>
+                        </template>
                       </q-table>
                       <q-btn label="Add New Payment" @click="onAddNewPayment"/>
                     </q-card-section>
@@ -123,6 +130,7 @@ const auditColumns = [
 export default {
   name: "ReservationDialog",
   methods: {
+    currency,
     onBeforeShow() {
       this.reservationData = this.reservation
       this.ticketTypeData = this.ticketTypes

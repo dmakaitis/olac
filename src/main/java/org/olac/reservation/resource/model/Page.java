@@ -10,6 +10,7 @@ import java.util.List;
 public class Page<T> {
 
     private int pageNumber;
+    private int pageSize;
     private int itemsPerPage;
     private long totalItems;
     private List<T> data;
