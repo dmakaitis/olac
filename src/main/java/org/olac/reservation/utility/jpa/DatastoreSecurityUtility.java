@@ -5,6 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.exception.OlacException;
 import org.olac.reservation.utility.SecurityUtility;
 import org.olac.reservation.utility.jpa.entity.AccountEntity;
@@ -36,6 +37,7 @@ import static java.util.Collections.singleton;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsService {
 
     public static final String UNRECOGNIZED_USER_OR_CREDENTIALS = "Unrecognized user or credentials";
@@ -140,6 +142,7 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
                                 .build());
 
                 if (response.isPresent()) {
+                    log.info("Authenticated user using Google account: {}", response.get().getUsername());
                     return response.get();
                 }
             }
