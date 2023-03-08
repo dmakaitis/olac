@@ -11,7 +11,7 @@ public class FormattingUtilities {
     private final FormatUtility formatUtility;
 
     public String currency(double value) {
-        return formatUtility.formatCurrencty(value);
+        return formatUtility.formatCurrency(value);
     }
 
 }

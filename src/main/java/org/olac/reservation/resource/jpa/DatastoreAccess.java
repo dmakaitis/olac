@@ -16,6 +16,8 @@ import org.olac.reservation.resource.model.*;
 import org.olac.reservation.utility.AuditUtility;
 import org.olac.reservation.utility.FormatUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -52,7 +54,9 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
+    @Cacheable("ticket-types")
     public List<TicketType> getTicketTypes() {
+        log.debug("Reading ticket types from database");
         return StreamSupport.stream(ticketTypeRepository.findAll().spliterator(), false)
                 .map(DatastoreAccess::toTicketType)
                 .toList();
@@ -60,6 +64,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "ticket-types", allEntries = true)
     public TicketType saveTicketType(TicketType ticketType) {
         TicketTypeEntity entity = getTicketTypeEntity(ticketType.getCode());
 
@@ -73,18 +78,21 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "ticket-types", allEntries = true)
     public void deleteTicketType(String ticketTypeCode) {
         ticketTypeRepository.findByCode(ticketTypeCode)
                 .ifPresent(ticketTypeRepository::delete);
     }
 
     @Override
+    @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
     public void deleteReservation(String reservationId) {
         reservationRepository.delete(withReservationId(reservationId));
     }
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
     public long createReservation(Reservation reservation) {
         ReservationEntity reservationEntity = toEntity(reservation);
 
@@ -99,7 +107,10 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
+    @Cacheable("reservations")
     public Page<Reservation> getReservations(String filter, org.olac.reservation.resource.model.PageRequest pageRequest) {
+        log.debug("Retrieving reservations for page {} using filter: {}", pageRequest, filter);
+
         Specification<ReservationEntity> specification = null;
         if (isNotBlank(filter)) {
             specification = withLastNameContaining(filter)
@@ -127,7 +138,10 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     }
 
     @Override
+    @Cacheable("reserved-tickets")
     public long getTotalTicketsReserved() {
+        log.debug("Getting total number of reserved tickets from the database");
+
         return reservationRepository.findAll().stream()
                 .filter(r -> r.getStatus() == ReservationStatus.RESERVED)
                 .mapToInt(r -> r.getTickets().stream()
@@ -138,6 +152,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = {"reservation", "reservations"}, allEntries = true)
     public void addPaymentToReservation(String reservationId, Payment payment) {
         Optional<ReservationEntity> reservationEntity = reservationRepository.findOne(withReservationId(reservationId));
         reservationEntity.ifPresent(e -> {
@@ -145,13 +160,14 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
             reservationRepository.save(e);
 
             auditUtility.logReservationEvent(reservationId, String.format("Added payment of %s, paid  by %s",
-                    formatUtility.formatCurrencty(payment.getAmount()),
+                    formatUtility.formatCurrency(payment.getAmount()),
                     payment.getMethod()));
         });
     }
 
     @Override
     @Transactional
+    @Cacheable("reservation")
     public Optional<Reservation> getReservation(String reservationId) {
         if (isBlank(reservationId)) {
             return Optional.empty();
@@ -163,6 +179,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
     public void updateReservationStatus(String reservationId, ReservationStatus newStatus) {
         reservationRepository.findOne(withReservationId(reservationId)).ifPresent(r -> {
             ReservationStatus oldStatus = r.getStatus();
@@ -176,6 +193,8 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     }
 
     @Override
+    @Transactional
+    @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
     public Reservation saveReservation(Reservation reservation) {
         boolean newReservation = true;
 

@@ -55,7 +55,7 @@ public class PublicApiController {
     }
 
     @PostMapping("reservations")
-    Reservation createReservation(@RequestBody NewReservationRequest request) {
+    long createReservation(@RequestBody NewReservationRequest request) {
         log.debug("Creating a new reservation: {}", request);
 
         Reservation newReservation = new Reservation();
@@ -74,7 +74,7 @@ public class PublicApiController {
             reservationManager.validateAndAddPayment(newReservation.getReservationId(), request.getPayPayPayment().getId());
         }
 
-        return reservationManager.getReservation(newReservation.getReservationId()).orElseThrow();
+        return newReservation.getId();
     }
 
     @GetMapping("reservations/_available")

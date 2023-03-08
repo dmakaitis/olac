@@ -11,7 +11,7 @@ public class FormatUtilityImpl implements FormatUtility {
     private final NumberFormat currencyInstance = NumberFormat.getCurrencyInstance();
 
     @Override
-    public String formatCurrencty(double value) {
+    public String formatCurrency(double value) {
         return currencyInstance.format(value);
     }
 

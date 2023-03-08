@@ -17,6 +17,7 @@ import org.olac.reservation.utility.SecurityUtility;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;
@@ -48,11 +49,6 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
     @Override
     public Page<Reservation> getReservations(String filter, PageRequest pageRequest) {
         return reservationDatastoreAccess.getReservations(filter, pageRequest);
-    }
-
-    @Override
-    public Optional<Reservation> getReservation(String reservationId) {
-        return reservationDatastoreAccess.getReservation(reservationId);
     }
 
     @Override
@@ -193,27 +189,35 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
             reservation.setReservationTimestamp(new Date());
         }
 
+        Consumer<Reservation> sendReservationFunction;
+
         // Send notifications if the reservation status has changed and notifications were requested
         if (sendNotification && reservationStatusHasChanged(reservation)) {
             switch (reservation.getStatus()) {
-                case PENDING_PAYMENT:
-                    notificationAccess.sentNotification(
-                            reservation.getEmail(),
-                            "Reservation Payment Reminder",
-                            templateEngine.createPaymentInstructions(reservation));
-                    break;
-                case RESERVED:
-                    notificationAccess.sentNotification(
-                            reservation.getEmail(),
-                            "Reservation Confirmation",
-                            templateEngine.createPaymentReceivedConfirmation(reservation));
-                    break;
-                default:
-                    log.debug("No notification sent for current reservation status: {}", reservation.getStatus());
+                case PENDING_PAYMENT -> sendReservationFunction = r ->
+                        notificationAccess.sentNotification(
+                                r.getEmail(),
+                                "Reservation Payment Reminder",
+                                templateEngine.createPaymentInstructions(r));
+                case RESERVED -> sendReservationFunction = r -> notificationAccess.sentNotification(
+                        r.getEmail(),
+                        "Reservation Confirmation",
+                        templateEngine.createPaymentReceivedConfirmation(r));
+                default ->
+                        sendReservationFunction = r -> log.debug("No notification sent for current reservation status: {}", r.getStatus());
             }
+        } else {
+            sendReservationFunction = r -> {
+            };
         }
 
-        return reservationDatastoreAccess.saveReservation(reservation);
+        // Save the reservations, generating the reservation number if it doesn't already exist
+        reservation = reservationDatastoreAccess.saveReservation(reservation);
+
+        // Send whatever notification we determined was needed now that we have a reservation number
+        sendReservationFunction.accept(reservation);
+
+        return reservation;
     }
 
     private boolean reservationStatusHasChanged(Reservation reservation) {
@@ -235,12 +239,6 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
                 .filter(p -> p.getAmount().getValue() != null)
                 .mapToDouble(p -> p.getAmount().getValue())
                 .sum();
-    }
-
-    @Override
-    public void addPayment(String reservationId, Payment payment) {
-        payment.setEnteredBy(securityUtility.getCurrentUserName());
-        reservationDatastoreAccess.addPaymentToReservation(reservationId, payment);
     }
 
 }

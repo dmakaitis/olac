@@ -314,7 +314,10 @@ export default {
           }),
         "payPayPayment": orderData
       })
-        .then(response => this.activePage = 4)
+        .then(response => {
+          this.reservationNumber = response.data
+          this.activePage = 4
+        })
     },
     onPayByCheck() {
       this.sendGtagEvent('purchase', this.reservationId)
@@ -331,7 +334,10 @@ export default {
             return {"ticketTypeCode": t.code, "count": t.count}
           })
       })
-        .then(response => this.activePage = 5)
+        .then(response => {
+          this.reservationNumber = response.data
+          this.activePage = 5
+        })
     },
     onTicketFieldFocus() {
       this.$refs.ticketFields.forEach(f => f.resetValidation())
