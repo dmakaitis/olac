@@ -36,9 +36,11 @@ public class PublicApiController {
         log.debug("Retrieving client configuration");
 
         // Check to see if the request contains a cookie indicating we should show the login button:
-        boolean showLogin = Arrays.stream(httpServletRequest.getCookies())
-                .anyMatch(c -> AuthApiController.COOKIE_SHOW_LOGIN.equals(c.getName()) &&
-                        AuthApiController.COOKIE_VALUE_YES.equals(c.getValue()));
+        boolean showLogin = httpServletRequest.getCookies() == null ?
+                false :
+                Arrays.stream(httpServletRequest.getCookies())
+                        .anyMatch(c -> AuthApiController.COOKIE_SHOW_LOGIN.equals(c.getName()) &&
+                                AuthApiController.COOKIE_VALUE_YES.equals(c.getValue()));
 
         return ClientConfiguration.builder()
                 .showLogin(showLogin)
