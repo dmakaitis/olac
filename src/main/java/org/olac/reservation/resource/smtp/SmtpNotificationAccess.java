@@ -22,7 +22,7 @@ public class SmtpNotificationAccess implements NotificationAccess {
 
     @Override
     @Async
-    public void sentNotification(String recipient, String subject, String htmlMessage) {
+    public void sendNotification(String recipient, String subject, String htmlMessage) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
@@ -37,4 +37,5 @@ public class SmtpNotificationAccess implements NotificationAccess {
             log.error("Failed to send email notification", e);
         }
     }
+
 }

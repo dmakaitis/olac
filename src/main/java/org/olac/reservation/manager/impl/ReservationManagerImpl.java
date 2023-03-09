@@ -107,7 +107,7 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
 
             // Send confirmation email
             String message = templateEngine.createPaymentReceivedConfirmation(r);
-            notificationAccess.sentNotification(r.getEmail(), "Reservation Confirmation", message);
+            notificationAccess.sendNotification(r.getEmail(), "Reservation Confirmation", message);
         });
 
         return true;
@@ -195,11 +195,11 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
         if (sendNotification && reservationStatusHasChanged(reservation)) {
             switch (reservation.getStatus()) {
                 case PENDING_PAYMENT -> sendReservationFunction = r ->
-                        notificationAccess.sentNotification(
+                        notificationAccess.sendNotification(
                                 r.getEmail(),
                                 "Reservation Payment Reminder",
                                 templateEngine.createPaymentInstructions(r));
-                case RESERVED -> sendReservationFunction = r -> notificationAccess.sentNotification(
+                case RESERVED -> sendReservationFunction = r -> notificationAccess.sendNotification(
                         r.getEmail(),
                         "Reservation Confirmation",
                         templateEngine.createPaymentReceivedConfirmation(r));
