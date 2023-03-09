@@ -30,6 +30,7 @@ export default {
     onAuth(authentication) {
       console.log(`Received authentication: ${JSON.stringify(authentication)}`)
       this.store.commit('auth/storeAuthentication', authentication)
+      this.store.commit('config/setShowLogin', true)
 
       gtag('event', 'login', {
         method: 'Google'

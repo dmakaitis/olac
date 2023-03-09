@@ -18,7 +18,7 @@
 
         <q-btn v-if="isLoggedIn" align="right" dense flat round icon="logout" to="/logout"/>
         <span v-if="!isLoggedIn">
-          <q-btn :v-if="showLoginButton" align="right" dense flat round icon="login" to="/login"/>
+          <q-btn v-if="store.getters['config/showLogin']" align="right" dense flat round icon="login" to="/login"/>
         </span>
       </q-toolbar>
 
