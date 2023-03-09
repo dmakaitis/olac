@@ -25,10 +25,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -92,21 +94,6 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
-    public long createReservation(Reservation reservation) {
-        ReservationEntity reservationEntity = toEntity(reservation);
-
-        reservationEntity = reservationRepository.save(reservationEntity);
-
-        auditUtility.logReservationEvent(reservation.getReservationId(), String.format("New reservation created for %s %s",
-                reservation.getFirstName(),
-                reservation.getLastName()));
-
-        return reservationEntity.getId();
-    }
-
-    @Override
-    @Transactional
     @Cacheable("reservations")
     public Page<Reservation> getReservations(String filter, org.olac.reservation.resource.model.PageRequest pageRequest) {
         log.debug("Retrieving reservations for page {} using filter: {}", pageRequest, filter);
@@ -143,11 +130,23 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         log.debug("Getting total number of reserved tickets from the database");
 
         return reservationRepository.findAll().stream()
-                .filter(r -> r.getStatus() == ReservationStatus.RESERVED)
+                .filter(DatastoreAccess::countTicketsAsReserved)
                 .mapToInt(r -> r.getTickets().stream()
                         .mapToInt(ReservationTicketsEntity::getCount)
                         .sum())
                 .sum();
+    }
+
+    private static boolean countTicketsAsReserved(ReservationEntity reservation) {
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            return false;
+        }
+        if (reservation.getStatus() == ReservationStatus.PENDING_PAYMENT) {
+            long timeSinceReserved = new Date().getTime() - reservation.getReservationTimestamp().getTime();
+            return timeSinceReserved <= TimeUnit.DAYS.toMillis(7);
+        }
+
+        return true;
     }
 
     @Override
@@ -329,13 +328,21 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
         reservation.setReservationTimestamp(entity.getReservationTimestamp());
         reservation.setAmountDue(entity.getAmountDue());
 
-        reservation.setTicketCounts(entity.getTickets().stream()
-                .map(t -> new TicketCounts(t.getTicketType().getCode(), t.getCount()))
-                .toList());
-        reservation.setPayments(entity.getPayments().stream()
-                .map(this::toPayment)
-                .sorted(comparing(Payment::getCreatedTimestamp))
-                .toList());
+        if (entity.getTickets() == null) {
+            reservation.setTicketCounts(emptyList());
+        } else {
+            reservation.setTicketCounts(entity.getTickets().stream()
+                    .map(t -> new TicketCounts(t.getTicketType().getCode(), t.getCount()))
+                    .toList());
+        }
+        if (entity.getPayments() == null) {
+            reservation.setPayments(emptyList());
+        } else {
+            reservation.setPayments(entity.getPayments().stream()
+                    .map(this::toPayment)
+                    .sorted(comparing(Payment::getCreatedTimestamp))
+                    .toList());
+        }
 
         return reservation;
     }

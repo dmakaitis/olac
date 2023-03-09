@@ -1,17 +1,21 @@
 package org.olac.reservation.resource.jpa
 
+import org.olac.reservation.resource.jpa.entity.PaymentEntity
 import org.olac.reservation.resource.jpa.entity.ReservationEntity
 import org.olac.reservation.resource.jpa.entity.ReservationTicketsEntity
 import org.olac.reservation.resource.jpa.entity.TicketTypeEntity
 import org.olac.reservation.resource.jpa.repository.ReservationRepository
 import org.olac.reservation.resource.jpa.repository.TicketTypeRepository
-import org.olac.reservation.resource.model.Reservation
-import org.olac.reservation.resource.model.TicketCounts
-import org.olac.reservation.resource.model.TicketType
+import org.olac.reservation.resource.jpa.specification.ReservationSpecification
+import org.olac.reservation.resource.model.*
 import org.olac.reservation.utility.AuditUtility
 import org.olac.reservation.utility.FormatUtility
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Sort
 import spock.lang.Specification
+import spock.lang.Unroll
 
+import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
 
 class DatastoreAccessTest extends Specification {
@@ -138,68 +142,231 @@ class DatastoreAccessTest extends Specification {
           ))
     }
 
-    def "Creating a reservation should save it to the database and return the ID"() {
+    def "Deleting a ticket type should remove it from the database if it exists"() {
         given:
-          def expectedId = 903845
+          def typeCode = "type1"
+          def typeEntity = new TicketTypeEntity(id: 3, code: typeCode, costPerTicket: 50.0, description: "My test type")
 
-          def reservation = new Reservation(
-                  reservationId: 'abcd',
-                  firstName: "Darius",
-                  lastName: "Makaitis",
-                  email: "dmakaitis@gmail.com",
-                  phone: "402-880-8442",
-                  ticketCounts: [
-                          new TicketCounts("type-a", 7),
-                          new TicketCounts("type-b", 12)
-                  ]
-          )
-
-          def typeA = new TicketTypeEntity(
-                  id: 13,
-                  code: "type-a",
-                  description: "Test Type A",
-                  costPerTicket: 47.0
-          )
-          def typeB = new TicketTypeEntity(
-                  id: 53,
-                  code: "type-b",
-                  description: "Test Type B",
-                  costPerTicket: 32.0
-          )
-
-          _ * ticketTypeRepository.findByCode("type-a") >> Optional.of(typeA)
-          _ * ticketTypeRepository.findByCode("type-b") >> Optional.of(typeB)
+          _ * ticketTypeRepository.findByCode(typeCode) >> Optional.of(typeEntity)
 
         when:
-          def result = service.createReservation(reservation)
+          service.deleteTicketType(typeCode)
 
         then:
-          result == expectedId
-
-          1 * reservationRepository.save(new ReservationEntity(
-                  reservationId: 'abcd',
-                  firstName: "Darius",
-                  lastName: "Makaitis",
-                  email: "dmakaitis@gmail.com",
-                  phone: "402-880-8442",
-                  amountDue: 0.0,
-                  tickets: [
-                          new ReservationTicketsEntity(ticketType: typeA, count: 7),
-                          new ReservationTicketsEntity(ticketType: typeB, count: 12)
-                  ],
-                  payments: []
-          )) >> new ReservationEntity(
-                  id: expectedId,
-                  reservationId: 'abcd',
-                  firstName: "Darius",
-                  lastName: "Makaitis",
-                  email: "dmakaitis@gmail.com",
-                  phone: "402-880-8442",
-                  amountDue: 0.0,
-                  tickets: [
-                          new ReservationTicketsEntity(id: 63, ticketType: typeA, count: 7),
-                          new ReservationTicketsEntity(id: 64, ticketType: typeB, count: 12)
-                  ]
-          )
+          1 * ticketTypeRepository.delete(typeEntity)
     }
+
+    def "Deleting a ticket type should do nothing if it doesn't exist"() {
+        given:
+          _ * ticketTypeRepository.findByCode(_) >> Optional.empty()
+
+        when:
+          service.deleteTicketType("some-type")
+
+        then:
+          0 * ticketTypeRepository.delete(_)
+    }
+
+    def "Deleting a reservation giving its ID should be completed using a specification"() {
+        given:
+          def reservationId = "my-reservation-id"
+          def expectedSpecification = ReservationSpecification.withReservationId(reservationId)
+
+        when:
+          service.deleteReservation(reservationId)
+
+        then:
+          1 * reservationRepository.delete(expectedSpecification)
+    }
+
+    def "We should be able to retrieve a page of reservations"() {
+        given:
+          def filter = "11"
+          def pageRequest = new PageRequest(page: 0, itemsPerPage: 5, sortBy: "lastName", descending: false)
+
+          def expectedData = [
+                  new Reservation(id: 1, reservationId: "test-reservation-id-1"),
+                  new Reservation(id: 2, reservationId: "test-reservation-id-2"),
+                  new Reservation(id: 3, reservationId: "test-reservation-id-3"),
+          ]
+
+          def total = 23
+
+          def pageable = org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getItemsPerPage(), Sort.Direction.ASC, pageRequest.sortBy);
+          def content = expectedData.collect { new ReservationEntity(id: it.id, reservationId: it.reservationId) }
+
+          _ * reservationRepository.findAll(_, pageable) >> new PageImpl<ReservationEntity>(content, pageable, total)
+
+        when:
+          def result = service.getReservations(filter, pageRequest)
+
+        then:
+          result.pageNumber == pageRequest.page
+          result.itemsPerPage == pageRequest.itemsPerPage
+          result.sortBy == pageRequest.sortBy
+          result.descending == pageRequest.descending
+          result.totalItems == total
+
+          result.data == expectedData
+    }
+
+    @Unroll
+    def "The total number of reserved tickets should be correctly calculated"() {
+        given:
+          _ * reservationRepository.findAll() >> reservations
+
+        expect:
+          service.getTotalTicketsReserved() == expected
+
+        where:
+          expected || reservations
+          0        || []
+          0        || [rtc(ReservationStatus.PENDING_PAYMENT, 12, [2, 3])]
+          3        || [rtc(ReservationStatus.PENDING_PAYMENT, 3, [1, 2])]
+          4        || [rtc(ReservationStatus.RESERVED, 12, [3, 1])]
+          5        || [rtc(ReservationStatus.RESERVED, 3, [2, 3])]
+          6        || [rtc(ReservationStatus.RESERVED, 3, [2, 4]), rtc(ReservationStatus.PENDING_PAYMENT, 12, [4, 2])]
+          7        || [rtc(ReservationStatus.RESERVED, 3, [2, 1]), rtc(ReservationStatus.PENDING_PAYMENT, 6, [1, 3])]
+          0        || [rtc(ReservationStatus.CANCELLED, 4, [5, 7])]
+          9        || [rtc(ReservationStatus.CHECKED_IN, 18, [2, 7])]
+    }
+
+    def "We should be able to retrieve a reservation by reservation ID"() {
+        given:
+          def reservationId = "my-reservation-id"
+          def expected = Optional.of(new Reservation(
+                  id: 123,
+                  reservationId: reservationId,
+                  ticketCounts: [],
+                  payments: []
+          ))
+          def entity = expected.map {
+              new ReservationEntity(
+                      id: it.id,
+                      reservationId: it.reservationId,
+                      tickets: [],
+                      payments: []
+              )
+          }
+
+          _ * reservationRepository.findOne(ReservationSpecification.withReservationId(reservationId)) >> entity
+
+        expect:
+          service.getReservation(reservationId) == expected
+    }
+
+    def "An empty optional should be returned if we try to retrieve a reservation that doesn't exist"() {
+        given:
+          _ * reservationRepository.findOne(_) >> Optional.empty()
+
+        expect:
+          service.getReservation("some-random-id") == Optional.empty()
+    }
+
+    def "Trying to retrieve a reservation with no ID should return nothing"() {
+        when:
+          def result = service.getReservation("")
+
+        then:
+          result == Optional.empty()
+          0 * reservationRepository._
+    }
+
+    def "Saving a new reservation should write it to the database"() {
+        given:
+          def reservation = new Reservation(reservationId: "my-reservation-id", firstName: "Bob", lastName: "Smith", email: "bob@gmail.com")
+          def expectedId = 255
+
+        when:
+          def result = service.saveReservation(reservation)
+
+        then:
+          1 * reservationRepository.save(new ReservationEntity(reservationId: reservation.reservationId, firstName: reservation.firstName, lastName: reservation.lastName, email: reservation.email, tickets: [], payments: [])) >>
+                  new ReservationEntity(id: expectedId, reservationId: reservation.reservationId, firstName: reservation.firstName, lastName: reservation.lastName, email: reservation.email, tickets: [], payments: [])
+
+          result.id == expectedId
+          result.reservationId == reservation.reservationId
+          result.firstName == reservation.firstName
+          result.lastName == reservation.lastName
+          result.email == reservation.email
+    }
+
+    def "Saving an existing reservation should update it in the database"() {
+        given:
+          def reservation = new Reservation(id: 123, reservationId: "my-reservation-id", firstName: "Bob", lastName: "Smith", email: "bob@gmail.com")
+
+          def oldEntity = new ReservationEntity(id: reservation.id, reservationId: reservation.reservationId, firstName: "Bobby", lastName: "Smithy", email: "bsmith@gmail.com", tickets: [], payments: [])
+          def newEntity = new ReservationEntity(id: reservation.id, reservationId: reservation.reservationId, firstName: reservation.firstName, lastName: reservation.lastName, email: reservation.email, tickets: [], payments: [])
+
+        when:
+          def result = service.saveReservation(reservation)
+
+        then:
+          1 * reservationRepository.findById(reservation.id) >> Optional.of(oldEntity)
+          1 * reservationRepository.save(newEntity) >> newEntity
+
+          result.id == reservation.id
+          result.reservationId == reservation.reservationId
+          result.firstName == reservation.firstName
+          result.lastName == reservation.lastName
+          result.email == reservation.email
+    }
+
+    def "Adding a payment to an existing reservation should update it in the database"() {
+        given:
+          def reservation = new Reservation(id: 123, reservationId: "my-reservation-id", firstName: "Bob", lastName: "Smith", email: "bob@gmail.com", payments: [new Payment(amount: 100.0, status: PaymentStatus.SUCCESSFUL, method: PaymentMethod.CHECK)])
+
+          def oldEntity = new ReservationEntity(
+                  id: reservation.id,
+                  reservationId: reservation.reservationId,
+                  firstName: reservation.firstName,
+                  lastName: reservation.lastName,
+                  email: reservation.email,
+                  amountDue: 0.0,
+                  tickets: [],
+                  payments: []
+          )
+          def newEntity = new ReservationEntity(
+                  id: reservation.id,
+                  reservationId: reservation.reservationId,
+                  firstName: reservation.firstName,
+                  lastName: reservation.lastName,
+                  email: reservation.email,
+                  amountDue: 0.0,
+                  tickets: [],
+                  payments: reservation.payments.collect {
+                      new PaymentEntity(
+                              amount: it.amount,
+                              status: it.status,
+                              method: it.method,
+                              createdTimestamp: it.createdTimestamp
+                      )
+                  }
+          )
+          newEntity.payments.each { it.reservation = newEntity }
+
+        when:
+          def result = service.saveReservation(reservation)
+
+        then:
+          1 * reservationRepository.findById(reservation.id) >> Optional.of(oldEntity)
+          1 * reservationRepository.save(newEntity) >> newEntity
+
+          result.id == reservation.id
+          result.reservationId == reservation.reservationId
+          result.firstName == reservation.firstName
+          result.lastName == reservation.lastName
+          result.email == reservation.email
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    ReservationEntity rtc(ReservationStatus status, int daysOld, List<Integer> counts) {
+        new ReservationEntity(
+                status: status,
+                reservationTimestamp: new Date(new Date().time - TimeUnit.DAYS.toMillis(daysOld)),
+                tickets: counts.collect { new ReservationTicketsEntity(count: it) }
+        )
+    }
+
 }

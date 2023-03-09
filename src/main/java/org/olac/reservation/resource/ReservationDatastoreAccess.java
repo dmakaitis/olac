@@ -6,16 +6,16 @@ import java.util.Optional;
 
 public interface ReservationDatastoreAccess {
 
-    long createReservation(Reservation reservation);
-
     Page<Reservation> getReservations(String filter, PageRequest pageRequest);
 
     long getTotalTicketsReserved();
 
+    @Deprecated
     void addPaymentToReservation(String reservationId, Payment payment);
 
     Optional<Reservation> getReservation(String reservationId);
 
+    @Deprecated
     void updateReservationStatus(String reservationId, ReservationStatus newStatus);
 
     Reservation saveReservation(Reservation reservation);
