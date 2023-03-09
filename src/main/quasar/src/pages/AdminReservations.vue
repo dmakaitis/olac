@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="q-gutter-md">
+  <q-page padding class="bg-white q-gutter-md">
     <q-table ref="table" title="Reservations" :rows="state.rows" :columns="columns" row-key="reservationId"
              @row-click="onRowClick"
              :selection="isAdmin() ? 'single' : 'none'" v-model:selected="selected" v-model:pagination="pagination"
