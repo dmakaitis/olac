@@ -1,6 +1,6 @@
 <template>
-  <q-page class="bg-primary olac-font">
-    <div class="container">
+  <q-page>
+    <div class="container q-gutter-y-lg">
       <ArticleWithImages title="Omaha Lithuanian-American Community" right-images="/img/olac-2007.jpg">
         <p>For multiple generations, this organization has sustained its foundational existence to maintain Lithuanian
           consciousness that unites all Lithuanians outside Lithuanian’s borders and promotes Lithuanian culture and
@@ -27,8 +27,6 @@
           that has been an integral part of what makes Omaha one of the best places to live. </p>
       </ArticleWithImages>
 
-      <q-separator/>
-
       <ArticleWithImages title="Aušra" :left-images="['/img/ausra-2022.jpg', '/img/ausra-old.jpg']">
         <p>Omaha's Lithuanian folk dance group, Aušra, first began as a part of the Omaha's Lithuanian Scout
           organization where Lithuanian youth fell in love with folk dancing and performed for the community. Then, in
@@ -47,8 +45,6 @@
           thriving in Omaha today, Aušra members are proud to represent their heritage and continue to live the lives
           that their relatives worked so hard to give them when they came to Omaha so many years ago.</p>
       </ArticleWithImages>
-
-      <q-separator/>
 
       <ArticleWithImages title="Women's Club" left-images="/img/womens-club.jpg">
         <p>The Lithuanian women’s club was founded in 1974 to promote and sustain the Lithuanian language, culture, and
@@ -70,8 +66,6 @@
           grandmothers, mothers and all of the former members who have done so much to enrich the Lithuanian legacy in
           Omaha.</p>
       </ArticleWithImages>
-
-      <q-separator/>
 
       <ArticleWithImages title="Omaha Sister Cities Association (OSCA)" subtitle="Omaha Friends of Šiauliai (OFŠ)"
                          left-images="/img/ofs-2013.jpg">
@@ -116,9 +110,7 @@ export default {
 <style scoped>
 .container {
   max-width: 1000px;
-  background-color: ghostwhite;
   margin: auto;
-  padding: 20px;
 }
 
 hr {

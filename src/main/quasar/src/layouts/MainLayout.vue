@@ -25,7 +25,7 @@
       &copy; {{ new Date().getFullYear() }} Omaha Lithuanian-American Community
     </q-footer>
 
-    <q-page-container>
+    <q-page-container class="bg-primary olac-font">
       <router-view/>
     </q-page-container>
 

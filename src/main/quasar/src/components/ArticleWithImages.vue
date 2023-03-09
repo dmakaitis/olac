@@ -1,14 +1,20 @@
 <template>
-  <div v-if="title" class="text-h4">{{ title }}</div>
-  <div v-if="subtitle" class="text-h5">{{ subtitle }}</div>
-  <br/>
-  <div v-if="leftImagesArray.length" class="float-left">
-    <q-img v-for="image in leftImagesArray" :key="image" :src="image" class="shadow-24"/>
-  </div>
-  <div v-if="rightImagesArray.length" class="float-right">
-    <q-img v-for="image in rightImagesArray" :key="image" :src="image" class="shadow-24"/>
-  </div>
-  <slot></slot>
+  <q-card>
+    <q-card-section>
+      <div v-if="title" class="text-h4">{{ title }}</div>
+      <div v-if="subtitle" class="text-h5">{{ subtitle }}</div>
+    </q-card-section>
+    <q-card-section>
+      <div v-if="leftImagesArray.length" class="float-left">
+        <q-img v-for="image in leftImagesArray" :key="image" :src="image" class="shadow-24"/>
+      </div>
+      <div v-if="rightImagesArray.length" class="float-right">
+        <q-img v-for="image in rightImagesArray" :key="image" :src="image" class="shadow-24"/>
+      </div>
+      <slot></slot>
+      <div style="clear: both;"></div>
+    </q-card-section>
+  </q-card>
 </template>
 
 <script>
