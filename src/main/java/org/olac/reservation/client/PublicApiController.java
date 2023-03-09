@@ -2,9 +2,7 @@ package org.olac.reservation.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.config.OlacProperties;
 import org.olac.reservation.manager.ReservationManager;
@@ -36,11 +34,12 @@ public class PublicApiController {
         log.debug("Retrieving client configuration");
 
         // Check to see if the request contains a cookie indicating we should show the login button:
-        boolean showLogin = httpServletRequest.getCookies() == null ?
-                false :
-                Arrays.stream(httpServletRequest.getCookies())
-                        .anyMatch(c -> AuthApiController.COOKIE_SHOW_LOGIN.equals(c.getName()) &&
-                                AuthApiController.COOKIE_VALUE_YES.equals(c.getValue()));
+        boolean showLogin = false;
+        if (httpServletRequest.getCookies() != null) {
+            showLogin = Arrays.stream(httpServletRequest.getCookies())
+                    .anyMatch(c -> AuthApiController.COOKIE_SHOW_LOGIN.equals(c.getName()) &&
+                            AuthApiController.COOKIE_VALUE_YES.equals(c.getValue()));
+        }
 
         return ClientConfiguration.builder()
                 .showLogin(showLogin)
@@ -96,12 +95,16 @@ public class PublicApiController {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ClientConfiguration {
         private PayPayConfig payPal;
         private boolean showLogin = false;
 
         @Data
         @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
         public static class PayPayConfig {
             private String apiBase;
             private String clientId;
