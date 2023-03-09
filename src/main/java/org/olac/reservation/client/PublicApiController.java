@@ -1,6 +1,7 @@
 package org.olac.reservation.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.olac.reservation.resource.paypal.model.CreateOrderResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,9 +32,16 @@ public class PublicApiController {
     private final OlacProperties properties;
 
     @GetMapping("client-config")
-    ClientConfiguration getClientConfiguration() {
+    ClientConfiguration getClientConfiguration(HttpServletRequest httpServletRequest) {
         log.debug("Retrieving client configuration");
+
+        // Check to see if the request contains a cookie indicating we should show the login button:
+        boolean showLogin = Arrays.stream(httpServletRequest.getCookies())
+                .anyMatch(c -> AuthApiController.COOKIE_SHOW_LOGIN.equals(c.getName()) &&
+                        AuthApiController.COOKIE_VALUE_YES.equals(c.getValue()));
+
         return ClientConfiguration.builder()
+                .showLogin(showLogin)
                 .payPal(ClientConfiguration.PayPayConfig.builder()
                         .apiBase(properties.getPaypal().getApiBase())
                         .clientId(properties.getPaypal().getClient())
@@ -87,6 +96,7 @@ public class PublicApiController {
     @Builder
     public static class ClientConfiguration {
         private PayPayConfig payPal;
+        private boolean showLogin = false;
 
         @Data
         @Builder

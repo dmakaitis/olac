@@ -17,6 +17,9 @@
         </q-toolbar-title>
 
         <q-btn v-if="isLoggedIn" align="right" dense flat round icon="logout" to="/logout"/>
+        <span v-if="!isLoggedIn">
+          <q-btn :v-if="showLoginButton" align="right" dense flat round icon="login" to="/login"/>
+        </span>
       </q-toolbar>
 
     </q-header>
@@ -38,15 +41,26 @@ import {useStore} from "vuex";
 
 export default {
   name: 'AdminLayout',
+  methods: {
+    showLogin() {
+      console.log(`Should show login button: ${this.showLoginButton && !this.isLoggedIn}`)
+      return this.showLoginButton && !this.isLoggedIn
+    }
+  },
   setup() {
+    const store = useStore()
+
     return {
+      store,
       isAdmin: ref(false),
-      isLoggedIn: ref(false)
+      isLoggedIn: ref(false),
+      showLoginButton: ref(false)
     }
   },
   mounted() {
-    this.isAdmin = useStore().getters['auth/isAdmin']
-    this.isLoggedIn = useStore().getters['auth/isLoggedIn']
+    this.isAdmin = this.store.getters['auth/isAdmin']
+    this.isLoggedIn = this.store.getters['auth/isLoggedIn']
+    this.showLoginButton = this.store.getters['config/showLogin']
   }
 }
 </script>

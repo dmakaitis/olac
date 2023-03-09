@@ -56,6 +56,7 @@ export default {
         }).render('#paypal-button-container');
       } else {
         console.error("PayPal library not loaded!!!")
+        setTimeout(this.initPayPalButton, 200)
       }
     }
   },
