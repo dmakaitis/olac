@@ -2,8 +2,6 @@ package org.olac.reservation.utility.jpa;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.olac.reservation.exception.OlacException;
@@ -21,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -34,6 +31,7 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +40,8 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
 
     public static final String UNRECOGNIZED_USER_OR_CREDENTIALS = "Unrecognized user or credentials";
     private final AccountRepository repository;
-    private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtility jwtUtility;
+    private final GoogleIdTokenVerifier tokenVerifier;
 
     @Override
     public String getCurrentUserName() {
@@ -83,6 +81,13 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
 
     @Override
     public Account createAccount(String username, String email, boolean admin) {
+        if (isBlank(username)) {
+            throw new OlacException("A username is required to create an account");
+        }
+        if (isBlank(email)) {
+            throw new OlacException("An email address is required to create an account");
+        }
+
         AccountEntity entity = new AccountEntity();
         entity.setUsername(username);
         entity.setEmail(email);
@@ -93,12 +98,16 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
 
     @Override
     public Optional<Account> findAccount(String username) {
-        return repository.findByUsername(username)
+        return isBlank(username) ? Optional.empty() : repository.findByUsername(username)
                 .map(this::toAccount);
     }
 
     @Override
     public boolean updateAccount(Account account) {
+        if (isBlank(account.getUsername())) {
+            return false;
+        }
+
         Optional<AccountEntity> accountOptional = repository.findByUsername(account.getUsername());
         if (accountOptional.isEmpty()) {
             return false;
@@ -124,12 +133,8 @@ public class DatastoreSecurityUtility implements SecurityUtility, UserDetailsSer
 
     @Override
     public ValidateUserResponse validateUserWithGoogleIdentity(String credential) {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                .setAudience(asList("192542427030-lo0r4n23ecl4bl35v1rq0ejhn3gfffgj.apps.googleusercontent.com"))
-                .build();
-
         try {
-            GoogleIdToken token = verifier.verify(credential);
+            GoogleIdToken token = tokenVerifier.verify(credential);
             if (token != null) {
                 GoogleIdToken.Payload payload = token.getPayload();
 
