@@ -1,11 +1,10 @@
 package org.olac.reservation.engine.impl;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.olac.reservation.resource.TicketDatastoreAccess;
 import org.olac.reservation.resource.model.Payment;
+import org.olac.reservation.resource.model.PaymentStatus;
 import org.olac.reservation.resource.model.Reservation;
 import org.olac.reservation.resource.model.TicketType;
 import org.springframework.stereotype.Service;
@@ -44,6 +43,7 @@ public class ThymeleafTemplateEngine implements org.olac.reservation.engine.Temp
     private Context getContextWithInvoice(Reservation reservation) {
         double totalCharges = reservation.getAmountDue();
         double totalPaid = reservation.getPayments().stream()
+                .filter(p -> p.getStatus() == PaymentStatus.SUCCESSFUL)
                 .mapToDouble(Payment::getAmount)
                 .sum();
         double amountDue = max(0.0, totalCharges - totalPaid);
@@ -73,6 +73,8 @@ public class ThymeleafTemplateEngine implements org.olac.reservation.engine.Temp
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class TicketRow {
         String description;
         double cost;
