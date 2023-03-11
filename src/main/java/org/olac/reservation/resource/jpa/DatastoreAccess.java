@@ -14,7 +14,7 @@ import org.olac.reservation.resource.jpa.repository.ReservationRepository;
 import org.olac.reservation.resource.jpa.repository.TicketTypeRepository;
 import org.olac.reservation.resource.model.*;
 import org.olac.reservation.utility.AuditUtility;
-import org.olac.reservation.utility.FormatUtility;
+import org.olac.reservation.utility.DateTimeUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -45,13 +45,12 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     private final TicketTypeRepository ticketTypeRepository;
     private final ReservationRepository reservationRepository;
     private final AuditUtility auditUtility;
-    private final FormatUtility formatUtility;
-
+    private final DateTimeUtility dateTimeUtility;
     private final Supplier<String> codeSupplier;
 
     @Autowired
-    public DatastoreAccess(TicketTypeRepository ticketTypeRepository, ReservationRepository reservationRepository, AuditUtility auditUtility, FormatUtility formatUtility) {
-        this(ticketTypeRepository, reservationRepository, auditUtility, formatUtility, () -> UUID.randomUUID().toString());
+    public DatastoreAccess(TicketTypeRepository ticketTypeRepository, ReservationRepository reservationRepository, AuditUtility auditUtility, DateTimeUtility dateTimeUtility) {
+        this(ticketTypeRepository, reservationRepository, auditUtility, dateTimeUtility, () -> UUID.randomUUID().toString());
     }
 
     @Override
@@ -151,22 +150,6 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = {"reservation", "reservations"}, allEntries = true)
-    public void addPaymentToReservation(String reservationId, Payment payment) {
-        Optional<ReservationEntity> reservationEntity = reservationRepository.findOne(withReservationId(reservationId));
-        reservationEntity.ifPresent(e -> {
-            e.getPayments().add(toPaymentEntity(payment, e));
-            reservationRepository.save(e);
-
-            auditUtility.logReservationEvent(reservationId, String.format("Added payment of %s, paid  by %s",
-                    formatUtility.formatCurrency(payment.getAmount()),
-                    payment.getMethod()));
-        });
-    }
-
-    @Override
-    @Transactional
-    @Cacheable("reservation")
     public Optional<Reservation> getReservation(String reservationId) {
         if (isBlank(reservationId)) {
             return Optional.empty();
@@ -179,22 +162,12 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     @Override
     @Transactional
     @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
-    public void updateReservationStatus(String reservationId, ReservationStatus newStatus) {
-        reservationRepository.findOne(withReservationId(reservationId)).ifPresent(r -> {
-            ReservationStatus oldStatus = r.getStatus();
-            r.setStatus(newStatus);
-            reservationRepository.save(r);
-
-            auditUtility.logReservationEvent(reservationId, String.format("Updated reservation status: %s => %s",
-                    oldStatus,
-                    newStatus));
-        });
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
     public Reservation saveReservation(Reservation reservation) {
+        // If we don't have a reservation timestamp, set it now...
+        if (reservation.getReservationTimestamp() == null) {
+            reservation.setReservationTimestamp(dateTimeUtility.getCurrentTime());
+        }
+
         boolean newReservation = true;
 
         if (reservation.getId() != null) {

@@ -9,7 +9,7 @@ import org.olac.reservation.resource.jpa.repository.TicketTypeRepository
 import org.olac.reservation.resource.jpa.specification.ReservationSpecification
 import org.olac.reservation.resource.model.*
 import org.olac.reservation.utility.AuditUtility
-import org.olac.reservation.utility.FormatUtility
+import org.olac.reservation.utility.DateTimeUtility
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
 import spock.lang.Specification
@@ -23,10 +23,10 @@ class DatastoreAccessTest extends Specification {
     def ticketTypeRepository = Mock(TicketTypeRepository)
     def reservationRepository = Mock(ReservationRepository)
     def auditUtility = Mock(AuditUtility)
-    def formatUtility = Mock(FormatUtility)
+    def dateTimeUtility = Mock(DateTimeUtility)
     def codeSupplier = Mock(Supplier)
 
-    def service = new DatastoreAccess(ticketTypeRepository, reservationRepository, auditUtility, formatUtility, codeSupplier)
+    def service = new DatastoreAccess(ticketTypeRepository, reservationRepository, auditUtility, dateTimeUtility, codeSupplier)
 
     def "Get ticket types should return an empty list if no types have been defined"() {
         given:

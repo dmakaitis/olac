@@ -1,6 +1,8 @@
 package org.olac.reservation.resource;
 
-import org.olac.reservation.resource.model.*;
+import org.olac.reservation.resource.model.Page;
+import org.olac.reservation.resource.model.PageRequest;
+import org.olac.reservation.resource.model.Reservation;
 
 import java.util.Optional;
 
@@ -10,13 +12,7 @@ public interface ReservationDatastoreAccess {
 
     long getTotalTicketsReserved();
 
-    @Deprecated
-    void addPaymentToReservation(String reservationId, Payment payment);
-
     Optional<Reservation> getReservation(String reservationId);
-
-    @Deprecated
-    void updateReservationStatus(String reservationId, ReservationStatus newStatus);
 
     Reservation saveReservation(Reservation reservation);
 
