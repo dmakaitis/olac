@@ -27,8 +27,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
@@ -41,6 +39,11 @@ import static org.olac.reservation.resource.jpa.specification.ReservationSpecifi
 @RequiredArgsConstructor
 @Slf4j
 public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatastoreAccess {
+
+    private static final String CACHE_TICKET_TYPES = "ticket-types";
+    private static final String CACHE_RESERVATIONS = "reservations";
+    private static final String CACHE_RESERVED_TICKETS = "reserved-tickets";
+
 
     private final TicketTypeRepository ticketTypeRepository;
     private final ReservationRepository reservationRepository;
@@ -55,17 +58,17 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
-    @Cacheable("ticket-types")
+    @Cacheable(CACHE_TICKET_TYPES)
     public List<TicketType> getTicketTypes() {
         log.debug("Reading ticket types from database");
-        return StreamSupport.stream(ticketTypeRepository.findAll().spliterator(), false)
+        return ticketTypeRepository.findAll().stream()
                 .map(DatastoreAccess::toTicketType)
                 .toList();
     }
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "ticket-types", allEntries = true)
+    @CacheEvict(cacheNames = CACHE_TICKET_TYPES, allEntries = true)
     public TicketType saveTicketType(TicketType ticketType) {
         TicketTypeEntity entity = getTicketTypeEntity(ticketType.getCode());
 
@@ -79,21 +82,21 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "ticket-types", allEntries = true)
+    @CacheEvict(cacheNames = CACHE_TICKET_TYPES, allEntries = true)
     public void deleteTicketType(String ticketTypeCode) {
         ticketTypeRepository.findByCode(ticketTypeCode)
                 .ifPresent(ticketTypeRepository::delete);
     }
 
     @Override
-    @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_RESERVATIONS, CACHE_RESERVED_TICKETS}, allEntries = true)
     public void deleteReservation(String reservationId) {
         reservationRepository.delete(withReservationId(reservationId));
     }
 
     @Override
     @Transactional
-    @Cacheable("reservations")
+    @Cacheable(CACHE_RESERVATIONS)
     public Page<Reservation> getReservations(String filter, org.olac.reservation.resource.model.PageRequest pageRequest) {
         log.debug("Retrieving reservations for page {} using filter: {}", pageRequest, filter);
 
@@ -124,7 +127,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
     }
 
     @Override
-    @Cacheable("reserved-tickets")
+    @Cacheable(CACHE_RESERVED_TICKETS)
     public long getTotalTicketsReserved() {
         log.debug("Getting total number of reserved tickets from the database");
 
@@ -161,7 +164,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = {"reservation", "reservations", "reserved-tickets"}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_RESERVATIONS, CACHE_RESERVED_TICKETS}, allEntries = true)
     public Reservation saveReservation(Reservation reservation) {
         // If we don't have a reservation timestamp, set it now...
         if (reservation.getReservationTimestamp() == null) {
@@ -217,8 +220,7 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
             changedFields.add(String.format("payments: %s => %s", oldTotal, newTotal));
         }
 
-        String formattedChanges = changedFields.stream()
-                .collect(Collectors.joining(", "));
+        String formattedChanges = String.join(", ", changedFields);
         if (formattedChanges.length() > 1024) {
             formattedChanges = formattedChanges.substring(0, 1020) + "...";
         }
