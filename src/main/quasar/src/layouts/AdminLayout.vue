@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh lpR fFf">
 
-    <q-header elevated class="bg-primary">
+    <q-header reveal elevated class="bg-primary">
       <div class="q-mx-auto text-center">
         <img class="headerimage" src="~assets/olac-logo.svg" alt="Omaha Lithuanian-American Community"/>
       </div>
