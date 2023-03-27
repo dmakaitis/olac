@@ -130,6 +130,30 @@
           happiness, sadness, love, and beauty of our world. We are grateful to all choral directors and members that
           have provided us with these very wonderful years to cherish.</p>
       </ArticleWithImages>
+
+      <ArticleWithImages title="Scouts" :left-images="['/img/scouts-girls.jpg', '/img/scouts-boys.jpg']">
+        <p>The Scout movement in Omaha started on November 26, 1949 when 12 boys and 8 girls met, in order to found a
+          scout unit. Another meeting was held with 7 Vytis or Eagle Scouts. The Darius and Girenas group. The leader
+          and organizer of these first 2 groups was Scoutmaster Juozas Sakalas.</p>
+
+        <p>In September of 1950 a group of girl students from the Lithuanian school was formed and was given the name
+          Zibuciu or Violets pack. Soon after another pack was formed and named Biciu or The Bees pack. March 24, 1951
+          the 2 packs formed a troop with the name Ziviles with Regina Parulyte as leader. At it’s peak both groups
+          together numbered 55 members.</p>
+
+        <p>The Scouts represented Omaha in many Jubilees, Jamborees and camps throughout the country. Many of the
+          leaders attended conferences and leadership training seminars.</p>
+
+        <p>Through all the years the Scout movement was active in Omaha it was supported by the Lithuanian colony. The
+          colony encouraged their children to join. A Parent’s Committee was started and organized picnics and social
+          events to collect funds for the movement.</p>
+
+        <p>In turn the Scouts assisted all the Lithuanian groups and clubs with their various meetings and celebrations
+          such as the annual Vasario 16d Independence Day, Mother’s Day, Veteran’s Day celebrations.</p>
+
+        <p>Sadly, the organization is no longer active though some members still remain to remember all those that have
+          helped preserve the Omaha Lithuanian Community and organizations over the years.</p>
+      </ArticleWithImages>
     </div>
   </q-page>
 </template>
