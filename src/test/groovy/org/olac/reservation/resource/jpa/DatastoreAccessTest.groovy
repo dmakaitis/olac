@@ -216,7 +216,7 @@ class DatastoreAccessTest extends Specification {
           _ * reservationRepository.findAll() >> reservations
 
         expect:
-          service.getTotalTicketsReserved() == expected
+          service.getReservationsStats().ticketsReserved == expected
 
         where:
           expected || reservations
@@ -365,7 +365,8 @@ class DatastoreAccessTest extends Specification {
         new ReservationEntity(
                 status: status,
                 reservationTimestamp: new Date(new Date().time - TimeUnit.DAYS.toMillis(daysOld)),
-                tickets: counts.collect { new ReservationTicketsEntity(count: it) }
+                tickets: counts.collect { new ReservationTicketsEntity(count: it) },
+                payments: []
         )
     }
 

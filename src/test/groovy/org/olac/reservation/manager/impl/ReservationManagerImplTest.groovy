@@ -58,7 +58,7 @@ class ReservationManagerImplTest extends Specification {
                   new Reservation(reservationId: "reservation-16"),
                   new Reservation(reservationId: "reservation-17"),
                   new Reservation(reservationId: "reservation-18")
-          ], "id", false)
+          ], "id", false, null)
 
           _ * reservationAccess.getReservations(filter, pageRequest) >> expected
 
@@ -70,7 +70,9 @@ class ReservationManagerImplTest extends Specification {
     def "Check ticket availability"() {
         given:
           properties.setMaxTickets(maxTickets)
-          _ * reservationAccess.getTotalTicketsReserved() >> totalReserved
+          _ * reservationAccess.getReservationsStats() >> ReservationStats.builder()
+                  .ticketsReserved(totalReserved)
+                  .build()
 
         expect:
           service.areTicketsAvailable(requested) == expected

@@ -40,12 +40,14 @@ public class ReservationManagerImpl implements ReservationManager, Administratio
 
     @Override
     public Page<Reservation> getReservations(String filter, PageRequest pageRequest) {
-        return reservationDatastoreAccess.getReservations(filter, pageRequest);
+        Page<Reservation> page = reservationDatastoreAccess.getReservations(filter, pageRequest);
+        page.setExt(reservationDatastoreAccess.getReservationsStats());
+        return page;
     }
 
     @Override
     public boolean areTicketsAvailable(long requestedTicketCount) {
-        long availableTickets = properties.getMaxTickets() - reservationDatastoreAccess.getTotalTicketsReserved();
+        long availableTickets = properties.getMaxTickets() - reservationDatastoreAccess.getReservationsStats().getTicketsReserved();
         return requestedTicketCount <= availableTickets;
     }
 

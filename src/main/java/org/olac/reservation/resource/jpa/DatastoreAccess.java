@@ -24,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -128,15 +129,30 @@ public class DatastoreAccess implements TicketDatastoreAccess, ReservationDatast
 
     @Override
     @Cacheable(CACHE_RESERVED_TICKETS)
-    public long getTotalTicketsReserved() {
-        log.debug("Getting total number of reserved tickets from the database");
+    public ReservationStats getReservationsStats() {
+        log.debug("Getting total ticket reservation statistics");
 
         return reservationRepository.findAll().stream()
-                .filter(DatastoreAccess::countTicketsAsReserved)
-                .mapToInt(r -> r.getTickets().stream()
-                        .mapToInt(ReservationTicketsEntity::getCount)
-                        .sum())
+                .map(DatastoreAccess::toReservationStats)
+                .reduce(ReservationStats.ZERO, ReservationStats::add);
+    }
+
+    private static ReservationStats toReservationStats(ReservationEntity reservation) {
+        long ordered = reservation.getTickets().stream()
+                .mapToLong(ReservationTicketsEntity::getCount)
                 .sum();
+        long reserved = countTicketsAsReserved(reservation) ? ordered : 0;
+        long paid = reservation.getStatus() == ReservationStatus.RESERVED ? ordered : 0;
+
+        return ReservationStats.builder()
+                .ticketsReserved(reserved)
+                .ticketsPaid(paid)
+                .amountDue(BigDecimal.valueOf(reservation.getAmountDue()))
+                .amountPaid(BigDecimal.valueOf(reservation.getPayments().stream()
+                        .filter(p -> p.getStatus() == PaymentStatus.SUCCESSFUL)
+                        .mapToDouble(PaymentEntity::getAmount)
+                        .sum()))
+                .build();
     }
 
     private static boolean countTicketsAsReserved(ReservationEntity reservation) {

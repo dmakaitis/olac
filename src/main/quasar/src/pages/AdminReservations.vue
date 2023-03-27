@@ -19,6 +19,22 @@
           (export using current search and sort settings)
         </div>
       </template>
+      <template v-slot:bottom-row>
+        <q-tr>
+          <q-td></q-td>
+          <q-td></q-td>
+          <q-td></q-td>
+          <q-td></q-td>
+          <q-td></q-td>
+          <q-td></q-td>
+          <q-td></q-td>
+          <q-td class="text-weight-bold text-right">Total:</q-td>
+          <q-td class="text-weight-bold text-center">{{ state.stats.ticketsReserved }}</q-td>
+          <q-td class="text-weight-bold text-right">{{ currency(state.stats.amountDue) }}</q-td>
+          <q-td class="text-weight-bold text-right">{{ currency(state.stats.amountPaid) }}</q-td>
+          <q-td v-for="col in columns" :key="col" props="col">{{ col.name }}</q-td>
+        </q-tr>
+      </template>
     </q-table>
     <q-btn label="New Reservation" @click="onNewReservation"/>
     <q-btn v-if="isAdmin()" label="Delete Selected Reservation" @click="onDelete"/>
@@ -137,6 +153,7 @@ export default {
           this.pagination.rowsPerPage = response.data.itemsPerPage
           this.pagination.sortBy = response.data.sortBy
           this.pagination.descending = response.data.descending
+          this.state.stats = response.data.ext
 
           this.loading = false
         })
@@ -223,7 +240,11 @@ export default {
   },
   setup() {
     const store = useStore()
-    const state = reactive({rows: [], ticketTypes: []})
+    const state = reactive({
+      rows: [],
+      ticketTypes: [],
+      stats: {}
+    })
 
     return {
       store,
@@ -244,7 +265,8 @@ export default {
         rowsPerPage: 5,
         rowsNumber: 0
       }),
-      filter: ref('')
+      filter: ref(''),
+      currency
     }
   },
   mounted() {

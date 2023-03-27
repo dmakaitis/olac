@@ -27,6 +27,32 @@ olac:
     client: '${PAYPAL_CLIENT}'
     secret: '${PAYPAL_SECRET}'
 
+  images:
+    - resource: ausra-2022.jpg
+      alt-text: 'Aušra Dance Group - 2022'
+    - resource: ausra-old.jpg
+      alt-text: 'Aušra Dance Group - 19xx'
+    - resource: ofs-2013.jpg
+      alt-text:
+    - resource: olac-2007.jpg
+      alt-text: 'Omaha Lithuanian American Community - 2007'
+    - resource: womens-club.jpg
+      alt-text: "Lithuanian Women's Club"
+
+  articles:
+    - headline: 'Omaha Lithuanian-American Community'
+      headline-image: '/img/olac-2007.jpg'
+      text-resource:
+    - headline: 'Aušra'
+      headline-image: '/img/ausra-2022.jpg'
+      text-resource:
+    - headline: "Women's Club"
+      headline-image: '/img/womens-club.jpg'
+      text-resource:
+    - headline: 'Omaha Sister Cities Association (OSCA)'
+      headline-image: '/img/ofs-2013.jpg'
+      text-resource:
+
   test-data:
     load: ${LOAD_TEST_DATA:false}
     ticket-types:

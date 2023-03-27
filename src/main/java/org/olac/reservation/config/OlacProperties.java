@@ -19,6 +19,7 @@ public class OlacProperties {
     private PayPal paypal;
     private TestData testData;
     private Jwt jwt;
+    private List<Article> articles;
 
     @Data
     public static class PayPal {
@@ -38,6 +39,13 @@ public class OlacProperties {
     public static class Jwt {
         private String key;
         private int timeoutMinutes;
+    }
+
+    @Data
+    public static class Article {
+        private String headline;
+        private String headlineImage;
+        private String textResource;
     }
 
 }
