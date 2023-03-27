@@ -94,6 +94,42 @@
           botanical center (<b>Lauritzen Gardens</b>), in collaboration with traditional folk artisans from Lithuania.
         </p>
       </ArticleWithImages>
+
+      <ArticleWithImages title="Rambynas" left-images="/img/rambynas.jpg">
+        <p>In the early 1900’s Lithuanians initiated the Omaha Lithuanian American Community Choir that participated in
+          certain local and some national events, but the group was primarily formed to provide religious Lithuanian
+          hymns during mass services at St. Anthony’s Church.</p>
+
+        <p>In 1949, Mečys Leškys became director/conductor of the group and in his 10 years he inaugurated a new
+          collection of music that initiated the four-part harmony choral music. It was a wide range of classical music
+          and also old folklore compositions. The choir grew to a considerable number of talented men and women whose
+          different vocal styles helped to position and reshape the new choir’s direction. These changes brought forth
+          an opportunity for the choral group to provide a performance on WOW TV.</p>
+
+        <p>One notable accomplishment is that Mr. Leškys established an artistic consortium that merged the choir and
+          the existing folk dancers as one performing unit. This provided a stronger Lithuanian representation which had
+          an impact to the recognition of Lithuanians living in Omaha. In August 1954, this assembly participated in the
+          celebration of the 100th anniversary of the founding of Omaha.</p>
+
+        <p>Proceeding Mr. Leškys death, Mr. Bronius Jonušas took the directorship role. An outstanding composer and
+          choral conductor, he suggested in 1967, that the choir’s name be changed to “Rambynas”. Known for his very
+          moving and nationally known Lithuanian marches, he elevated the choir to even higher performance levels.
+          During his leadership, Rambynas was recognized locally and nationally as an extraordinarily strong musical
+          ensemble that performed at multiple venues throughout the US and always had strong participation at National
+          Song Festivals.</p>
+
+        <p>In 1976, as a current Rambynas member, Algimantas (Al) Totilas was promoted to lead the choir. For the next
+          40 years, Al dedicated his love of music and passion to maintain the Lithuanian Song in our Lithuanian
+          Community. As previous directors, Al expanded the choir’s repertoire of music providing a robust platform of
+          new and various songs that can were used at church services or concerts. During Al’s leadership, Rambynas
+          created a very memorable CD of their most popular songs.</p>
+
+        <p>Sadly, we lost Al, in 2021 and at present our community no longer has a choral ensemble.</p>
+
+        <p>Rambynas is synonymous for love of Lithuanian music and through song we have been able to expresses
+          happiness, sadness, love, and beauty of our world. We are grateful to all choral directors and members that
+          have provided us with these very wonderful years to cherish.</p>
+      </ArticleWithImages>
     </div>
   </q-page>
 </template>
