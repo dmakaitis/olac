@@ -99,6 +99,7 @@ public class PublicApiController {
     @AllArgsConstructor
     public static class ClientConfiguration {
         private PayPayConfig payPal;
+        @Builder.Default
         private boolean showLogin = false;
 
         @Data
