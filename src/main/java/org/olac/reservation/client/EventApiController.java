@@ -10,6 +10,8 @@ import org.olac.reservation.resource.model.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/event")
@@ -54,27 +56,15 @@ public class EventApiController {
         String sort = "null".equals(sortBy) ? null : sortBy;
         StringBuilder builder = new StringBuilder();
 
+        List<TicketType> ticketTypes = administrationManager.getTicketTypes();
+
         try (CSVPrinter printer = new CSVPrinter(builder, CSVFormat.Builder.create()
                 .setDelimiter(',')
                 .setQuote('"')
                 .setRecordSeparator("\r\n")
                 .setIgnoreEmptyLines(true)
                 .setDuplicateHeaderMode(DuplicateHeaderMode.ALLOW_ALL)
-                .setHeader(
-                        "Reservation Number",
-                        "Date/Time Reserved",
-                        "First Name",
-                        "Last Name",
-                        "Email",
-                        "Phone",
-                        "Status",
-                        "Tickets",
-                        "Amount Due",
-                        "Payment Method",
-                        "Payment Received",
-                        "Payment Status",
-                        "Payment Amount",
-                        "Payment Notes")
+                .setHeader(getHeaders(ticketTypes))
                 .build())) {
             Page<Reservation> page = administrationManager.getReservations(filter, PageRequest.builder()
                     .page(0)
@@ -83,74 +73,52 @@ public class EventApiController {
                     .descending(desc)
                     .build());
             while (page.getPageSize() > 0) {
-                page = addPageToOutput(sort, desc, filter, printer, page);
+                page = addPageToOutput(ticketTypes, sort, desc, filter, printer, page);
             }
         }
 
         return builder.toString();
     }
 
-    private Page<Reservation> addPageToOutput(String sortBy, boolean desc, String filter, CSVPrinter printer, Page<Reservation> page) throws IOException {
+    private String[] getHeaders(List<TicketType> ticketTypes) {
+        List<String> headers = new ArrayList<>();
+
+        headers.add("Reservation Number");
+        headers.add("Date/Time Reserved");
+        headers.add("First Name");
+        headers.add("Last Name");
+        headers.add("Email");
+        headers.add("Phone");
+        headers.add("Status");
+
+        for (TicketType ticketType : ticketTypes) {
+            headers.add(ticketType.getDescription());
+        }
+        headers.add("Total Tickets");
+
+        headers.add("Amount Due");
+        headers.add("Payment Method");
+        headers.add("Payment Received");
+        headers.add("Payment Status");
+        headers.add("Payment Amount");
+        headers.add("Payment Notes");
+
+        return headers.toArray(new String[0]);
+    }
+
+    private Page<Reservation> addPageToOutput(List<TicketType> ticketTypes, String sortBy, boolean desc, String filter, CSVPrinter printer, Page<Reservation> page) throws IOException {
         for (Reservation r : page.getData()) {
+            List<Object> reservationData = getReservationData(ticketTypes, r);
             if (r.getPayments().isEmpty()) {
-                printer.printRecord(
-                        r.getId(),
-                        r.getReservationTimestamp(),
-                        r.getFirstName(),
-                        r.getLastName(),
-                        r.getEmail(),
-                        r.getPhone(),
-                        r.getStatus(),
-                        r.getTicketCounts().stream()
-                                .mapToInt(TicketCounts::getCount)
-                                .sum(),
-                        r.getAmountDue(),
-                        "",
-                        "",
-                        "",
-                        "",
-                        "");
+                printer.printRecord(addPaymentData(reservationData, null));
             } else {
-                boolean first = true;
-
                 for (Payment p : r.getPayments()) {
-                    if (first) {
-                        printer.printRecord(
-                                r.getId(),
-                                r.getReservationTimestamp(),
-                                r.getFirstName(),
-                                r.getLastName(),
-                                r.getEmail(),
-                                r.getPhone(),
-                                r.getStatus(),
-                                r.getTicketCounts().stream()
-                                        .mapToInt(TicketCounts::getCount)
-                                        .sum(),
-                                r.getAmountDue(),
-                                p.getMethod(),
-                                p.getCreatedTimestamp(),
-                                p.getStatus(),
-                                p.getAmount(),
-                                p.getNotes());
-                    } else {
-                        printer.printRecord(
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                p.getMethod(),
-                                p.getCreatedTimestamp(),
-                                p.getStatus(),
-                                p.getAmount(),
-                                p.getNotes());
-                    }
+                    printer.printRecord(addPaymentData(reservationData, p));
 
-                    first = false;
+                    // For subsequent rows for the same reservation, blank out the reservation data...
+                    for (int i = 0; i < reservationData.size(); i++) {
+                        reservationData.set(i, "");
+                    }
                 }
             }
         }
@@ -163,5 +131,44 @@ public class EventApiController {
                 .build());
         return page;
     }
+
+    private List<Object> addPaymentData(List<Object> reservationData, Payment p) {
+        List<Object> rVal = new ArrayList<>(reservationData);
+
+        rVal.add(p == null ? "" : p.getMethod());
+        rVal.add(p == null ? "" : p.getCreatedTimestamp());
+        rVal.add(p == null ? "" : p.getStatus());
+        rVal.add(p == null ? "" : p.getAmount());
+        rVal.add(p == null ? "" : p.getNotes());
+
+        return rVal;
+    }
+
+    private List<Object> getReservationData(List<TicketType> ticketTypes, Reservation reservation) {
+        List<Object> data = new ArrayList<>();
+
+        data.add(reservation.getId());
+        data.add(reservation.getReservationTimestamp());
+        data.add(reservation.getFirstName());
+        data.add(reservation.getLastName());
+        data.add(reservation.getEmail());
+        data.add(reservation.getPhone());
+        data.add(reservation.getStatus());
+
+        for (TicketType ticketType : ticketTypes) {
+            data.add(reservation.getTicketCounts().stream()
+                    .filter(t -> ticketType.getCode().equals(t.getTicketTypeCode()))
+                    .mapToInt(TicketCounts::getCount)
+                    .sum());
+        }
+        data.add(reservation.getTicketCounts().stream()
+                .mapToInt(TicketCounts::getCount)
+                .sum());
+
+        data.add(reservation.getAmountDue());
+
+        return data;
+    }
+
 
 }
