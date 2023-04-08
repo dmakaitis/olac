@@ -96,7 +96,7 @@
         </q-card>
 
         <q-card class="q-pa-sm rsvp text-center">
-          <span class="text-h5">Kindly RSVP below by April 8th, 2023.</span>
+          <span class="text-h5">Kindly RSVP below by April 15th, 2023.</span>
         </q-card>
 
         <div class="donation container text-center">
@@ -206,7 +206,7 @@
           </div>
           <div class="width-400">
             <div v-if="paymentMethod === 'online'">
-              <PayPalButton :purchase-units="purchaseUnits" @approved="onPayPayPaymentAccepted"/>
+              <PayPalButton :purchase-units="purchaseUnits" @approved="onPayPayPaymentAccepted" @error="onPayPalError"/>
             </div>
             <div v-if="paymentMethod === 'check'">
               <p>Please note that your tickets will not be reserved until payment has been received, so be sure to
@@ -270,6 +270,9 @@
       </q-card>
     </div>
   </q-page>
+
+  <PaymentErrorDialog v-model="showPayPalError">
+  </PaymentErrorDialog>
 </template>
 
 <script>
@@ -277,10 +280,11 @@ import {ref} from "vue";
 import {api} from "boot/axios";
 import {currency} from "boot/helper";
 import PayPalButton from "components/PayPalButton.vue";
+import PaymentErrorDialog from "components/PaymentErrorDialog.vue";
 
 export default {
   name: "MainTickets",
-  components: {PayPalButton},
+  components: {PaymentErrorDialog, PayPalButton},
   methods: {
     currency,
     sendGtagEvent(eventType, transactionId = null) {
@@ -364,6 +368,9 @@ export default {
           this.activePage = 4
         })
     },
+    onPayPalError() {
+      this.showPayPalError = true
+    },
     onPayByCheck() {
       this.sendGtagEvent('purchase', this.reservationId)
 
@@ -403,6 +410,7 @@ export default {
       reservationId: ref(''),
       reservationNumber: ref(0),
       purchaseUnits: ref([]),
+      showPayPalError: ref(false),
 
       isValidEmail(val) {
         const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;

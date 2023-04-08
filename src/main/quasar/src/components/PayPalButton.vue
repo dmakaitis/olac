@@ -21,9 +21,13 @@ export default {
       this.$emit('approved', orderData)
       this.paymentAccepted = true
     },
+    emitPaymentErrorEvent() {
+      this.$emit('error')
+    },
     initPayPalButton() {
       const getPurchaseUnitsFunc = this.getPurchaseUnits
       const emitPaymentApprovedEventFunc = this.emitPaymentApprovedEvent
+      const emitPaymentErrorEventFunc = this.emitPaymentErrorEvent
 
       if (window.paypal) {
         console.log("Initializing PayPal buttons")
@@ -46,12 +50,13 @@ export default {
             console.log(`Configurating PayPal onApproval`)
             return actions.order.capture().then(function (orderData) {
               // Full available details
-              console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+              console.log('Capture result', orderData, JSON.stringify(orderData, null, 2))
               emitPaymentApprovedEventFunc(orderData)
             });
           },
           onError: function (err) {
-            console.log(err);
+            console.log(err)
+            emitPaymentErrorEventFunc()
           },
         }).render('#paypal-button-container');
       } else {
