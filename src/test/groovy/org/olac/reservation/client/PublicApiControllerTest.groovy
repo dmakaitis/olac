@@ -25,6 +25,7 @@ class PublicApiControllerTest extends Specification {
         expect:
           api.getClientConfiguration(httpRequest) == new PublicApiController.ClientConfiguration(
                   showLogin: false,
+                  enableReservations: true,
                   payPal: new PublicApiController.ClientConfiguration.PayPayConfig(
                           apiBase: properties.paypal.apiBase,
                           clientId: properties.paypal.client
@@ -41,6 +42,7 @@ class PublicApiControllerTest extends Specification {
         expect:
           api.getClientConfiguration(httpRequest) == new PublicApiController.ClientConfiguration(
                   showLogin: false,
+                  enableReservations: true,
                   payPal: new PublicApiController.ClientConfiguration.PayPayConfig(
                           apiBase: properties.paypal.apiBase,
                           clientId: properties.paypal.client
@@ -59,6 +61,7 @@ class PublicApiControllerTest extends Specification {
         expect:
           api.getClientConfiguration(httpRequest) == new PublicApiController.ClientConfiguration(
                   showLogin: true,
+                  enableReservations: true,
                   payPal: new PublicApiController.ClientConfiguration.PayPayConfig(
                           apiBase: properties.paypal.apiBase,
                           clientId: properties.paypal.client
@@ -77,6 +80,7 @@ class PublicApiControllerTest extends Specification {
         expect:
           api.getClientConfiguration(httpRequest) == new PublicApiController.ClientConfiguration(
                   showLogin: false,
+                  enableReservations: true,
                   payPal: new PublicApiController.ClientConfiguration.PayPayConfig(
                           apiBase: properties.paypal.apiBase,
                           clientId: properties.paypal.client
