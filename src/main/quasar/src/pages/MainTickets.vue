@@ -95,51 +95,63 @@
           </q-card-section>
         </q-card>
 
-        <q-card class="q-pa-sm rsvp text-center">
-          <span class="text-h5">Kindly RSVP below by April 15th, 2023.</span>
-        </q-card>
-
-        <div class="donation container text-center">
-          Can’t attend but would still like to make a donation? Click here:<br/>
-          <a href="https://www.paypal.com/donate/?hosted_button_id=N4ZY3QGD6CMVN" target="_">
-            <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="Donate Button">
-          </a>
+        <div v-if="!enableReservations">
+          <div class="donation container text-center">
+            Reservations have closed for the 70th anniversary event, but if you would like to make a donation, click
+            here:<br/>
+            <a href="https://www.paypal.com/donate/?hosted_button_id=N4ZY3QGD6CMVN" target="_">
+              <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="Donate Button">
+            </a>
+          </div>
         </div>
 
-        <q-card class="q-pa-sm reservations text-center">
-          <q-form greedy @submit="onSubmit">
-            <q-card-section>
-              <span class="text-h5" style="color: #475971;">Ticket Reservations:</span>
-            </q-card-section>
+        <div v-if="enableReservations">
+          <q-card class="q-pa-sm rsvp text-center">
+            <span class="text-h5">Kindly RSVP below by April 15th, 2023.</span>
+          </q-card>
 
-            <q-card-section>
-              <div class="row justify-center q-gutter-md">
-                <q-input class="width-400" label="First Name *" v-model.trim="firstName" lazy-rules
-                         :rules="[val => !!val || 'First name is required']"/>
-                <q-input class="width-400" label="Last Name *" v-model.trim="lastName" lazy-rules
-                         :rules="[val => !!val || 'Last name is required']"/>
-                <q-input class="width-400" label="Email *" v-model.trim="email" lazy-rules
-                         :rules="[val => !!val || 'Email is required', isValidEmail]"/>
-                <q-input class="width-400" label="Phone" v-model="phone" mask="(###) ###-####" lazy-rules
-                         :rules="[val => !val || val.length == 14 || 'Please enter your full phone number']"/>
-                <q-input v-for="type in ticketTypes" :key="type.code" ref="ticketFields" class="width-400"
-                         :label="type.description + ' @ ' + currency(type.costPerTicket) + ' each'"
-                         v-model.number="type.count" type="number" lazy-rules :rules="[
+          <div class="donation container text-center">
+            Can’t attend but would still like to make a donation? Click here:<br/>
+            <a href="https://www.paypal.com/donate/?hosted_button_id=N4ZY3QGD6CMVN" target="_">
+              <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="Donate Button">
+            </a>
+          </div>
+
+          <q-card class="q-pa-sm reservations text-center">
+            <q-form greedy @submit="onSubmit">
+              <q-card-section>
+                <span class="text-h5" style="color: #475971;">Ticket Reservations:</span>
+              </q-card-section>
+
+              <q-card-section>
+                <div class="row justify-center q-gutter-md">
+                  <q-input class="width-400" label="First Name *" v-model.trim="firstName" lazy-rules
+                           :rules="[val => !!val || 'First name is required']"/>
+                  <q-input class="width-400" label="Last Name *" v-model.trim="lastName" lazy-rules
+                           :rules="[val => !!val || 'Last name is required']"/>
+                  <q-input class="width-400" label="Email *" v-model.trim="email" lazy-rules
+                           :rules="[val => !!val || 'Email is required', isValidEmail]"/>
+                  <q-input class="width-400" label="Phone" v-model="phone" mask="(###) ###-####" lazy-rules
+                           :rules="[val => !val || val.length == 14 || 'Please enter your full phone number']"/>
+                  <q-input v-for="type in ticketTypes" :key="type.code" ref="ticketFields" class="width-400"
+                           :label="type.description + ' @ ' + currency(type.costPerTicket) + ' each'"
+                           v-model.number="type.count" type="number" lazy-rules :rules="[
                          val => val !== null && val !== '' || 'Ticket count must be a number',
                          val => val >= 0 || 'Must be zero or more',
                          atLeastOneTicket,
                          validateTicketsAvailable
                        ]" @focus="onTicketFieldFocus"/>
-              </div>
+                </div>
 
-              <div v-if="notEnoughTickets" class="error">Not enough tickets are available.</div>
-            </q-card-section>
+                <div v-if="notEnoughTickets" class="error">Not enough tickets are available.</div>
+              </q-card-section>
 
-            <q-card-actions align="center">
-              <q-btn type="submit" label="Submit"/>
-            </q-card-actions>
-          </q-form>
-        </q-card>
+              <q-card-actions align="center">
+                <q-btn type="submit" label="Submit"/>
+              </q-card-actions>
+            </q-form>
+          </q-card>
+        </div>
       </div>
     </div>
 
@@ -281,6 +293,8 @@ import {api} from "boot/axios";
 import {currency} from "boot/helper";
 import PayPalButton from "components/PayPalButton.vue";
 import PaymentErrorDialog from "components/PaymentErrorDialog.vue";
+import {enableReservations} from "src/store/config/getters";
+import {useStore} from "vuex";
 
 export default {
   name: "MainTickets",
@@ -397,8 +411,10 @@ export default {
   },
   setup() {
     const ticketTypes = ref([])
+    const store = useStore()
 
     return {
+      store,
       activePage: ref(1),
       firstName: ref(''),
       lastName: ref(''),
@@ -411,6 +427,7 @@ export default {
       reservationNumber: ref(0),
       purchaseUnits: ref([]),
       showPayPalError: ref(false),
+      enableReservations: ref(false),
 
       isValidEmail(val) {
         const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
@@ -439,6 +456,9 @@ export default {
 
     api.get("/api/public/new-reservation-id")
       .then(response => this.reservationId = response.data)
+
+    this.enableReservations = this.store.getters['config/enableReservations']
+    console.log(`Enable reservations: ${this.enableReservations}`)
   }
 }
 </script>

@@ -12,7 +12,7 @@
         <q-toolbar-title>
           <q-tabs align="center" no-caps>
             <q-route-tab to="/main/about" replace label="About Us"/>
-            <q-route-tab to="/main/tickets" target="_top" label="OLAC 70th Anniversary Reservations"/>
+            <q-route-tab to="/main/tickets" target="_top" label="OLAC 70th Anniversary Event"/>
             <q-route-tab v-if="isLoggedIn" to="/main/reservations" replace label="Reservations"/>
             <q-route-tab v-if="isAdmin" to="/admin/ticket-types" replace label="Admin"/>
           </q-tabs>

@@ -1,7 +1,8 @@
 export default function () {
   return {
     config: {
-      showLogin: false
+      showLogin: false,
+      enableReservations: true
     }
   }
 }

@@ -20,7 +20,8 @@ olac:
     key: ${JWT_KEY:my-jwt-secret-with-an-even-longer-key}
     timeoutMinutes: 120
   disable-security: ${DISABLE_SECURITY:false}
-  max-tickets: 250
+  enable-reservations: false
+  max-tickets: 140
   email: ${MAIL_USERNAME}
   paypal:
     api-base: ${PAYPAL_API_BASE}

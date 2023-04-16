@@ -43,6 +43,7 @@ public class PublicApiController {
 
         return ClientConfiguration.builder()
                 .showLogin(showLogin)
+                .enableReservations(properties.isEnableReservations())
                 .payPal(ClientConfiguration.PayPayConfig.builder()
                         .apiBase(properties.getPaypal().getApiBase())
                         .clientId(properties.getPaypal().getClient())
@@ -101,6 +102,7 @@ public class PublicApiController {
         private PayPayConfig payPal;
         @Builder.Default
         private boolean showLogin = false;
+        private boolean enableReservations;
 
         @Data
         @Builder

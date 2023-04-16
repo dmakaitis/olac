@@ -14,6 +14,7 @@ public class OlacProperties {
 
     private boolean disableSecurity = false;
 
+    private boolean enableReservations = true;
     private int maxTickets;
     private String email;
     private PayPal paypal;
